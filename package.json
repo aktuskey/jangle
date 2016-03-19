@@ -1,0 +1,37 @@
+{
+  "name": "mongo-cms",
+  "version": "1.0.0",
+  "description": "a straightforward way to manage content with MongoDB.",
+  "main": "app.js",
+  "scripts": {
+    "test": "gulp test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RyanNHG/mongo-cms.git"
+  },
+  "keywords": [
+    "mongodb",
+    "content",
+    "management",
+    "system",
+    "angular"
+  ],
+  "author": "Ryan Haskell-Glatz",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RyanNHG/mongo-cms/issues"
+  },
+  "homepage": "https://github.com/RyanNHG/mongo-cms#readme",
+  "dependencies": {
+    "angular": "^1.5.2",
+    "angular-route": "^1.5.2",
+    "express": "^4.13.4",
+    "mongoose": "^4.4.8"
+  },
+  "devDependencies": {
+    "browserify": "^13.0.0",
+    "gulp": "^3.9.1",
+    "vinyl-source-stream": "^1.1.0"
+  }
+}
