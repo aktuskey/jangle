@@ -46,7 +46,7 @@ gulp.task('copy-css', function() {
 
 });
 
-gulp.task('build', ['clean', 'bundle-js', 'copy-html', 'copy-css']);
+gulp.task('build', ['bundle-js', 'copy-html', 'copy-css']);
 
 gulp.task('watch', ['build'], function() {
 
