@@ -5,6 +5,7 @@ require('angular').module(module.exports='modal', [])
         controller: require('shared/modal/modal.ctrl'),
         transclude: true,
         bindings: {
-            title: '@'
+            title: '@',
+            ngShow: '='
         }
     })

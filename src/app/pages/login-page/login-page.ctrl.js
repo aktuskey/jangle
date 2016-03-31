@@ -2,8 +2,10 @@ module.exports = [function(){
   
     var ctrl = this;
 
+    ctrl.showModal = false;
+
     ctrl.learnMoreClicked = function() {
-        console.log('Learn more clicked!');
+        ctrl.showModal = true;
     };
   
 }];

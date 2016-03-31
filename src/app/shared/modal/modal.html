@@ -1,6 +1,16 @@
-<div class="panel panel-default">
-  <div class="panel-heading">
-    <h3 class="panel-title">{{$ctrl.title}}</h3>
-  </div>
-  <div class="panel-body" ng-transclude></div>
+<div class="modal" ng-click="$ctrl.close()">
+  <div class="modal-dialog" ng-click="$event.stopPropagation()">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" aria-label="Close" ng-click="$ctrl.close()"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">{{$ctrl.title}}</h4>
+      </div>
+      <div class="modal-body" ng-transclude>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" ng-click="$ctrl.close()">Close</button>
+        <button type="button" class="btn btn-primary" ng-click="$ctrl.submit()">Submit</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
 </div>
