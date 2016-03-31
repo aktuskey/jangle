@@ -27,13 +27,16 @@
   "dependencies": {
     "angular": "^1.5.2",
     "angular-route": "^1.5.2",
+    "bootstrap": "^3.3.6",
     "express": "^4.13.4",
+    "jquery": "^2.2.2",
     "mongoose": "^4.4.8"
   },
   "devDependencies": {
     "browserify": "^13.0.0",
     "del": "^2.2.0",
     "gulp": "^3.9.1",
+    "gulp-sass": "^2.2.0",
     "vinyl-source-stream": "^1.1.0"
   }
 }

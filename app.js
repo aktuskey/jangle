@@ -2,6 +2,7 @@ var express = require('express');
 var app = express();
 
 app.use('/static', express.static('dist/static'));
+app.use('/node_modules', express.static('node_modules'));
 app.use('/templates', express.static('dist/app'));
 
 app.use(function(req, res) {

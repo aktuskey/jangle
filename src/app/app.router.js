@@ -4,20 +4,11 @@ function($routeProvider, $locationProvider){
     $routeProvider.
         when('/', {
             template: '<login-page></login-page>'
-        }).
-        when('/dashboard', {
-            template: '<dashboard-page></dashboard-page>'
-        }).
-        when('/settings', {
-            template: '<settings-page></settings-page>'
-        }).
-        when('/profile', {
-            template: '<profile-page></profile-page>'
-        }).
-        when('/oops', {
-            template: '<error-page></error-page>'
-        }).
-        otherwise({
+        })
+        .when('/machine-admin', {
+            template: '<machine-admin-page></machine-admin-page>'
+        })
+        .otherwise({
             redirectTo: '/oops'
         });
 

@@ -1,9 +1,9 @@
 module.exports = [function(){
   
-  var ctrl = this;
-  
-  ctrl.loginClicked = function() {
-    console.log('Login clicked!');
-  };
+    var ctrl = this;
+
+    ctrl.learnMoreClicked = function() {
+        console.log('Learn more clicked!');
+    };
   
 }];
