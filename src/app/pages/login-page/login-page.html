@@ -3,13 +3,19 @@
   <div class="container">
     <h1>MongoCMS</h1>
     <p>Content management, made simple.</p>
-    <p><a class="btn btn-primary btn-lg" role="button" ng-click="$ctrl.learnMoreClicked()">Learn more</a></p>
+    <p><a class="btn btn-primary btn-lg" role="button" ng-click="$ctrl.showSimpleModal = true">Show simple modal</a></p>
+    <p><a class="btn btn-primary btn-lg" role="button" ng-click="$ctrl.showButtonModal = true">Show button modal</a></p>
   </div>
 </div>
 <div class="container">
 </div>
 
-<modal title="Sign Up" ng-show="$ctrl.showModal">
+<modal title="Sign Up" ng-show="$ctrl.showSimpleModal">
   <h4>Hey you!</h4>
-  <p>This is modal content!</p>
+  <p>This is modal without buttons!</p>
+</modal>
+
+<modal title="Sign Up" ng-show="$ctrl.showButtonModal" bottom-buttons="true">
+  <h4>Hey you!</h4>
+  <p>This is modal with buttons!</p>
 </modal>
