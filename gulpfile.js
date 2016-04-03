@@ -31,6 +31,10 @@ gulp.task('bundle-js', function(){
         paths: ['./node_modules', './src/app']
     })
         .bundle()
+        .on('error', function (err) {
+            console.log(err.toString());
+            this.emit("end");
+        })
         .pipe(source('bundle.js'))
         .pipe(gulp.dest(paths.js.out));
 
