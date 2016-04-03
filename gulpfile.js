@@ -3,6 +3,7 @@ var browserify = require('browserify');
 var source = require('vinyl-source-stream');
 var sass = require('gulp-sass');
 var del = require('del');
+var Server = require('karma').Server;
 
 var paths = {
     clean: './dist',
@@ -63,6 +64,16 @@ gulp.task('watch', ['build'], function() {
     gulp.watch(paths.html.in, ['copy-html']);
     gulp.watch(paths.css.in, ['bundle-css']);
 
+});
+
+/**
+ * Run test once and exit
+ */
+gulp.task('test', function (done) {
+  new Server({
+    configFile: __dirname + '/karma.conf.js',
+    singleRun: true
+  }, done).start();
 });
 
 gulp.task('default', ['build']);
