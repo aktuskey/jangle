@@ -1,0 +1,28 @@
+<form class="form-horizontal">
+
+  <!-- Email -->
+  <div class="form-group">
+    <label class="col-sm-2 control-label">Email</label>
+    <div class="col-sm-10">
+      <input type="email" class="form-control" placeholder="Email" ng-model="$ctrl.email">
+    </div>
+  </div>
+
+  <!-- Password -->
+  <div class="form-group">
+    <label class="col-sm-2 control-label">Password</label>
+    <div class="col-sm-10">
+      <input type="password" class="form-control" placeholder="Password" ng-model="$ctrl.password">
+    </div>
+  </div>
+
+  <!-- Sign Up Form -->
+  <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+      <button class="btn btn-success pull-right" ng-show="$ctrl.onSubmit != null" ng-click="$ctrl.onSubmit({email: $ctrl.email, password: $ctrl.password})">
+        <i class="fa fa-user-plus"></i>
+        Sign Up
+      </button>
+    </div>
+  </div>
+</form>

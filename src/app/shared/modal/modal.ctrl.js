@@ -9,6 +9,7 @@ module.exports = [function(){
 
     ctrl.submit = function(){
         console.log('submitting modal');
+        ctrl.onSubmit();
         ctrl.ngShow = false;
     }
 

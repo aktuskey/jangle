@@ -1,6 +1,6 @@
 require('angular').module(module.exports="LoginPage", [
-    require('navbar'),
-    require('shared/modal')
+    require('shared/modal'),
+    require('shared/sign-up-form')
 ])
     .component('loginPage', {
         templateUrl: 'templates/pages/login-page/login-page.html',

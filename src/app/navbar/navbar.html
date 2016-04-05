@@ -1,9 +1,22 @@
-<nav class="navbar navbar-default navbar-static-top">
-  <div class="container">  
+<nav class="navbar navbar-default navbar-static-top" ng-init="$ctrl.checkUser()">
+  <div class="container">
     <div class="navbar-header">
       <a class="navbar-brand" href="/">
-        MongoCMS
+        <span class="fa-stack fa-sm pad-right">
+      <i class="fa fa-square fa-stack-2x"></i>
+      <i class="fa fa-database fa-stack-1x fa-inverse"></i>
+    </span>MongoCMS
       </a>
+    </div>
+
+    <div class="collapse navbar-collapse">
+      <ul class="nav navbar-nav navbar-right">
+        <li ng-show="$ctrl.user.email != null">
+          <a href="#user">
+            <i class="fa fa-user pad-right"></i>{{$ctrl.user.email}}
+          </a>
+        </li> 
+      </ul>
     </div>
   </div>
 </nav>

@@ -5,8 +5,8 @@ function($routeProvider, $locationProvider){
         when('/', {
             template: '<login-page></login-page>'
         })
-        .when('/machine-admin', {
-            template: '<machine-admin-page></machine-admin-page>'
+        .when('/dashboard', {
+            template: '<dashboard-page></dashboard-page>'
         })
         .otherwise({
             redirectTo: '/oops'

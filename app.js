@@ -6,7 +6,11 @@ app.use('/node_modules', express.static('node_modules'));
 app.use('/templates', express.static('dist/app'));
 
 app.use(function(req, res) {
-  res.status(200).sendFile(__dirname+'/dist/index.html');
+  console.log(req.url);
+  if(req.url.substr(0,'/templates'.length) == '/templates')
+  	res.status(500);
+  else
+  	res.status(200).sendFile(__dirname+'/dist/index.html');
 });
 
 console.log('Listening on port 8080...')

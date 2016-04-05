@@ -1,42 +1,41 @@
-<navbar></navbar>
-<div class="jumbotron">
+<div class="">
   <div class="container">
-    <h1>MongoCMS</h1>
-    <p>Content management, made simple.</p>
-    <p><a class="btn btn-primary btn-lg" role="button" ng-click="$ctrl.showSimpleModal = true">Show simple modal</a></p>
-    <p><a class="btn btn-primary btn-lg" role="button" ng-click="$ctrl.showButtonModal = true">Show button modal</a></p>
+    <div class="row">
+
+      <!-- Description -->
+      <div class="col-md-6 text-center">
+        <div class="jumbotron">
+          <h2>
+            <span class="fa-stack fa-sm pad-right">
+              <i class="fa fa-square fa-stack-2x"></i>
+              <i class="fa fa-database fa-stack-1x fa-inverse"></i>
+            </span>MongoCMS
+          </h2>
+          <p>Manage your content.</p>
+          <p><a class="btn btn-primary visible-xs" role="button" ng-click="$ctrl.showSignUpModal = true">Get Started</a></p>
+        </div>
+      </div>
+
+      <hr class="visible-sm">
+
+      <!-- Sign Up Form -->
+      <div class="col-md-6 hidden-xs">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            Get started
+          </div>
+          <div class="panel-body">
+            <sign-up-form on-submit="$ctrl.onSignUp(email, password)"></sign-up-form>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </div>
 </div>
 <div class="container">
 </div>
 
-<modal title="Sign Up" ng-show="$ctrl.showSimpleModal">
-  <h4>Hey you!</h4>
-  <p>This is modal without buttons!</p>
-</modal>
-
-<modal title="Sign Up" ng-show="$ctrl.showButtonModal" bottom-buttons="true">
-<form class="form-horizontal">
-  <div class="form-group">
-    <label for="inputEmail3" class="col-sm-2 control-label">Email</label>
-    <div class="col-sm-10">
-      <input type="email" class="form-control" id="inputEmail3" placeholder="Email">
-    </div>
-  </div>
-  <div class="form-group">
-    <label for="inputPassword3" class="col-sm-2 control-label">Password</label>
-    <div class="col-sm-10">
-      <input type="password" class="form-control" id="inputPassword3" placeholder="Password">
-    </div>
-  </div>
-  <div class="form-group">
-    <div class="col-sm-offset-2 col-sm-10">
-      <div class="checkbox">
-        <label>
-          <input type="checkbox"> Remember me
-        </label>
-      </div>
-    </div>
-  </div>
-</form>
+<modal title="Sign Up" ng-show="$ctrl.showSignUpModal">
+  <sign-up-form on-submit="$ctrl.onSignUp(email, password)"></sign-up-form>
 </modal>

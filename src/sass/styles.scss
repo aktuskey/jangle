@@ -1,29 +1,27 @@
 @import 'navbar';
+@import 'modal';
 
-modal > .modal {
-	
-	display: flex;
-	align-items: center;
-	background: rgba(0,0,0,0.5);
+body {
+	min-width: 320px;
+}
 
-	.modal-body:before,
-	.modal-body:after {
-	    display: table;
-	    content: " ";
+.jumbotron {
+	hr {
+		border-color: #ccc;
 	}
-	.modal-header:before,
-	.modal-header:after {
-	    display: table;
-	    content: " ";
+	.btn {
+		display: inline-block;
 	}
+}
 
-	.modal-dialog {
+.pad-right {
+	margin-right: 5px;
+}
 
-		flex: 1;
+.pad-left {
+	margin-left: 5px;
+}
 
-		@media (min-width: 768px) {
-		    max-width: 600px;
-		    margin: 30px auto;
-		}
-	}
+.fa-sm {
+    font-size: 0.63em;
 }

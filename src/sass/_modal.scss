@@ -1,0 +1,32 @@
+modal {
+
+	> .modal {
+		
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: rgba(0,0,0,0.5);
+
+		.modal-body:before,
+		.modal-body:after {
+		    display: table;
+		    content: " ";
+		}
+		.modal-header:before,
+		.modal-header:after {
+		    display: table;
+		    content: " ";
+		}
+
+		.modal-dialog {
+
+			flex: 1;
+
+			@media (min-width: 768px) {
+			    max-width: 600px;
+			    margin: 30px auto;
+			}
+		}
+	}
+	
+}
