@@ -4,6 +4,10 @@ module.exports = [function(){
 
     ctrl.close = function(){
         console.log('closing modal');
+
+        if(ctrl.onClose)
+            ctrl.onClose();
+        
         ctrl.ngShow = false;
     };
 

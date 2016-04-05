@@ -6,6 +6,7 @@ require('angular').module(module.exports='modal', [])
         transclude: true,
         bindings: {
             title: '@',
+            onClose: '&',
             onSubmit: '&',
             ngShow: '='
         }

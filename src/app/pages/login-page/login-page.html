@@ -42,6 +42,6 @@
 </modal>
 
 <!-- User Info Modal -->
-<modal title="Welcome" ng-show="$ctrl.showUserInfoModal">
+<modal title="Welcome, {{$ctrl.user.email}}!" ng-show="$ctrl.showUserInfoModal" on-close="$ctrl.onUserInfo()">
   <user-info-form on-submit="$ctrl.onUserInfo(name)"></user-info-form>
 </modal>

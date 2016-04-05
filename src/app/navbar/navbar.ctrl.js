@@ -3,7 +3,7 @@ module.exports = ['UserDataService', '$location', function(UserDataService, $loc
 
 	ctrl.user = UserDataService.user;
 
-	ctrl.checkUser = function(){
+	ctrl.route = function(){
 		if($location.path() == '/dashboard' && ctrl.user.email == null)
 		{
 			$location.path('/');
