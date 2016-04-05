@@ -11,9 +11,9 @@
 
     <div class="collapse navbar-collapse">
       <ul class="nav navbar-nav navbar-right">
-        <li ng-show="$ctrl.user.email != null">
+        <li ng-show="$ctrl.user != null">
           <a href="#user">
-            <i class="fa fa-user pad-right"></i>{{$ctrl.user.email}}
+            <i class="fa fa-user pad-right"></i>{{$ctrl.user.name.first}}
           </a>
         </li> 
       </ul>

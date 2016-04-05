@@ -14,4 +14,14 @@ module.exports = [function(){
 
 		})
 	};
+
+	srvc.setName = function(name) {
+		return new Promise(function(resolve, reject) {
+
+			srvc.user.name = name;
+
+			resolve(srvc.user);
+
+		})
+	}
 }]

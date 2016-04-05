@@ -37,6 +37,7 @@
     "browserify": "^13.0.0",
     "del": "^2.2.0",
     "gulp": "^3.9.1",
+    "gulp-protractor": "^2.2.0",
     "gulp-sass": "^2.2.0",
     "jasmine-core": "^2.4.1",
     "karma": "^0.13.22",

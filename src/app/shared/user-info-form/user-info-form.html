@@ -1,0 +1,30 @@
+<form class="form-horizontal">
+
+  <!-- First Name -->
+  <div class="form-group">
+    <label class="col-sm-2 control-label">First Name</label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" placeholder="First Name" ng-model="$ctrl.firstName">
+    </div>
+  </div>
+
+  <!-- Last Name -->
+  <div class="form-group">
+    <label class="col-sm-2 control-label">Last Name</label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" placeholder="Last Name" ng-model="$ctrl.lastName">
+    </div>
+  </div>
+
+  <!-- Update Button -->
+  <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+      <button class="btn btn-success pull-right" 
+        ng-show="$ctrl.onSubmit != null" 
+        ng-click="$ctrl.onSubmit({name: { first: $ctrl.firstName, last: $ctrl.lastName}})">
+        <i class="fa fa-pencil"></i>
+        Update
+      </button>
+    </div>
+  </div>
+</form>
