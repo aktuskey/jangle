@@ -4,6 +4,7 @@ var source = require('vinyl-source-stream');
 var sass = require('gulp-sass');
 var del = require('del');
 var Server = require('karma').Server;
+var protractor = require("gulp-protractor").protractor;
 
 var paths = {
     clean: './dist',
@@ -72,5 +73,15 @@ gulp.task('test', function (done) {
     singleRun: true
   }, done).start();
 });
+
+gulp.task('e2e', function(){
+    gulp.src(["./src/tests/**/*.js"])
+        .pipe(protractor({
+            configFile: "./protractor.conf.js",
+            seleniumServerJar: 'gulp-protractor/node_modules/protractor/selenium/selenium-server-standalone-2.45.0.jar',
+            args: ['--baseUrl', 'http://127.0.0.1:8000']
+        }))
+        .on('error', function(e) { throw e })
+})
 
 gulp.task('default', ['build']);
