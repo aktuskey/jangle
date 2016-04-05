@@ -66,9 +66,6 @@ gulp.task('watch', ['build'], function() {
 
 });
 
-/**
- * Run test once and exit
- */
 gulp.task('test', function (done) {
   new Server({
     configFile: __dirname + '/karma.conf.js',
