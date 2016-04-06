@@ -17,12 +17,15 @@ var paths = {
         in: './src/sass/**/*.scss',
         out: './dist/static'
     },
+    img: {
+        in: './src/img/**/*',
+        out: './dist/static/img'
+    },
     html: {
         in: './src/**/*.html',
         out: './dist'
     }
 }
-
 gulp.task('clean', function(){
     del([paths.clean]);
 });
@@ -42,6 +45,14 @@ gulp.task('bundle-js', function(){
 
 });
 
+
+gulp.task('copy-img', function() {
+
+    gulp.src(paths.img.in)
+        .pipe(gulp.dest(paths.img.out));
+
+});
+
 gulp.task('copy-html', function() {
 
     gulp.src(paths.html.in)
@@ -57,13 +68,14 @@ gulp.task('bundle-css', function() {
 
 });
 
-gulp.task('build', ['bundle-js', 'copy-html', 'bundle-css']);
+gulp.task('build', ['bundle-js', 'copy-html', 'bundle-css', 'copy-img']);
 
 gulp.task('watch', ['build'], function() {
 
     gulp.watch(paths.js.in, ['bundle-js']);
-    gulp.watch(paths.html.in, ['copy-html']);
     gulp.watch(paths.css.in, ['bundle-css']);
+    gulp.watch(paths.img.in, ['copy-img']);
+    gulp.watch(paths.html.in, ['copy-html']);
 
 });
 
