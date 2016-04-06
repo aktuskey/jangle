@@ -1,3 +1,4 @@
 exports.config = {
-  framework: 'jasmine'
+  framework: 'jasmine',
+  directConnect: true
 }
