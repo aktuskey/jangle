@@ -1,37 +1,9 @@
-module.exports = ['UserDataService', '$location', function(UserDataService, $location){
+module.exports = [function(){
   
     var ctrl = this;
 
-    ctrl.showSignUpModal = false;
-    ctrl.showUserInfoModal = false;
-
-    ctrl.user = UserDataService.user;
-
-    ctrl.learnMoreClicked = function() {
-        ctrl.showModal = true;
+    ctrl.onSignIn = function(username, password) {
+        console.log(username);
     };
 
-    ctrl.onSignUp = function(email, password) {
-        
-        if(email == null)
-            return;
-
-    	ctrl.showSignUpModal = false;
-
-    	var promise = UserDataService.signIn(email, password);
-
-    	promise.then(function(res){
-            ctrl.showUserInfoModal = true;
-    	})
-    };
-
-    ctrl.onUserInfo = function(name) {
-
-        ctrl.showUserInfoModal = false;
-
-        var promise = UserDataService.setName(name);
-
-        $location.path('/dashboard');
-    };
-  
 }];

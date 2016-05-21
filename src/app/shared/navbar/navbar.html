@@ -1,0 +1,18 @@
+<nav class="nav has-shadow">
+  <div class="container">
+
+    <div ng-repeat="(side,links) in $ctrl.links"
+         ng-class="{'nav-left': side == 'left', 'nav-right': side == 'right'}">
+
+      <a ng-repeat="link in links"
+         class="nav-item is-tab"
+         ng-class="{'is-active': $ctrl.isActiveLink(link.link)}"
+         ng-href="{{link.link}}">
+        <i class="fa {{link.icon}}"></i>
+        <span style="padding-left: 10px">{{link.label}}</span>
+      </a>
+
+    </div>
+
+  </div>
+</nav>

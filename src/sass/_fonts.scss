@@ -1,2 +1,10 @@
 @import url(https://fonts.googleapis.com/css?family=Roboto+Slab);
 @import url(https://fonts.googleapis.com/css?family=Roboto);
+
+.title:not(.fa), .serif {
+    font-family: 'Roboto Slab', serif;
+}
+
+body, input {
+    font-family: 'Roboto', sans-serif;
+}
