@@ -86,6 +86,12 @@ gulp.task('test', function (done) {
   }, done).start();
 });
 
+gulp.task('test-watch', function (done) {
+  new Server({
+    configFile: __dirname + '/karma.conf.js'
+  }, done).start();
+});
+
 gulp.task('e2e', function(){
     gulp.src(["./src/tests/**/*.js"])
         .pipe(protractor({

@@ -1,6 +1,6 @@
 require('angular').module(module.exports='modal', [])
 
-    .component('modal', {
+    .component(module.exports, {
         templateUrl: 'templates/shared/modal/modal.html',
         controller: require('shared/modal/modal.ctrl'),
         transclude: true,

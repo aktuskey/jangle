@@ -1,16 +1,28 @@
-<div class="modal" ng-click="$ctrl.close()">
-  <div class="modal-dialog" ng-click="$event.stopPropagation()">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" aria-label="Close" ng-click="$ctrl.close()"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">{{$ctrl.title}}</h4>
-      </div>
-      <div class="modal-body" ng-transclude>
-      </div>
-      <div class="modal-footer" ng-show="$ctrl.showButtons == true">
-        <button type="button" class="btn btn-default" ng-click="$ctrl.close()">Cancel</button>
-        <button type="button" class="btn btn-primary" ng-click="$ctrl.submit()">Sign Up</button>
-      </div>
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
+<div class="modal">
+  
+  <!-- Background -->
+  <div class="modal-background" ng-click="$ctrl.close()"></div>
+  
+  <!-- Modal Card -->
+  <div class="modal-card">
+    
+    <!-- Modal Header -->
+    <header class="modal-card-head">
+      <p class="modal-card-title">{{$ctrl.title}}</p>
+      <button class="delete"ng-click="$ctrl.close()"></button>
+    </header>
+    
+    <!-- Modal Body -->
+    <section class="modal-card-body" ng-transclude>
+    </section>
+
+    <!-- Modal Footer -->
+    <!--     
+    <footer class="modal-card-foot">
+      <a class="button is-primary">Save changes</a>
+      <a class="button">Cancel</a>
+    </footer>  
+    -->
+
+  </div>
 </div>

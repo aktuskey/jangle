@@ -1,9 +1,8 @@
-require('angular').module(module.exports="LoginPage", [
+require('angular').module(module.exports="loginPage", [
     require('shared/modal'),
-    require('shared/sign-up-form'),
-    require('shared/user-info-form')
+    require('shared/sign-up-form')
 ])
-    .component('loginPage', {
+    .component(module.exports, {
         templateUrl: 'templates/pages/login-page/login-page.html',
         controller: require('pages/login-page/login-page.ctrl')
     })

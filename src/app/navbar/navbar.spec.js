@@ -1,26 +1,43 @@
 describe("navbar", function() {
 
-  // Load module
-  beforeEach(angular.mock.module(require('navbar')));
+  var element, ctrl;
 
-  // Load templates for module
-  beforeEach(angular.mock.module('templates/navbar/navbar.html'));
+  beforeEach(function(){
 
-  var compile, rootScope;
+    // Load module
+    angular.mock.module(require('navbar'))
 
-  beforeEach(inject(function($compile, $rootScope){
-    compile = $compile;
-    rootScope = $rootScope;
-  }));
+    // Mock services
+    angular.mock.module(function ($provide) {
+      $provide.value('UserDataService', {});
+    });
+
+    // Load templates
+    angular.mock.module('templates/navbar/navbar.html');
+
+    // Initialize component
+    var $compile, $rootScope, $componentController;
+    inject(function(_$compile_, _$rootScope_, _$componentController_){
+      $compile = _$compile_;
+      $rootScope = _$rootScope_;
+      $componentController = _$componentController_;
+    });
+
+    // Initialize template
+    element = $compile('<navbar></navbar>')($rootScope);
+    $rootScope.$digest();
+
+    // Initialize controller
+    ctrl = $componentController('navbar', {})
+
+  });
+
 
   it("contains spec with an expectation", function() {
     expect(true).toBe(true);
   });
 
   it("has title 'MongoCMS'", function() {
-    var element = compile('<navbar></navbar>')(rootScope);
-    rootScope.$digest();
-
-    expect(element.html()).toContain('MongoCMS');
+    expect(element.html()).toContain(ctrl.title);
   });
 });

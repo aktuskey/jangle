@@ -2,14 +2,14 @@ module.exports = ['$routeProvider', '$locationProvider',
 function($routeProvider, $locationProvider){
 
     $routeProvider.
-        when('/', {
+        when('/login', {
             template: '<login-page></login-page>'
         })
         .when('/dashboard', {
             template: '<dashboard-page></dashboard-page>'
         })
         .otherwise({
-            redirectTo: '/oops'
+            redirectTo: '/login'
         });
 
     $locationProvider.html5Mode(true);

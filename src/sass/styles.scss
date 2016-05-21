@@ -1,27 +1,16 @@
+@import 'fonts';
 @import 'navbar';
 @import 'modal';
 
-body {
-	min-width: 320px;
+html, body, div[ng-view] {
+    height: 100%;
+	font-family: 'Roboto', sans-serif;
 }
 
-.jumbotron {
-	hr {
-		border-color: #ccc;
-	}
-	.btn {
-		display: inline-block;
-	}
+html {
+    overflow-y: inherit;
 }
 
-.pad-right {
-	margin-right: 5px;
-}
-
-.pad-left {
-	margin-left: 5px;
-}
-
-.fa-sm {
-    font-size: 0.63em;
+.title:not[.fa], .serif {
+	font-family: 'Roboto Slab', serif;
 }

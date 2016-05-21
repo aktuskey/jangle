@@ -1,47 +1,23 @@
-<div class="">
-  <div class="container">
-    <div class="row">
+<section class="hero is-fullheight">
 
-      <!-- Description -->
-      <div class="col-md-6 text-center">
-        <div class="jumbotron">
-          <h2>
-            <span class="fa-stack fa-sm pad-right">
-              <i class="fa fa-square fa-stack-2x"></i>
-              <i class="fa fa-database fa-stack-1x fa-inverse"></i>
-            </span>MongoCMS
-          </h2>
-          <p>Manage your content.</p>
-          <p><a class="btn btn-primary visible-xs" role="button" ng-click="$ctrl.showSignUpModal = true">Get Started</a></p>
-        </div>
+  <div class="hero-body">
+    <div class="container">
+
+      <!-- Header -->
+      <div class="section">
+        <h2 class="has-icon title is-1 has-text-centered">
+          <i class="fa fa-database title is-1"></i>
+          MongoCMS
+        </h2>
       </div>
 
-      <hr class="visible-sm">
-
       <!-- Sign Up Form -->
-      <div class="col-md-6 hidden-xs">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            Get started
-          </div>
-          <div class="panel-body">
-            <sign-up-form on-submit="$ctrl.onSignUp(email, password)"></sign-up-form>
-          </div>
+      <div class="columns">
+        <div class="column is-half is-offset-one-quarter">
+          <sign-up-form on-submit="$ctrl.onSignUp(email, password)"></sign-up-form>
         </div>
       </div>
 
     </div>
   </div>
-</div>
-<div class="container">
-</div>
-
-<!-- Sign Up Modal -->
-<modal title="Sign Up" ng-show="$ctrl.showSignUpModal">
-  <sign-up-form on-submit="$ctrl.onSignUp(email, password)"></sign-up-form>
-</modal>
-
-<!-- User Info Modal -->
-<modal title="Welcome, {{$ctrl.user.email}}!" ng-show="$ctrl.showUserInfoModal" on-close="$ctrl.onUserInfo()">
-  <user-info-form on-submit="$ctrl.onUserInfo(name)"></user-info-form>
-</modal>
+</section>
