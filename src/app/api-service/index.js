@@ -1,2 +1,4 @@
-require('angular').module(module.exports='ApiService', [])
-    .service(module.exports, require('api-service/api.srvc.js'));
+require('angular').module(module.exports='ApiService', [
+    require('api-service/user-service')
+])
+    .service(module.exports, require('./api.srvc.js'));
