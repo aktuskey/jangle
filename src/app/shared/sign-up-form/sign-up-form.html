@@ -24,17 +24,29 @@
     </div>
   </div>
 
-  <!-- Buttons -->
-  <p class="control is-pulled-right">
+  <div class="columns is-mobile">
 
-    <!-- Sign In -->
-    <button class="button is-primary" 
-            ng-click="$ctrl.onSignIn()"
-            ng-class="{'is-loading': $ctrl.signingIn}"
-            ng-disabled="signUpForm.$invalid">
-      Sign In
-    </button>
+    <!-- Error Message -->
+    <div class="column">
+      <p class="control is-pulled-left">
+        <span class="help is-danger">{{$ctrl.error}}</span>
+      </p>
+    </div>
 
-  </p>
+    <!-- Buttons -->    
+    <div class="column">
+      <p class="control is-pulled-right">
+
+        <!-- Sign In -->
+        <button class="button is-primary" 
+                ng-click="$ctrl.onSignIn()"
+                ng-class="{'is-loading': $ctrl.signingIn}"
+                ng-disabled="signUpForm.$invalid">
+          Sign In
+        </button>
+
+      </p>
+    </div>
+
 
 </form>

@@ -1,17 +1,29 @@
 module.exports = ['$http', function($http){
-	var srvc = this;
-	srvc.data = {};
+    
+    var srvc = this;
 
-    var baseUrl = '/_api';
+    srvc.baseUrl = '/api/';
 
-    srvc.get = function(url, data){
-        return _request('GET', url, data);
+    srvc.get = function(route, data) {
+        return srvc.request('GET', route, data);
     };
 
-    _request = function(method, url, data) {
-
-        return method + ' ' + baseUrl + '/' + url;
-
+    srvc.post = function(route, data) {
+        return srvc.request('POST', route, data);
     };
+
+    srvc.put = function(route, data) {
+        return srvc.request('PUT', route, data);
+    };
+
+    srvc.request = function(method, route, data) {
+
+        return $http({
+            method: method,
+            url: srvc.baseUrl + route,
+            params: data
+        });
+
+    }
 
 }];

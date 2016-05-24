@@ -1,9 +1,11 @@
-module.exports = [function(){
+module.exports = ['$location', function($location){
   
     var ctrl = this;
 
-    ctrl.onSignIn = function(username, password) {
-        console.log(username);
+    ctrl.onSignUp = function(){
+
+        $location.path('dashboard');
+
     };
 
 }];

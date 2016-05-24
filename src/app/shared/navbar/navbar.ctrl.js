@@ -1,7 +1,8 @@
-module.exports = ['$location', function($location){
+module.exports = ['$location', 'UserService', function($location, UserService){
 	var ctrl = this;
 
 	ctrl.title = 'MongoCMS';
+	ctrl.userServiceData = UserService.data;
 
 	ctrl.links = {
 		left: [
@@ -23,7 +24,7 @@ module.exports = ['$location', function($location){
 		],
 		right: [
 			{
-				label: 'User',
+				label: (ctrl.userServiceData.user) ? ctrl.userServiceData.user.username : '',
 				icon: 'fa-user',
 				link: '/user'
 			}
