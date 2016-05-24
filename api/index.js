@@ -10,13 +10,18 @@ module.exports = function(router) {
     var password = process.env.CMS_DB_PWD;
     var connectionString = 'mongodb://'+username+':'+password+'@'+url;
 
-    mongoose.connect(connectionString);
+    mongoose.connect(connectionString).then(function(){
+        console.log('connected to database!');
+    })
 
     router.route('/')
 
         .get(function(req, res){
             res.json('')
         })
+
+    // Collection API
+    require('./collection-api')(mongoose, router);
 
     // User API
     require('./user-api')(router);
