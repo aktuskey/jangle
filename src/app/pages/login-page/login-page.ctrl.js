@@ -4,7 +4,7 @@ module.exports = ['$location', function($location){
 
     ctrl.onSignUp = function(){
 
-        $location.path('dashboard');
+        $location.path('collections');
 
     };
 

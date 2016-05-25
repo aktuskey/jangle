@@ -6,7 +6,7 @@ module.exports = ['UserService', function(UserService){
     ctrl.onSignIn = function() {
 
         ctrl.signingIn = true;
-        ctrl.error = '';
+        ctrl.inputClass = '';
 
         UserService.signIn(ctrl.username, ctrl.password)
             .then(function(res){
@@ -15,7 +15,7 @@ module.exports = ['UserService', function(UserService){
             })
             .catch(function(err){
                 console.log(err);
-                ctrl.error = err.data;
+                ctrl.inputClass = 'is-danger';
             })
             .then(function(res){
                 ctrl.signingIn = false;

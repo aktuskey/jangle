@@ -6,7 +6,7 @@
       <label class="label">Username</label>
     </div>
     <div class="control has-icon">
-      <input class="input" type="text" placeholder="Username" 
+      <input class="input {{$ctrl.inputClass}}" type="text" placeholder="Username" 
              name="username" ng-model="$ctrl.username" required>
       <i class="fa fa-user"></i>
     </div>
@@ -18,7 +18,7 @@
       <label class="label">Password</label>
     </div>
     <div class="control has-icon">
-      <input class="input" type="password" placeholder="Password" 
+      <input class="input {{$ctrl.inputClass}}" type="password" placeholder="Password" 
              name="password" ng-model="$ctrl.password" required>
       <i class="fa fa-lock"></i>
     </div>
