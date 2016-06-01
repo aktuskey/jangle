@@ -6,16 +6,16 @@ function($routeProvider, $locationProvider){
             template: '<login-page></login-page>'
         })
         .when('/dashboard', {
-            template: 'dashboard'
+            template: '<navbar></navbar>dashboard'
         })
         .when('/collections', {
             template: '<collections-page></collections-page>'
         })
         .when('/roles', {
-            template: 'roles'
+            template: '<navbar></navbar>roles'
         })
         .when('/user', {
-            template: 'user'
+            template: '<navbar></navbar>user'
         })
         .otherwise({
             redirectTo: '/login'

@@ -18,6 +18,8 @@ module.exports = ['$http', function($http){
 
     srvc.request = function(method, route, data) {
 
+        // TODO: Add user role authentication for API calls
+
         return $http({
             method: method,
             url: srvc.baseUrl + route,
