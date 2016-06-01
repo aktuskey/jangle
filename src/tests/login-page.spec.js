@@ -30,6 +30,6 @@ describe('Login page', function() {
         expect(usernameInput.getAttribute('class')).toContain('is-danger');
         expect(passwordInput.getAttribute('class')).toContain('is-danger');
 
-    })
+    });
 
 });
