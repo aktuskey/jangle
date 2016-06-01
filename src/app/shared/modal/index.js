@@ -8,6 +8,6 @@ require('angular').module(module.exports='modal', [])
             title: '@',
             onClose: '&',
             onSubmit: '&',
-            ngShow: '='
+            showModal: '='
         }
     })

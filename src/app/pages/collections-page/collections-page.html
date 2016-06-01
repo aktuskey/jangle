@@ -1,5 +1,5 @@
 <navbar></navbar>
-<div class="container" ng-init="$ctrl.onInit()">
+<div class="container" ng-init="$ctrl.getAllCollections()">
   <div class="section">
     <div class="columns is-mobile is-multiline">
 
@@ -10,7 +10,8 @@
 
       <!-- 'Add New Collection' Button -->
       <div class="column is-4">
-        <a class="button is-pulled-right is-medium is-outlined">
+        <a class="button is-pulled-right is-medium is-outlined"
+           ng-click="$ctrl.addNewCollection()">
           <span class="icon">
             <i class="fa fa-plus"></i>
           </span>
@@ -29,8 +30,12 @@
             <div class="content">{{collection.description}}</div>
           </div>
           <footer class="card-footer">
-            <a class="card-footer-item">Edit Model</a>
-            <a class="card-footer-item">Edit Documents</a>
+            <a class="card-footer-item" ng-click="$ctrl.editCollection(collection)">
+              Edit Collection
+            </a>
+            <a class="card-footer-item" ng-click="$ctrl.editDocuments(collection)">
+              Edit Documents
+            </a>
           </footer>
         </div>
       </div>
@@ -38,3 +43,9 @@
     </div>
   </div>
 </div>
+
+<modal title="Edit Collection"
+       on-submit="$ctrl.getAllCollections()" 
+       show-modal="$ctrl.showEditModal">
+  <collection-form on-success="$ctrl.showEditModal = false"></collection-form>
+</modal>

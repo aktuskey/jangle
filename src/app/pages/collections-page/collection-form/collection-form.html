@@ -1,0 +1,73 @@
+<form name="collectionForm" novalidate class="form-horizontal">
+
+  <!-- Name - disabled on edit-->
+  <div class="control is-horizontal">
+    <div class="control-label">
+      <label class="label">Name</label>
+    </div>
+    <div class="control has-icon">
+      <input class="input {{$ctrl.inputClass}}" 
+             ng-class="{'is-disabled': !$ctrl.collectionServiceData.isNewCollection}" 
+             type="text" 
+             placeholder="Name" 
+             name="name" 
+             ng-model="$ctrl.collectionServiceData.collection.name" 
+             required>
+      <i class="fa fa-font"></i>
+    </div>
+  </div>
+
+  <!-- Description -->
+  <div class="control is-horizontal">
+    <div class="control-label">
+      <label class="label">Description</label>
+    </div>
+    <div class="control has-icon">
+      <textarea class="textarea {{$ctrl.inputClass}}" 
+                placeholder="Description"
+                name="description" 
+                ng-model="$ctrl.collectionServiceData.collection.description">
+      </textarea>
+      <i class="fa fa-indent"></i>
+    </div>
+  </div>
+
+  <!-- Bottom Row -->
+  <div class="columns is-mobile">
+
+    <!-- Buttons -->    
+    <div class="column">
+      <p class="control is-pulled-right">
+
+        <!-- Add Collection - hidden on edit-->
+        <button class="button is-primary"
+                ng-show="$ctrl.collectionServiceData.isNewCollection"
+                ng-click="$ctrl.onAddCollection()"
+                ng-class="{'is-loading': $ctrl.isAdding}"
+                ng-disabled="collectionForm.$invalid">
+          Add Collection
+        </button>
+
+        <!-- Remove Collection - shown on edit -->
+        <button class="button is-danger"
+                ng-hide="$ctrl.collectionServiceData.isNewCollection"
+                ng-click="$ctrl.onRemoveCollection()"
+                ng-class="{'is-loading': $ctrl.isRemoving}"
+                ng-disabled="collectionForm.$invalid">
+          Remove Collection
+        </button>
+
+        <!-- Edit Collection - shown on edit -->
+        <button class="button is-primary"
+                ng-hide="$ctrl.collectionServiceData.isNewCollection"
+                ng-click="$ctrl.onEditCollection()"
+                ng-class="{'is-loading': $ctrl.isEditing}"
+                ng-disabled="collectionForm.$invalid">
+          Edit Collection
+        </button>
+
+      </p>
+    </div>
+
+
+</form>

@@ -16,6 +16,10 @@ module.exports = ['$http', function($http){
         return srvc.request('PUT', route, data);
     };
 
+    srvc.delete = function(route, data) {
+        return srvc.request('DELETE', route, data);
+    };
+
     srvc.request = function(method, route, data) {
 
         // TODO: Add user role authentication for API calls

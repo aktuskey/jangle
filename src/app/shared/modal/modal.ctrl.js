@@ -8,13 +8,13 @@ module.exports = [function(){
         if(ctrl.onClose)
             ctrl.onClose();
         
-        ctrl.ngShow = false;
+        ctrl.showModal = false;
     };
 
     ctrl.submit = function(){
         console.log('submitting modal');
         ctrl.onSubmit();
-        ctrl.ngShow = false;
+        ctrl.showModal = false;
     }
 
 }];
