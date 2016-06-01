@@ -14,14 +14,22 @@ module.exports = ['CollectionService', function(CollectionService){
     };
 
     ctrl.onRemoveCollection = function(){
-        submitHelper('isRemoving', 'removeCollection');
+        ctrl.showConfirmationModal = true;
     };
+
+    ctrl.onRemovalConfirmation = function(){
+        submitHelper('isRemoving', 'removeCollection').then(function(){
+            ctrl.showConfirmationModal = false;
+        });
+    };
+
+    ctrl.showConfirmationModal = false;
 
     var submitHelper = function(isLoading, serviceFunction) {
 
         ctrl[isLoading] = true;
 
-        CollectionService[serviceFunction]().then(function(res){
+        return CollectionService[serviceFunction]().then(function(res){
             
             if(ctrl.onSuccess) 
                 ctrl.onSuccess();

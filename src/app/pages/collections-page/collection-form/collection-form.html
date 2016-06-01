@@ -52,7 +52,6 @@
         <button class="button is-danger"
                 ng-hide="$ctrl.collectionServiceData.isNewCollection"
                 ng-click="$ctrl.onRemoveCollection()"
-                ng-class="{'is-loading': $ctrl.isRemoving}"
                 ng-disabled="collectionForm.$invalid">
           Remove Collection
         </button>
@@ -62,7 +61,7 @@
                 ng-hide="$ctrl.collectionServiceData.isNewCollection"
                 ng-click="$ctrl.onEditCollection()"
                 ng-class="{'is-loading': $ctrl.isEditing}"
-                ng-disabled="collectionForm.$invalid">
+                ng-disabled="collectionForm.$invalid || collectionForm.$pristine">
           Edit Collection
         </button>
 
@@ -71,3 +70,29 @@
 
 
 </form>
+
+<modal title="Removing a Collection"
+       show-modal="$ctrl.showConfirmationModal">
+
+  <p class="control">
+    Are you sure you want to permanently remove the <strong>{{$ctrl.collectionServiceData.collection.name}}</strong> collection?
+  </p>
+
+  <p class="control is-pulled-right">
+
+    <!-- Remove Collection - shown on edit -->
+    <button class="button is-default"
+            ng-click="$ctrl.showConfirmationModal = false">
+      Cancel
+    </button>
+
+    <!-- Edit Collection - shown on edit -->
+    <button class="button is-danger"
+            ng-click="$ctrl.onRemovalConfirmation()"
+            ng-class="{'is-loading': $ctrl.isRemoving}">
+      Remove {{$ctrl.collectionServiceData.collection.name}}
+    </button>
+
+  </p>
+
+</modal>

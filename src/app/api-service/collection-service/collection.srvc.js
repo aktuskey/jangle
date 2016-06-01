@@ -43,24 +43,22 @@ module.exports = ['ApiService', function(ApiService){
 
     // editCollection - edits an existing collection
     srvc.editCollection = function(){
+
         return ApiService.put('collections',{
             name: srvc.data.collection.name,
             description: srvc.data.collection.description
-        }).then(function(res){
-            console.log(res);
-            return res;
         });
+
     };
 
     // addCollection - adds a new collection
     srvc.addCollection = function(){
+
         return ApiService.post('collections', {
             name: srvc.data.collection.name,
             description: srvc.data.collection.description
-        }).then(function(res){
-            console.log('added ', res);
-            return res;
         });
+        
     };
 
     // removeCollection - removes an existing collection
@@ -68,9 +66,6 @@ module.exports = ['ApiService', function(ApiService){
 
         return ApiService.delete('collections', {
             name: srvc.data.collection.name
-        }).then(function(res){
-            console.log('removed ', res);
-            return res;
         });
 
     };
