@@ -8,7 +8,7 @@ module.exports = function(router, secret) {
         return crypto.createHash('sha256').update(password).digest('base64');
     };
 
-    router.route('/user')
+    router.route('/sign-in')
 
         .get(function(req, res){
             var params = req.query;
@@ -18,27 +18,31 @@ module.exports = function(router, secret) {
                 password: hash(process.env.CMS_DB_PWD)
             };
 
-            var match = true;
+            var isAdmin = true;
             for(var i in adminUser)
             {
                 if(params[i] != adminUser[i])
-                    match = false;
+                    isAdmin = false;
             }
 
-            if(match)
+            if(isAdmin)
             {
                 var user = {
                     username: params.username,
                     role: 'site-admin'
                 };
 
-                user.token = jwt.sign(user, secret, {
-                    expiresIn: '24h'
-                });
-
-                res.status(200).json(user);
             }
-            else res.status(400).json('Login failed');
+            else 
+            {
+                res.status(400).json('Login failed');
+            }
+            
+            user.token = jwt.sign(user, secret, {
+                expiresIn: '24h'
+            });
+
+            res.status(200).json(user);
 
         })
 

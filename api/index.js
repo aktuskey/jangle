@@ -18,8 +18,8 @@ module.exports = function(router) {
     // Secret for Tokenization
     var secret = ''+Math.random()*Number.MAX_SAFE_INTEGER;
 
-    // User API
-    require('./user-api')(router, secret);
+    // Sign In API
+    require('./sign-in-api')(router, secret);
 
     // Authentication Middleware
     router.use(function(req, res, next){
@@ -31,7 +31,7 @@ module.exports = function(router) {
             jwt.verify(token, secret, function(err, authenticatedUser){
 
                 if(err)
-                    return res.json({success: false, message: 'Failed to authenticate token.'});
+                    return res.status(403).json('Failed to authenticate token.');
                 else
                 {
                     req.authenticatedUser = authenticatedUser;
@@ -42,10 +42,7 @@ module.exports = function(router) {
         }
         else
         {
-            return res.status(403).send({
-                success: false,
-                message: 'No token provided'
-            });
+            return res.status(403).send('No token provided');
         }
 
     });

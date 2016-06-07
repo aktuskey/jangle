@@ -6,6 +6,9 @@ module.exports = function(mongoose, router) {
 
         .get(function(req, res){
             
+            if(req.authenticatedUser.role != 'site-admin')
+                return res.status(403).json('Insufficient privileges');
+
             if(req.query.all !== undefined)
             {
                 // Return array of all collections in database
