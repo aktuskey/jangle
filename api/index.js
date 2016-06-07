@@ -47,6 +47,9 @@ module.exports = function(router) {
 
     });
 
+    // User API
+    require('./user-api')(mongoose, router);
+    
     // Collection API
     require('./collection-api')(mongoose, router);
 

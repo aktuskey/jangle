@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
 var crypto = require('crypto');
 var jwt = require('jsonwebtoken');
+var User = require('../user-api/model');
 
 module.exports = function(router, secret) {
 
@@ -25,6 +26,7 @@ module.exports = function(router, secret) {
                     isAdmin = false;
             }
 
+            // Check if user signed in as admin
             if(isAdmin)
             {
                 var user = {
@@ -32,17 +34,38 @@ module.exports = function(router, secret) {
                     role: 'site-admin'
                 };
 
+                user.token = jwt.sign(user, secret, {
+                    expiresIn: '24h'
+                });
+
+                return res.status(200).json(user);
             }
+            // Check if user is registered in user collection
             else 
             {
-                res.status(400).json('Login failed');
-            }
-            
-            user.token = jwt.sign(user, secret, {
-                expiresIn: '24h'
-            });
+                User.findOne({
+                    username: params.username,
+                    password: params.password
+                }, function(err,user){
+                    if(err)
+                        return res.status(400).json('Login failed');
+                    else
+                    {
+                        var newUser = {
+                            username: user.username,
+                            role: user.role
+                        };
 
-            res.status(200).json(user);
+                        newUser.token = jwt.sign(newUser, secret, {
+                            expiresIn: '24h'
+                        });
+
+                        return res.status(200).json(newUser);
+                    }
+                });
+
+            }
+
 
         })
 
