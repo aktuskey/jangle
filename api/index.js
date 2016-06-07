@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var jwt = require('jsonwebtoken');
 
 module.exports = function(router) {
   
@@ -12,18 +13,45 @@ module.exports = function(router) {
 
     mongoose.connect(connectionString).then(function(){
         console.log('connected to database!');
-    })
+    });
 
-    router.route('/')
+    // Secret for Tokenization
+    var secret = ''+Math.random()*Number.MAX_SAFE_INTEGER;
 
-        .get(function(req, res){
-            res.json('')
-        })
+    // User API
+    require('./user-api')(router, secret);
+
+    // Authentication Middleware
+    router.use(function(req, res, next){
+
+        var token = req.query.token;
+
+        if(token) 
+        {
+            jwt.verify(token, secret, function(err, authenticatedUser){
+
+                if(err)
+                    return res.json({success: false, message: 'Failed to authenticate token.'});
+                else
+                {
+                    req.authenticatedUser = authenticatedUser;
+                    next();
+                }
+
+            });
+        }
+        else
+        {
+            return res.status(403).send({
+                success: false,
+                message: 'No token provided'
+            });
+        }
+
+    });
 
     // Collection API
     require('./collection-api')(mongoose, router);
 
-    // User API
-    require('./user-api')(router);
 
 };

@@ -1,7 +1,8 @@
 var mongoose = require('mongoose');
 var crypto = require('crypto');
+var jwt = require('jsonwebtoken');
 
-module.exports = function(router) {
+module.exports = function(router, secret) {
 
     var hash = function(password){
         return crypto.createHash('sha256').update(password).digest('base64');
@@ -26,10 +27,16 @@ module.exports = function(router) {
 
             if(match)
             {
-                res.status(200).json({
+                var user = {
                     username: params.username,
                     role: 'site-admin'
-                });                
+                };
+
+                user.token = jwt.sign(user, secret, {
+                    expiresIn: '24h'
+                });
+
+                res.status(200).json(user);
             }
             else res.status(400).json('Login failed');
 

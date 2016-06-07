@@ -30,6 +30,7 @@
     "bootstrap": "^3.3.6",
     "express": "^4.13.4",
     "jquery": "^2.2.2",
+    "jsonwebtoken": "^7.0.0",
     "mongoose": "^4.4.8"
   },
   "devDependencies": {
