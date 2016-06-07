@@ -6,7 +6,8 @@ module.exports = function(mongoose, router) {
 
         .get(function(req, res){
             
-            if(req.authenticatedUser.role != 'site-admin')
+            // Only allow results if user has sufficient permission
+            if(req.role != 'site-admin')
                 return res.status(403).json('Insufficient privileges');
 
             if(req.query.all !== undefined)

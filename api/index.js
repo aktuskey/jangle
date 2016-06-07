@@ -34,7 +34,7 @@ module.exports = function(router) {
                     return res.status(403).json('Failed to authenticate token.');
                 else
                 {
-                    req.authenticatedUser = authenticatedUser;
+                    req.role = authenticatedUser.role;
                     next();
                 }
 
