@@ -35,6 +35,7 @@ module.exports = function(router) {
                 else
                 {
                     req.role = authenticatedUser.role;
+                    req.secret = secret;
                     next();
                 }
 

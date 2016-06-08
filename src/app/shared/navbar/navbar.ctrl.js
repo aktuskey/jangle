@@ -4,31 +4,26 @@ module.exports = ['$location', 'UserService', function($location, UserService){
 	ctrl.title = 'MongoCMS';
 	ctrl.userServiceData = UserService.data;
 
-	ctrl.links = {
-		left: [
-			{
-				label: 'MongoCMS',
-				icon: 'fa-database',
-				link: '/dashboard'
-			},
-			{
-				label: 'Collections',
-				icon: 'fa-th-list',
-				link: '/collections'
-			},
-			{
-				label: 'User Roles',
-				icon: 'fa-users',
-				link: '/roles'
-			}
-		],
-		right: [
-			{
-				label: (ctrl.userServiceData.user) ? ctrl.userServiceData.user.username : '',
-				icon: 'fa-user',
-				link: '/user'
-			}
-		]
+	ctrl.links = [
+		{
+			label: 'MongoCMS',
+			icon: 'fa-database',
+			link: '/dashboard'
+		},
+		{
+			label: 'Collections',
+			icon: 'fa-th-list',
+			link: '/collections'
+		},
+		{
+			label: 'User Roles',
+			icon: 'fa-users',
+			link: '/roles'
+		}
+	];
+
+	ctrl.getCachedUser = function(){
+		UserService.getCachedUser();
 	};
 
 	ctrl.isActiveLink = function(link){

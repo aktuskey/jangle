@@ -1,15 +1,25 @@
-<nav class="nav has-shadow">
+<nav class="nav has-shadow" ng-init="$ctrl.getCachedUser()">
   <div class="container">
 
-    <div ng-repeat="(side,links) in $ctrl.links"
-         ng-class="{'nav-left': side == 'left', 'nav-right': side == 'right'}">
+    <div class="nav-left">
 
-      <a ng-repeat="link in links"
+      <a ng-repeat="link in $ctrl.links"
          class="nav-item is-tab"
          ng-class="{'is-active': $ctrl.isActiveLink(link.link)}"
          ng-href="{{link.link}}">
         <i class="fa {{link.icon}}"></i>
         <span style="padding-left: 10px" ng-bind="link.label"></span>
+      </a>
+
+    </div>
+
+    <div class="nav-right">
+
+      <a class="nav-item is-tab"
+         ng-class="{'is-active': $ctrl.isActiveLink('/user')}"
+         href="/user">
+        <i class="fa fa-user"></i>
+        <span style="padding-left: 10px">{{$ctrl.userServiceData.user.username}}</span>
       </a>
 
     </div>
