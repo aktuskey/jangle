@@ -18,7 +18,7 @@ function($routeProvider, $locationProvider){
             template: '<navbar></navbar>user'
         })
         .otherwise({
-            redirectTo: '/login'
+            redirectTo: '/collections'
         });
 
     $locationProvider.html5Mode(true);

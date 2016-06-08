@@ -1,4 +1,4 @@
-module.exports = ['$http', function($http){
+module.exports = ['$http','$location', function($http, $location){
     
     var srvc = this;
     var TOKEN_KEY = 'mongo-cms-auth-token';
@@ -15,6 +15,8 @@ module.exports = ['$http', function($http){
 
     srvc.getToken = function(){
         var string = localStorage.getItem(TOKEN_KEY);
+        if(!string)
+            $location.path('/login');
         return JSON.parse(string);
     };
 
