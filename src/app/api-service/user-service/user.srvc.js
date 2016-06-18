@@ -22,7 +22,6 @@ module.exports = ['ApiService', function(ApiService){
             srvc.data.user.role = res.data.role;
             return res;
         });
-
     };
 
     srvc.signIn = function(username, password){
