@@ -1,12 +1,13 @@
-module.exports = ['$http','$location', function($http, $location){
+module.exports = ['$http', function($http){
     
     var srvc = this;
     var TOKEN_KEY = 'mongo-cms-auth-token';
 
     srvc.baseUrl = '/api/';
 
+    // User Authentication
     srvc.signIn = function(data){
-        return srvc.request('GET', 'sign-in', data, true);        
+        return srvc.get('sign-in', data, true);        
     };
 
     srvc.saveToken = function(token){
@@ -14,49 +15,50 @@ module.exports = ['$http','$location', function($http, $location){
     };
 
     srvc.getToken = function(){
-        var string = localStorage.getItem(TOKEN_KEY);
-        if(!string)
-            $location.path('/login');
-        return JSON.parse(string);
+        return JSON.parse(localStorage.getItem(TOKEN_KEY));
     };
 
     srvc.resetToken = function(){
         localStorage.removeItem(TOKEN_KEY);
-    }
-
-    srvc.get = function(route, data) {
-        return srvc.request('GET', route, data);
     };
 
-    srvc.post = function(route, data) {
-        return srvc.request('POST', route, data);
+    srvc.get = function(route, data, isSigningIn) {
+        return srvc.request('GET', route, data, isSigningIn);
     };
 
-    srvc.put = function(route, data) {
-        return srvc.request('PUT', route, data);
+    srvc.post = function(route, data, isSigningIn) {
+        return srvc.request('POST', route, data, isSigningIn);
     };
 
-    srvc.delete = function(route, data) {
-        return srvc.request('DELETE', route, data);
+    srvc.put = function(route, data, isSigningIn) {
+        return srvc.request('PUT', route, data, isSigningIn);
     };
 
-    srvc.request = function(method, route, data, isSignIn) {
+    srvc.delete = function(route, data, isSigningIn) {
+        return srvc.request('DELETE', route, data, isSigningIn);
+    };
 
-        if(!isSignIn)
+    srvc.request = function(method, route, data, isSigningIn) {
+
+        if(!data)
+            data = {};
+
+        if(!isSigningIn)
             data.token = srvc.getToken();
 
         return $http({
             method: method,
             url: srvc.baseUrl + route,
             params: data
-        }).then(function(res){
+        })
+            .then(function(res){
 
-            if(isSignIn)
-                srvc.saveToken(res.data.token);
+                if(isSigningIn)
+                    srvc.saveToken(res.data.token);
 
-            return res;
+                return res;
 
-        });
+            });
 
     };
 

@@ -1,4 +1,4 @@
-module.exports = ['ApiService', function(ApiService){
+module.exports = ['ApiService', '$location', function(ApiService, $location){
     var srvc = this;
     srvc.data = {};
 
@@ -11,17 +11,16 @@ module.exports = ['ApiService', function(ApiService){
 
     srvc.getCachedUser = function(){
 
-        // Get token if available
-        var token = ApiService.getToken();
-
-        return ApiService.get('user', {
-            token: token
-        }).then(function(res){
-            srvc.data.user = {};
-            srvc.data.user.username = res.data.username;
-            srvc.data.user.role = res.data.role;
-            return res;
-        });
+        return ApiService.get('user')
+            .then(function(res){
+                srvc.data.user = {};
+                srvc.data.user.username = res.data.username;
+                srvc.data.user.role = res.data.role;
+                return res;
+            })
+            .catch(function(res){
+                $location.path('/login');
+            });
     };
 
     srvc.signIn = function(username, password){
@@ -31,7 +30,6 @@ module.exports = ['ApiService', function(ApiService){
             password: hash(password)
         })
         .then(function(res){
-            console.log(res);
             srvc.data.user = res.data;
             return res;
         });
