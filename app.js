@@ -1,6 +1,11 @@
 var express = require('express');
 var app = express();
 var router = express.Router();
+var dotenv = require('dotenv');
+
+// Load environment variables from .env file
+if(process.env.NODE_ENV != 'production')
+  dotenv.load();
 
 // Static Files
 app.use('/static', express.static('dist/static'));
