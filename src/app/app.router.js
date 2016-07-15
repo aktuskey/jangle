@@ -1,24 +1,26 @@
 module.exports = ['$routeProvider', '$locationProvider',
 function($routeProvider, $locationProvider){
 
+    var MONGO_PREFIX = '/mongo-cms'
+
     $routeProvider.
-        when('/login', {
+        when(MONGO_PREFIX + '/login', {
             template: '<login-page></login-page>'
         })
-        .when('/dashboard', {
+        .when(MONGO_PREFIX + '/dashboard', {
             template: '<navbar></navbar>dashboard'
         })
-        .when('/collections', {
+        .when(MONGO_PREFIX + '/collections', {
             template: '<collections-page></collections-page>'
         })
-        .when('/roles', {
+        .when(MONGO_PREFIX + '/roles', {
             template: '<navbar></navbar>roles'
         })
-        .when('/user', {
+        .when(MONGO_PREFIX + '/user', {
             template: '<navbar></navbar>user'
         })
         .otherwise({
-            redirectTo: '/collections'
+            redirectTo: MONGO_PREFIX + '/collections'
         });
 
     $locationProvider.html5Mode(true);
