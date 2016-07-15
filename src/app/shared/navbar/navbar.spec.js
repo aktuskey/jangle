@@ -5,15 +5,26 @@ describe("navbar", function() {
   beforeEach(function(){
 
     // Load module
-    angular.mock.module(require('navbar'))
+    angular.mock.module(require('shared/navbar'))
 
     // Mock services
     angular.mock.module(function ($provide) {
-      $provide.value('UserDataService', {});
+      $provide.value('$location', {
+        path: function(){
+          return '/mongo-cms/login';
+        }
+      });
+      $provide.value('UserService', {
+        getCachedUser: function(){ 
+          return new Promise(function(resolve, reject){
+            resolve();
+          });
+        }
+      });
     });
 
     // Load templates
-    angular.mock.module('templates/navbar/navbar.html');
+    angular.mock.module('templates/shared/navbar/navbar.html');
 
     // Initialize component
     var $compile, $rootScope, $componentController;
