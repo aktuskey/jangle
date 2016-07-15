@@ -1,4 +1,4 @@
-# MongoCMS
+# MongoCMS [![Build Status](https://travis-ci.org/RyanNHG/mongo-cms.svg?branch=master)](https://travis-ci.org/RyanNHG/mongo-cms)
 
 ### Getting Started
 1. __`npm install`__ - installs all dependencies
