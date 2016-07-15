@@ -25,5 +25,16 @@ app.use(function(req, res) {
   	res.status(200).sendFile(__dirname+'/dist/index.html');
 });
 
-console.log('Listening on port 8080...')
-app.listen(8080);
+//  Start the server
+if (module === require.main) {
+    var server = app.listen(process.env.PORT || 8080, function () {
+    var host = server.address().address;
+    var port = server.address().port;
+
+    host = (host == '::') ? 'localhost' : host;
+
+    console.log('App listening at http://%s:%s', host, port);
+  });
+}
+
+module.exports = app;
