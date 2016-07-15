@@ -4,4 +4,7 @@ node_js:
 before_script:
   - npm install -g gulp
 script: gulp
-after_success: npm test
+after_success: 
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - npm test
