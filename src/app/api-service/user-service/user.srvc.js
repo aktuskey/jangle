@@ -19,7 +19,8 @@ module.exports = ['ApiService', '$location', function(ApiService, $location){
                 return res;
             })
             .catch(function(res){
-                $location.path('/login');
+                $location.path('/mongo-cms/login');
+                return res;
             });
     };
 
@@ -33,6 +34,19 @@ module.exports = ['ApiService', '$location', function(ApiService, $location){
             srvc.data.user = res.data;
             return res;
         });
+
+    };
+
+    srvc.signOut = function(){
+
+        return ApiService.signOut()
+        .then(function(res){
+
+            srvc.data.user = null;
+            return res;
+
+        });
+
     };
 
 }];

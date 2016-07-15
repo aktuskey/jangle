@@ -10,6 +10,13 @@ module.exports = ['$http', function($http){
         return srvc.get('sign-in', data, true);        
     };
 
+    srvc.signOut = function(){
+        return new Promise(function(resolve, reject){
+            srvc.resetToken();
+            resolve();
+        });
+    };
+
     srvc.saveToken = function(token){
         localStorage.setItem(TOKEN_KEY, JSON.stringify(token));
     };

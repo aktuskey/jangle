@@ -8,19 +8,23 @@ module.exports = ['$location', 'UserService', function($location, UserService){
 		{
 			label: 'MongoCMS',
 			icon: 'fa-database',
-			link: '/dashboard'
+			link: '/mongo-cms/dashboard'
 		},
 		{
 			label: 'Collections',
 			icon: 'fa-th-list',
-			link: '/collections'
+			link: '/mongo-cms/collections'
 		},
 		{
 			label: 'User Roles',
 			icon: 'fa-users',
-			link: '/roles'
+			link: '/mongo-cms/roles'
 		}
 	];
+
+	ctrl.onUserLinkClicked = function(){
+		UserService.signOut().then(ctrl.getCachedUser);
+	};
 
 	ctrl.getCachedUser = function(){
 		UserService.getCachedUser();
@@ -28,9 +32,5 @@ module.exports = ['$location', 'UserService', function($location, UserService){
 
 	ctrl.isActiveLink = function(link){
 		return $location.path() == link;
-	}
-
-	ctrl.route = function(){
-
 	};
 }]

@@ -17,9 +17,9 @@
 
       <a class="nav-item is-tab is-full-height"
          ng-class="{'is-active': $ctrl.isActiveLink('/user')}"
-         href="/user">
+         ng-click="$ctrl.onUserLinkClicked()">
         <i class="fa fa-user"></i>
-        <span style="padding-left: 10px" class="is-hidden-mobile">{{$ctrl.userServiceData.user.username}}</span>
+        <span style="padding-left: 10px" class="is-hidden-mobile" >Sign out {{$ctrl.userServiceData.user.username}}</span>
       </a>
 
     </div>
