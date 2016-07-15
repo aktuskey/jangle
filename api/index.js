@@ -4,15 +4,15 @@ var jwt = require('jsonwebtoken');
 module.exports = function(router) {
   
     // Attempt database connection
-    console.log('Attempting to connect...');
 
     var url = process.env.CMS_DB_URL;
     var username = process.env.CMS_DB_USER;
     var password = process.env.CMS_DB_PWD;
     var connectionString = 'mongodb://'+username+':'+password+'@'+url;
 
+    console.log('Connecting to ' + url + ' ...');
     mongoose.connect(connectionString).then(function(){
-        console.log('connected to database!');
+        console.log('connected!');
     });
 
     // Secret for Tokenization
