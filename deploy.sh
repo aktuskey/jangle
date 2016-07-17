@@ -10,8 +10,6 @@ fi
 
 rev=$(git rev-parse --short HEAD)
 
-cd stage/_book
-
 git init
 git config user.name "Ryan Haskell-Glatz"
 git config user.email "ryan.nhg@gmail.com"
@@ -19,8 +17,6 @@ git config user.email "ryan.nhg@gmail.com"
 git remote add upstream "https://$GH_TOKEN@github.com/ryannhg/mongo-cms.git"
 git fetch upstream
 git reset upstream/production
-
-#echo "rustbyexample.com" > CNAME
 
 touch .
 
