@@ -13,6 +13,10 @@ if [ ! -d "dist" ]; then
   gulp
 fi
 
+# Set up local git user
+git config user.email "ryan.nhg@gmail.com"
+git config user.name "Ryan Haskell-Glatz"
+
 # Clone the production branch into 'prod'
 git clone -b production http://github.com/ryannhg/mongo-cms.git prod
 

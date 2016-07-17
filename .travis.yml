@@ -12,8 +12,9 @@ script:
 before_install:
 - openssl aes-256-cbc -K $encrypted_e4c5ebf2a3cf_key -iv $encrypted_e4c5ebf2a3cf_iv
   -in deploy_key.pem.enc -out deploy_key.pem -d
+- ls
 after_success:
 - eval "$(ssh-agent -s)" #start the ssh agent
-- chmod 600 .travis/deploy_key.pem.enc # this key should have push access
-- ssh-add .travis/deploy_key.pem.enc
+- chmod 600 .travis/deploy_key.pem # this key should have push access
+- ssh-add .travis/deploy_key.pem
 - bash ./deploy.sh
