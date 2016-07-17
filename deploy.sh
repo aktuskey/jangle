@@ -8,14 +8,14 @@ set -o errexit -o nounset
 #   exit 0
 # fi
 
+# Generate dist folder if it has not been generated
 if [ ! -d "dist" ]; then
-  # Control will enter here if dist/ doesn't exist.
   gulp
 fi
 
 # Set up local git user
-git config --global user.email "ryan.nhg@gmail.com"
-git config --global user.name "Ryan Haskell-Glatz"
+# git config --global user.email "ryan.nhg@gmail.com"
+# git config --global user.name "Ryan Haskell-Glatz"
 
 # Clone the production branch into 'prod'
 git clone -b production http://github.com/ryannhg/mongo-cms.git prod
@@ -39,4 +39,3 @@ git push origin production
 
 # Remove the prod folder
 rm prod -rf
-
