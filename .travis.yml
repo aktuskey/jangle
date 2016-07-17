@@ -10,6 +10,7 @@ script:
   - gulp
   - npm test
 after_success:
+  - rm .gitignore
   - rm src -rf
   - rm node_modules -rf
   - npm install --production
