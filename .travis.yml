@@ -9,3 +9,13 @@ before_script:
 script: 
   - gulp
   - npm test
+after_success:
+  - rm src -rf
+  - rm node_modules -rf
+  - npm install --production
+  - ls
+  - bash ./deploy.sh
+env:
+  global:
+  - ENCRYPTION_LABEL: "e4c5ebf2a3cf"
+  - COMMIT_AUTHOR_EMAIL: "ryan.nhg@gmail.com"
