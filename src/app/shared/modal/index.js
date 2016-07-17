@@ -1,4 +1,4 @@
-require('angular').module(module.exports='modal', [])
+angular.module(module.exports='modal', [])
 
     .component(module.exports, {
         templateUrl: 'templates/shared/modal/modal.html',

@@ -1,4 +1,4 @@
-require('angular').module(module.exports="collectionsPage", [
+angular.module(module.exports="collectionsPage", [
     require('shared/navbar'),
     require('shared/modal'),
     require('pages/collections-page/collection-form')

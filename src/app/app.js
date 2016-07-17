@@ -1,5 +1,3 @@
-var angular = require('angular');
-
 angular.module(module.exports='app', [
   require('shared/navbar'),
   require('pages'),

@@ -1,4 +1,4 @@
-require('angular').module(module.exports="collectionForm", [
+angular.module(module.exports="collectionForm", [
     require('shared/modal')
 ])
     .component(module.exports, {

@@ -1,4 +1,4 @@
-require('angular').module(module.exports='signUpForm', [])
+angular.module(module.exports='signUpForm', [])
 
     .component(module.exports, {
         templateUrl: 'templates/shared/sign-up-form/sign-up-form.html',

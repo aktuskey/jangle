@@ -1,4 +1,4 @@
-require('angular').module(module.exports="loginPage", [
+angular.module(module.exports="loginPage", [
     require('shared/modal'),
     require('shared/sign-up-form')
 ])

@@ -1,4 +1,4 @@
-require('angular').module(module.exports='ApiService', [
+angular.module(module.exports='ApiService', [
     require('api-service/user-service'),
     require('api-service/collection-service')
 ])
