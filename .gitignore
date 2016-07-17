@@ -4,3 +4,5 @@
 dist/
 node_modules/
 settings/
+
+deploy_key.pem

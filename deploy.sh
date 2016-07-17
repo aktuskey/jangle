@@ -2,24 +2,37 @@
 
 set -o errexit -o nounset
 
-if [ "$TRAVIS_BRANCH" != "master" ]
-then
-  echo "This commit was made against the $TRAVIS_BRANCH and not the master! No deploy!"
-  exit 0
+# if [ "$TRAVIS_BRANCH" != "master" ]
+# then
+#   echo "This commit was made against the $TRAVIS_BRANCH and not the master! No deploy!"
+#   exit 0
+# fi
+
+if [ ! -d "dist" ]; then
+  # Control will enter here if dist/ doesn't exist.
+  gulp
 fi
 
-rev=$(git rev-parse --short HEAD)
+# Clone the production branch into 'prod'
+git clone -b production http://github.com/ryannhg/mongo-cms.git prod
 
-git init
-git config user.name "Ryan Haskell-Glatz"
-git config user.email "ryan.nhg@gmail.com"
+# Delete all non-hidden files in prod folder
+rm prod/* -r
 
-git remote add upstream "https://$GH_TOKEN@github.com/ryannhg/mongo-cms.git"
-git fetch upstream
-git reset upstream/production
+# Copy all new files into the prod directory
+cp dist package.json app.js api Procfile README.prod.md prod -r
 
-touch .
+# Enter the prod directory
+cd prod
 
-git add -A .
-git commit -m "rebuild pages at ${rev}"
-git push -q upstream HEAD:production
+# Create README for production branch
+mv README.prod.md README.md
+
+# Add all changes, commit them, push them
+git add --all
+git commit -m "travis automated deploy"
+git push origin production
+
+# Remove the prod folder
+rm prod -rf
+
