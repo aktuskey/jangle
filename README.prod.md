@@ -1,4 +1,4 @@
-# MongoCMS
+# Jangle
 _Create your own instance, all in the web browser!_
 
 ### How to Deploy
