@@ -3,10 +3,14 @@
 
     <div class="nav-left">
 
+      <!-- Title -->
+      <img class="nav-image" src="/static/img/icon.png" width="50" height="50">
+
       <a ng-repeat="link in $ctrl.links"
          class="nav-item is-tab"
-         ng-class="{'is-active': $ctrl.isActiveLink(link.link)}"
-         ng-href="{{link.link}}">
+         ng-class="{'is-active': $ctrl.isActiveLink(link.link), 'is-disabled': link.disabled}"
+         ng-href="{{link.link}}"
+         ng-disabled="link.disabled">
         <i class="fa {{link.icon}}"></i>
         <span style="padding-left: 10px" class="is-hidden-mobile" ng-bind="link.label"></span>
       </a>

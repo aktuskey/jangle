@@ -1,7 +1,7 @@
 module.exports = ['$routeProvider', '$locationProvider',
 function($routeProvider, $locationProvider){
 
-    var MONGO_PREFIX = '/mongo-cms'
+    var MONGO_PREFIX = '/jangle'
 
     $routeProvider.
         when(MONGO_PREFIX + '/login', {

@@ -1,4 +1,4 @@
-<form name="signUpForm" novalidate class="form-horizontal">
+<form name="$ctrl.signUpForm" novalidate class="form-horizontal">
 
   <!-- Username -->
   <div class="control is-horizontal">
@@ -7,7 +7,7 @@
     </div>
     <div class="control has-icon">
       <input class="input {{$ctrl.inputClass}}" type="text" placeholder="Username" 
-             name="username" ng-model="$ctrl.username" required>
+             name="username" ng-model="$ctrl.username" required autofocus>
       <i class="fa fa-user"></i>
     </div>
   </div>
@@ -41,7 +41,7 @@
         <button class="button is-primary" 
                 ng-click="$ctrl.onSignIn()"
                 ng-class="{'is-loading': $ctrl.signingIn}"
-                ng-disabled="signUpForm.$invalid">
+                ng-disabled="$ctrl.signUpForm.$invalid">
           Sign In
         </button>
 

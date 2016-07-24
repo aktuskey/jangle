@@ -4,7 +4,7 @@ module.exports = ['$location', function($location){
 
     ctrl.onSignUp = function(){
 
-        $location.path('mongo-cms/collections');
+        $location.path('jangle/collections');
 
     };
 

@@ -19,7 +19,7 @@ module.exports = ['ApiService', '$location', function(ApiService, $location){
                 return res;
             })
             .catch(function(res){
-                $location.path('/mongo-cms/login');
+                $location.path('/jangle/login');
                 return res;
             });
     };

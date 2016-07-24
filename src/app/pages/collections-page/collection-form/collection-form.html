@@ -39,7 +39,7 @@
     <div class="column">
       <p class="control is-pulled-right">
 
-        <!-- Add Collection - hidden on edit-->
+        <!-- Add Collection - shown on add -->
         <button class="button is-primary"
                 ng-show="$ctrl.collectionServiceData.isNewCollection"
                 ng-click="$ctrl.onAddCollection()"
@@ -48,7 +48,7 @@
           Add Collection
         </button>
 
-        <!-- Remove Collection - shown on edit -->
+        <!-- Remove Collection - hidden on add -->
         <button class="button is-danger"
                 ng-hide="$ctrl.collectionServiceData.isNewCollection"
                 ng-click="$ctrl.onRemoveCollection()"
@@ -56,7 +56,7 @@
           Remove Collection
         </button>
 
-        <!-- Edit Collection - shown on edit -->
+        <!-- Edit Collection - hidden on add -->
         <button class="button is-primary"
                 ng-hide="$ctrl.collectionServiceData.isNewCollection"
                 ng-click="$ctrl.onEditCollection()"
@@ -80,13 +80,11 @@
 
   <p class="control is-pulled-right">
 
-    <!-- Remove Collection - shown on edit -->
     <button class="button is-default"
             ng-click="$ctrl.showConfirmationModal = false">
       Cancel
     </button>
 
-    <!-- Edit Collection - shown on edit -->
     <button class="button is-danger"
             ng-click="$ctrl.onRemovalConfirmation()"
             ng-class="{'is-loading': $ctrl.isRemoving}">

@@ -1,24 +1,20 @@
 module.exports = ['$location', 'UserService', function($location, UserService){
 	var ctrl = this;
 
-	ctrl.title = 'MongoCMS';
+	ctrl.title = 'Jangle';
 	ctrl.userServiceData = UserService.data;
 
 	ctrl.links = [
 		{
-			label: 'MongoCMS',
-			icon: 'fa-database',
-			link: '/mongo-cms/dashboard'
-		},
-		{
 			label: 'Collections',
 			icon: 'fa-th-list',
-			link: '/mongo-cms/collections'
+			link: '/jangle/collections'
 		},
 		{
 			label: 'User Roles',
 			icon: 'fa-users',
-			link: '/mongo-cms/roles'
+			link: '/jangle/roles',
+			disabled: true
 		}
 	];
 
