@@ -48,7 +48,4 @@ describe("navbar", function() {
     expect(true).toBe(true);
   });
 
-  it("has correct title", function() {
-    expect(element.html()).toContain(ctrl.title);
-  });
 });
