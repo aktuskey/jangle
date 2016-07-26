@@ -12,7 +12,7 @@
          ng-href="{{link.link}}"
          ng-disabled="link.disabled">
         <i class="fa {{link.icon}}"></i>
-        <span style="padding-left: 10px" class="is-hidden-mobile" ng-bind="link.label"></span>
+        <span class="is-hidden-mobile media-right" ng-bind="link.label"></span>
       </a>
 
     </div>
@@ -22,8 +22,8 @@
       <a class="nav-item is-tab is-full-height"
          ng-class="{'is-active': $ctrl.isActiveLink('/user')}"
          ng-click="$ctrl.onUserLinkClicked()">
-        <i class="fa fa-user"></i>
-        <span style="padding-left: 10px" class="is-hidden-mobile" >Sign out {{$ctrl.userServiceData.user.username}}</span>
+        <i class="fa fa-sign-out"></i>
+        <span class="is-hidden-mobile media-right" >Sign out</span>
       </a>
 
     </div>

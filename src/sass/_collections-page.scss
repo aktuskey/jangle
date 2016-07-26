@@ -1,0 +1,36 @@
+collections-page {
+    
+    .icon-column {
+        margin-right: 20px;
+
+        i {
+            font-size: 53px;
+        }
+
+    }
+
+    .collection-list {
+
+        .box:hover {
+
+            box-shadow: 0 2px 8px #666;
+
+        }
+
+        .add-new-box article {
+
+            flex: 1;
+            justify-content: center;
+            align-items: center;
+
+            h3 {
+                margin: 0;
+            }
+        }
+    }
+
+    .hero {
+        overflow: auto;
+    }
+
+}

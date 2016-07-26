@@ -1,49 +1,73 @@
 <navbar></navbar>
-<div class="container" ng-init="$ctrl.getAllCollections()">
-  <div class="section">
-    <div class="columns is-mobile is-multiline">
+<section class="hero is-primary is-full-height-minus-nav is-bold">
+  <div class="hero-body">
+    <div class="container">
 
-      <!-- Title -->
-      <div class="column is-8">
-        <h3 class="title is-3">Collections</h3>
+    <div class="is-flex">
+    
+      <div class="icon-column">
+        <i class="fa fa-book"></i>
       </div>
-
-      <!-- 'Add Collection' Button -->
-      <div class="column is-4">
-        <a class="button is-pulled-right is-medium is-outlined"
-           ng-click="$ctrl.addNewCollection()">
-          <span class="icon">
-            <i class="fa fa-plus"></i>
-          </span>
-          <span>Add Collection</span>
-        </a>
+      <div class="text-column">
+        <h1 class="title">
+          Collections
+        </h1>
+        <h2 class="subtitle">
+          Lists of documents
+        </h2>
       </div>
+    </div>
 
-      <!-- List of collections -->
-      <div class="column is-4-desktop is-6-tablet is-12-mobile" 
-           ng-repeat="collection in $ctrl.collectionServiceData.collections">
-        <div class="card is-fullwidth">
-          <header class="card-header">
-            <p class="card-header-title">{{collection.name}}</p>
-          </header>
-          <div class="card-content">
-            <div class="content">{{collection.description}}</div>
+    <!-- Collection List -->
+    <div class="collection-list" ng-init="$ctrl.getAllCollections()">
+      <div class="section">
+        <div class="columns is-mobile is-multiline">
+          <!-- List of collections -->
+          <div class="column is-4-desktop is-6-tablet is-12-mobile" 
+               ng-repeat="collection in $ctrl.collectionServiceData.collections">
+
+            <a ng-click="$ctrl.editCollection(collection)">
+              <div class="box is-full-height">
+                <article class="media">
+                  <div class="media-content">
+                    <div class="content">
+                      
+                      <h3><strong>{{collection.name}}</strong></h3>
+                      <hr>
+                      <h6>{{collection.description}}</h6>
+
+                    </div>
+                  </div>
+                </article>
+              </div>
+            </a>           
+            
+          </div>      
+
+          <!-- Add New -->
+          <div class="column is-4-desktop is-6-tablet is-12-mobile add-new-box">
+
+            <a ng-click="$ctrl.addNewCollection()">
+              <div class="box is-full-height">
+                <article class="media is-full-height is-flex">
+
+                    <div class="content">
+                      <h3><strong>Add New Collection</strong></h3>
+                    </div>
+
+                </article>
+              </div>
+            </a>           
+            
           </div>
-          <footer class="card-footer">
-            <a class="card-footer-item" ng-click="$ctrl.editCollection(collection)">
-              Edit Collection
-            </a>
-            <a class="card-footer-item" ng-click="$ctrl.editDocuments(collection)">
-              Edit Documents
-            </a>
-          </footer>
+
         </div>
       </div>
-
     </div>
   </div>
-</div>
 
+  </div>
+</section>
 <modal title="Edit Collection"
        on-submit="$ctrl.getAllCollections()" 
        show-modal="$ctrl.showEditModal">

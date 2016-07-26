@@ -7,15 +7,15 @@ module.exports = ['$location', 'UserService', function($location, UserService){
 	ctrl.links = [
 		{
 			label: 'Collections',
-			icon: 'fa-th-list',
+			icon: 'fa-book',
 			link: '/jangle/collections'
 		},
-		{
-			label: 'User Roles',
-			icon: 'fa-users',
-			link: '/jangle/roles',
-			disabled: true
-		}
+		// {
+		// 	label: 'User Roles',
+		// 	icon: 'fa-users',
+		// 	link: '/jangle/roles',
+		// 	disabled: true
+		// }
 	];
 
 	ctrl.onUserLinkClicked = function(){
