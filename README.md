@@ -1,4 +1,4 @@
-# Jangle [![Build Status](https://travis-ci.org/RyanNHG/mongo-cms.svg?branch=master)](https://travis-ci.org/RyanNHG/mongo-cms)
+# Jangle [![Build Status](https://travis-ci.org/RyanNHG/jangle.svg?branch=master)](https://travis-ci.org/RyanNHG/jangle)
 
 ### Getting Started
 1. __`npm install`__ - installs all dependencies
