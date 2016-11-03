@@ -1,0 +1,26 @@
+{
+  "name": "jangle",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "gulp test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ryannhg/jangle.git"
+  },
+  "keywords": [
+    "cms"
+  ],
+  "author": "Ryan Haskell-Glatz",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ryannhg/jangle/issues"
+  },
+  "homepage": "https://github.com/ryannhg/jangle#readme",
+  "dependencies": {
+    "express": "^4.14.0",
+    "mongoose": "^4.6.6"
+  }
+}
