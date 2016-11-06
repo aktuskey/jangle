@@ -1,37 +1,20 @@
-module.exports = function(mongodb){
+module.exports = function(mongodb, onComplete){
 
   const MongoClient = mongodb.MongoClient;
 
-  const connectionInfo = {
-    host: process.env.JANGLE_HOST,
-    user: process.env.JANGLE_USER,
-    pass: process.env.JANGLE_PASS,
-    database: 'jangle',
-    port: 27017,
-    authMechanism: 'DEFAULT',
-    authDatabase: 'admin',
-    getUrl: function() {
-      return 'mongodb://' +
-        this.user + ':' + this.pass +
-        '@' +
-        this.host + ':' + this.port +
-        '/' + this.database +
-        '?authMechanism=' + this.authMechanism +
-        '&authSource=' + this.authDatabase;
-    }
-  };
+  const connectionInfo = include('connectionInfo.js');
 
-  MongoClient.connect(connectionInfo.getUrl(), function(err, db){
+  MongoClient.connect(connectionInfo.getAdminUrl(), function(err, db){
 
     if(err)
       console.error(`Could not access '${connectionInfo.database}' database with user '${connectionInfo.user}'.`)
     else
-      updateJangleCollections(db);
+      updateJangleCollections(db, onComplete);
 
   });
 };
 
-const updateJangleCollections = function(db){
+const updateJangleCollections = function(db, onComplete){
 
   const collections = [
     'content.collection', // holds collection data
@@ -44,7 +27,7 @@ const updateJangleCollections = function(db){
   const collectionAdded = () => {
     collectionsToUpdate -= 1;
     if(collectionsToUpdate == 0)
-      doneUpdatingCollections(db);
+      doneUpdatingCollections(db, onComplete);
   };
 
   console.log(`Updating ${collectionsToUpdate} jangle collections:`);
@@ -120,10 +103,10 @@ const updateDocument = (db, callback, collectionName, uniqueIndexes, value) => {
     upsert: true
   };
 
+  // build a query of unique indices to uniquely id the document
   for(var field in uniqueIndexes)
   {
     query[field] = value[field];
-
   }
 
   db.collection(collectionName).updateOne(
@@ -160,7 +143,7 @@ const getModelFromCollectionName = function(collectionName) {
 
 };
 
-const doneUpdatingCollections = function(db){
+const doneUpdatingCollections = function(db, onComplete){
   console.log('Done updating collections!');
-  db.close();
+  onComplete(db);
 }

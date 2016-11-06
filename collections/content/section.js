@@ -19,7 +19,9 @@ module.exports = {
   },
 
   getInitialValues: function(){
-    return [];
+    return [
+      this.constructor('unsorted','Unsorted',1)
+    ];
   },
 
   uniqueIndexes: { 'name': 1 }

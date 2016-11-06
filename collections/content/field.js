@@ -29,6 +29,7 @@ module.exports = {
       this.constructor('float', 'Decimal', 'Numbers'),
 
       // Options
+      this.constructor('checkbox', 'Checkbox', 'Options'),
       this.constructor('single-option', 'Single Choice', 'Options'),
       this.constructor('multi-option', 'Multiple Choice', 'Options')
 
