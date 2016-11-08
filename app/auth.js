@@ -6,24 +6,30 @@ module.exports = function(req, res){
 
   if(user === undefined || pass === undefined)
   {
-    res.status(401).send({ token: null });
+    res.status(401).send({
+      token: null,
+      error: 'Please provide both a username and password.'
+    });
   }
   else
   {
-    getToken(user, pass, function(token){
+    requestToken(user, pass, function(token){
 
       if(token)
         res.status(200).send({ token: token });
       else
-        res.status(401).send({ token: token });
+        res.status(403).send({
+          token: token,
+          error: 'Invalid username or password.'
+        });
 
     });
   }
-  
+
 };
 
 
-const getToken = function(user, pass, callback){
+const requestToken = function(user, pass, callback){
 
   const mongodb = require('mongodb');
   const connectionInfo = include('connectionInfo.js');
@@ -35,9 +41,25 @@ const getToken = function(user, pass, callback){
       if(err)
         callback(null);
       else
-        callback('n34no43oin2313414');
+        getNewTokenFor(user, pass, callback);
 
     }
   );
+
+};
+
+const getNewTokenFor = (user, pass, callback) => {
+
+  const jwt = global.jwt;
+  const payload = {
+    user: user,
+    pass: pass
+  }
+  const secret = global.secret;
+  const options = {
+    expiresIn: '24h'
+  };
+
+  callback(jwt.sign(payload,secret,options));
 
 };

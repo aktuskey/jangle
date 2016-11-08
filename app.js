@@ -1,4 +1,6 @@
 global.include = (file) => { return require(__dirname + '/' + file); };
+global.jwt = require('jsonwebtoken');
+global.secret = ''+parseInt(Math.random()*Number.MAX_SAFE_INTEGER);
 
 // Step 1: Load any development environment variables
 if(process.env.NODE_ENV != 'production')
@@ -23,12 +25,20 @@ require('./startup/init-jangle-db')(mongodb, (db) => {
   const express = require('express');
   const app = express();
 
+  // Web UI
   app.get('/', require('./app/index.js'));
+  app.get('/login', require('./app/index.js'));
+  app.get('/app/*', require('./app/index.js'));
+
+  // Auth endpoint
   app.get('/auth', require('./app/auth.js'));
+
+  // All api requests
   app.get('/api', require('./app/api.js'));
 
+  // Host on port 3000
   app.listen(3000, function(){
-    console.log('API available at http://localhost:3000');
+    console.log('Jangle available at http://localhost:3000');
   });
 
 });
