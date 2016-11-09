@@ -31,10 +31,10 @@ require('./startup/init-jangle-db')(mongodb, (db) => {
   app.get('/app/*', require('./app/index.js'));
 
   // Auth endpoint
-  app.get('/auth', require('./app/auth.js'));
+  app.use('/auth', require('./app/auth.js'));
 
   // All api requests
-  app.get('/api', require('./app/api.js'));
+  app.use('/api/*', require('./app/api.js'));
 
   // Host on port 3000
   app.listen(3000, function(){

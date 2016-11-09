@@ -27,10 +27,20 @@ module.exports = function(req, res){
       {
         req.userObject = userObject;
 
-        // TODO: Continue with 'req.userObject' to authenticate request
-        res.status(200).json({
-          user: userObject.user
-        });
+        console.log(req);
+
+        // TODO: Generate required file based off of folder structure
+        switch(req.params[0]){
+
+          case 'collections':
+            return require('./api/collections.js')(req, res);
+          default:
+            return res.status(200).json({
+              user: userObject.user
+            });
+
+        }
+
       }
 
     });
