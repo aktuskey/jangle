@@ -24,7 +24,7 @@ __`PUT`__ |`/api/collections/some-example`| Update `some-example` collection.
 __`DELETE`__ |`/api/collections/some-example`| Delete `some-example` collection.
 | |
 __`GET`__ |`/api/collections/some-example`| List documents in `some-example` collection.
-__`POST`__ |`/api/collections`| Create a new document in `some-example` collection.
+__`POST`__ |`/api/collections/some-example`| Create a new document in `some-example` collection.
 __`PUT`__ |`/api/collections/some-example/123`| Update document `123` from `some-example` collection.
 __`DELETE`__ |`/api/collections/some-example/123`| Delete document `123` from `some-example` collection.
 
