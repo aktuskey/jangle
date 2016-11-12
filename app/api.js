@@ -1,9 +1,28 @@
-module.exports = function(req, res){
+module.exports = function(req, res, next){
 
-  const query = req.query;
-  const token = query.token;
   const jwt = global.jwt;
   const secret = global.secret;
+  const token = req.query.token || req.headers['x-access-token'];
+  const mongodb = require('mongodb');
+  const connectionInfo = include('connectionInfo.js');
+
+  /*  STATUS CODE REF: http://www.restapitutorial.com/httpstatuscodes.html
+
+      200 - OK
+      201 - CREATED
+      204 - NO CONTENT (to return)
+
+      304 - NOT MODIFIED
+
+      400 - BAD REQUEST
+      401 - UNAUTHORIZED (didnt provide credentials)
+      403 - FORBIDDEN (credentials insufficient)
+      404 - NOT FOUND
+      409 - CONFLICT (try again)
+
+      500 - INTERNAL SERVER ERROR
+
+  */
 
   if(token === undefined)
   {
@@ -25,22 +44,25 @@ module.exports = function(req, res){
       }
       else
       {
-        req.userObject = userObject;
+        mongodb.MongoClient.connect(
+          connectionInfo.getUrl(userObject.user, userObject.pass),
+          function(err, db){
 
-        console.log(req);
+            if(err)
+            {
+              res.status(403).json({
+                data: [],
+                error: `User '${userObject.user}' does not have access.`
+              });
+            }
+            else
+            {
+              req.db = db;
+              next();
+            }
 
-        // TODO: Generate required file based off of folder structure
-        switch(req.params[0]){
-
-          case 'collections':
-            return require('./api/collections.js')(req, res);
-          default:
-            return res.status(200).json({
-              user: userObject.user
-            });
-
-        }
-
+          }
+        );
       }
 
     });

@@ -33,8 +33,24 @@ require('./startup/init-jangle-db')(mongodb, (db) => {
   // Auth endpoint
   app.use('/auth', require('./app/auth.js'));
 
-  // All api requests
-  app.use('/api/*', require('./app/api.js'));
+  // API Authenticaiton Middleware
+  const apiMiddleware = require('./app/api.js');
+  app.use('/api', apiMiddleware);
+  app.use('/api/*', apiMiddleware);
+
+  // API
+  app.get('/api', (req, res) => {
+    res.status(200).json({
+      data: 'api docs!'
+    });
+  });
+
+  // Collections API
+  const collectionApi = require('./app/api/collections.js');
+  app.get('/api/collections', collectionApi.get);
+  app.post('/api/collections', collectionApi.post);
+  app.put('/api/collections/:collectionName', collectionApi.put);
+  app.delete('/api/collections/:collectionName', collectionApi.delete);
 
   // Host on port 3000
   app.listen(3000, function(){

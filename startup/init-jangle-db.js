@@ -44,7 +44,8 @@ const updateJangleCollection = function(db, callback, collectionNameSuffix) {
   const collectionName = dbPrefix + collectionNameSuffix;
 
   const options = {
-    validator: collectionModel.validator,
+    autoIndexId: (collectionModel.autoIndexId !== undefined) ? collectionModel.autoIndexId : true,
+    validator: collectionModel.validator || {},
     validationLevel: 'strict'
   };
 

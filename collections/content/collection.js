@@ -13,27 +13,29 @@ module.exports = {
 
   },
 
-  validator: {
-    '$and': [
-      { 'name': { '$type': 'string' } },
-      { 'label': { '$type': 'string' } },
-      { 'description': { '$type': 'string' } },
-      { 'fields': { '$type': 'array' } },
-        { 'fields.label': { '$type': 'string' } },
-        { 'fields.optional': { '$type': 'bool' } },
-        { 'fields.default': { '$type': 'string' } },
-        { 'fields.order': { '$type': 'int' } },
-        { 'fields.options': { '$type': 'object' } },
-        { 'fields.type': { '$type': 'objectId' } },
-      { 'section': { '$type': 'objectId' } },
-      { 'order': { '$type': 'int' } }
-    ]
-  },
+  // validator: {
+  //   '$and': [
+  //     { 'name': { '$type': 'string' } },
+  //     { 'label': { '$type': 'string' } },
+  //     { 'description': { '$type': 'string' } },
+  //     // { 'fields': { '$type': 'array' } },
+  //     //   { 'fields.label': { '$type': 'string' } },
+  //     //   { 'fields.optional': { '$type': 'bool' } },
+  //     //   { 'fields.default': { '$type': 'string' } },
+  //     //   { 'fields.order': { '$type': 'int' } },
+  //     //   { 'fields.options': { '$type': 'object' } },
+  //     //   { 'fields.type': { '$type': 'objectId' } },
+  //     // { 'section': { '$type': 'objectId' } },
+  //     { 'order': { '$type': 'int' } }
+  //   ]
+  // },
 
   getInitialValues: function(){
     return [];
   },
 
-  uniqueIndexes: { 'name': 1 }
+  uniqueIndexes: { 'name': 1 },
+
+  autoIndexId: false
 
 };
