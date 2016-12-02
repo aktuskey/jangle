@@ -39,9 +39,21 @@ __`POST`__ | `data` | Object to create.
 __`PUT`__ | `data` | Object containing fields to update.
 
 
-___User API___
-> For managing users. (This is a work in progress)
+### Jangle Meta Collections
 
-Method | URL | Result
+__What are 'Meta Collections'?__
+
+In addition to storing your content in collections, Jangle creates a couple "meta collections" that maintain information about your Jangle configuration. For example, the `jangle.collections` meta collection keeps track of all of your collection information (the name, the fields, etc). It is Jangle's responsibility to maintain a relationship with the MongoDB instance to ensure that these collections reflect the true state of your content.
+
+__Meta Collections__
+> A list of Jangle's meta collections.
+
+Name | Field | Description
 --- | --- | ---
-| |
+__`jangle.collections`__ | `name` | The actual name of the Mongo collection
+                         | `labels.singular` | The singular display name
+                         | `labels.plural` | The plural display name
+                         | `fields` | An array of collection fields
+                         | `fields[i].name` | Property name of document
+                         | `fields[i].label` | Display name
+                         | `fields[i].name` | Actual name of fieldTrevor Noah
