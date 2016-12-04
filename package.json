@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "test": "gulp test",
+    "test": "node_modules/newman/bin/newman.js -c api-tests.json",
     "dev": "node_modules/nodemon/bin/nodemon.js app.js"
   },
   "repository": {
@@ -27,7 +27,7 @@
     "mongoose": "^4.7.1"
   },
   "devDependencies": {
-    "dotenv": "^2.0.0",
+    "newman": "^3.3.0",
     "nodemon": "^1.11.0"
   }
 }

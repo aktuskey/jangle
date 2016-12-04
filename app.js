@@ -1,60 +1,83 @@
-global.include = (file) => { return require(__dirname + '/' + file); };
-global.jwt = require('jsonwebtoken');
-global.secret = ''+parseInt(Math.random()*Number.MAX_SAFE_INTEGER);
-
-// Step 1: Load any development environment variables
-if(process.env.NODE_ENV != 'production')
-{
-  const dotenv = require('dotenv');
-  dotenv.config({silent: true});
+//  Step 1: Load app dependencies
+try {
+    var express = require('express'),
+        app = express(),
+        mongoose = require('mongoose'),
+        jwt = require('jsonwebtoken');
+} catch (e) {
+    console.log(`Please run 'npm install' first.`);
+    return;
 }
 
-// Step 2: Aalert user if environment variables are missing
-require('./startup/env-check.js');
+try {
+    var config = require('./jangle-config');
 
-// Step 3: Initialize jangle database
-const mongodb = require('mongodb');
-require('./startup/init-jangle-db')(mongodb, (db) => {
+    if(config.mongodb == null) {
+        config.mongodb = {};
+    }
+} catch (e) {
+    var config = {};
+    config.mongodb = {};
+}
 
-  // I have strong feels that I'm going
-  // to use user connections to the mongo, not this
-  // root admin one.
-  db.close();
 
-  // Step 4: Expose APIs to allow authorized access to content
-  const express = require('express');
-  const app = express();
+//  Step 2: Set default values for config
+global.config = {
 
-  // Web UI
-  app.get('/', require('./app/index.js'));
-  app.get('/login', require('./app/index.js'));
-  app.get('/app/*', require('./app/index.js'));
+    // For connecting to MongoDB
+    mongodb : {
+        host: config.mongodb.host || 'localhost',
+        port: config.mongodb.port || 27017,
+        contentDb: config.mongodb.contentDb || 'jangle',
+        liveDb: config.mongodb.liveDb || 'jangleLive',
+        auth: config.mongodb.auth || false,
+        rootUser: config.mongodb.rootUser || null,
+        rootPassword: config.mongodb.rootPassword || null
+    }
 
-  // Auth endpoint
-  app.use('/auth', require('./app/auth.js'));
+};
 
-  // API Authenticaiton Middleware
-  const apiMiddleware = require('./app/api.js');
-  app.use('/api', apiMiddleware);
-  app.use('/api/*', apiMiddleware);
 
-  // API
-  app.get('/api', (req, res) => {
-    res.status(200).json({
-      data: 'api docs!'
-    });
-  });
+//  Step 3: Set up routes
+var webApp = require('./web-app'),
+    apiApp = require('./api-app');
 
-  // Collections API
-  const collectionApi = require('./app/api/collections.js');
-  app.get('/api/collections', collectionApi.get);
-  app.post('/api/collections', collectionApi.post);
-  app.put('/api/collections/:collectionName', collectionApi.put);
-  app.delete('/api/collections/:collectionName', collectionApi.delete);
+app.get('/', webApp);
+app.get('/sign-in', webApp);
+app.get('/app', webApp);
+app.get('/app/*', webApp);
 
-  // Host on port 3000
-  app.listen(3000, function(){
-    console.log('Jangle available at http://localhost:3000');
-  });
+app.get('/api', apiApp);
+
+// API Middleware
+app.use('/api/*', require('./api/middleware'));
+
+// Collections API
+app.get('/api/collections', 
+    require('./api/collections/get'));
+app.post('/api/collections', 
+    require('./api/collections/post'));
+app.put('/api/collections/:collectionName', 
+    require('./api/collections/put'));
+app.delete('/api/collections/:collectionName', 
+    require('./api/collections/delete'));
+
+// Documents API
+app.get('/api/collections/:collectionName', 
+    require('./api/documents/get'));
+app.post('/api/collections/:collectionName', 
+    require('./api/documents/post'));
+app.put('/api/collections/:collectionName/:docId', 
+    require('./api/documents/put'));
+app.delete('/api/collections/:collectionName/:docId', 
+    require('./api/documents/delete'));
+
+
+//  Step 4: Run app
+var port = process.env.PORT || 3000;
+
+app.listen(port, function(stuff) {
+
+    console.log(`Jangle ready on port ${port}!`);
 
 });
