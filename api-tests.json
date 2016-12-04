@@ -27,6 +27,16 @@
 				"49970157-aa32-334a-59ce-909dd6166584"
 			],
 			"owner": 0
+		},
+		{
+			"id": "18e70961-05f5-74f9-8130-d350952a41f7",
+			"name": "Public API",
+			"description": "",
+			"order": [
+				"ffee37c0-e570-8cae-99fe-972680815e80",
+				"49e0ccb1-d833-3ef3-5c2b-78c5a0bf32d7"
+			],
+			"owner": 0
 		}
 	],
 	"timestamp": 1480812340076,
@@ -95,6 +105,27 @@
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"folder": "7e2e5887-e361-a57c-1cff-6c8897d5a5c0"
+		},
+		{
+			"id": "49e0ccb1-d833-3ef3-5c2b-78c5a0bf32d7",
+			"headers": "",
+			"url": "localhost:3000/api/auth",
+			"pathVariables": {},
+			"preRequestScript": null,
+			"method": "GET",
+			"collectionId": "e3fac52d-4f1d-4c06-2a61-558bdef81ff7",
+			"data": null,
+			"dataMode": "params",
+			"name": "Get User Token",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1480881683628,
+			"version": 2,
+			"responses": [],
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"folder": "18e70961-05f5-74f9-8130-d350952a41f7"
 		},
 		{
 			"id": "76af3642-6221-b34b-7f32-9504e3e1db0f",
@@ -200,6 +231,27 @@
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"folder": "7e2e5887-e361-a57c-1cff-6c8897d5a5c0"
+		},
+		{
+			"id": "ffee37c0-e570-8cae-99fe-972680815e80",
+			"headers": "",
+			"url": "localhost:3000/api/ping",
+			"pathVariables": {},
+			"preRequestScript": null,
+			"method": "GET",
+			"collectionId": "e3fac52d-4f1d-4c06-2a61-558bdef81ff7",
+			"data": null,
+			"dataMode": "params",
+			"name": "Test Connection",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1480881594620,
+			"version": 2,
+			"responses": [],
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"folder": "18e70961-05f5-74f9-8130-d350952a41f7"
 		}
 	]
 }

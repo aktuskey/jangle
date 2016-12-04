@@ -37,7 +37,6 @@ global.config = {
 
 };
 
-
 //  Step 3: Set up routes
 var webApp = require('./web-app'),
     apiApp = require('./api-app');
@@ -51,6 +50,10 @@ app.get('/api', apiApp);
 
 // API Middleware
 app.use('/api/*', require('./api/middleware'));
+
+// Public API
+app.get('/api/ping', require('./api/ping.js'));
+app.get('/api/auth', require('./api/auth.js'));
 
 // Collections API
 app.get('/api/collections', 
