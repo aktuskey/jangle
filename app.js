@@ -4,6 +4,7 @@ try {
         app = express(),
         mongoose = require('mongoose'),
         jwt = require('jsonwebtoken');
+    global.include = (path) => require(`${__dirname}/${path}`);
 } catch (e) {
     console.log(`Please run 'npm install' first.`);
     return;
