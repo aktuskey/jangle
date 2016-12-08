@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "test": "node_modules/newman/bin/newman.js -c api-tests.json",
+    "test": "node_modules/newman/bin/newman.js run api-tests.json",
     "dev": "node_modules/nodemon/bin/nodemon.js app.js"
   },
   "repository": {

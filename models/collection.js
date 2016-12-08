@@ -1,29 +1,16 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
+var FieldSchema = include('models/schemas/field.js');
+
 var CollectionSchema = new Schema(
     {
-        name: String,
+        name: { type: String, required: true, lowercase: true, trim: true, unique: true },
         labels: {
-            singular: String,
-            plural: String
+            singular: { type: String, required: true, trim: true },
+            plural: { type: String, required: true, trim: true }
         },
-        fields: [
-            {
-                name: String,
-                label: String,
-                type: Schema.Types.ObjectId, // FieldType
-                required: Boolean,
-                defaultValue: Schema.Types.Mixed,
-                helpText: String,
-                options: [
-                    { 
-                        key: String, 
-                        value: Schema.Types.Mixed 
-                    }
-                ]
-            }
-        ],
+        fields: [ FieldSchema ],
         parent: Schema.Types.ObjectId, // Collection
         tags : [
             Schema.Types.ObjectId // Tag

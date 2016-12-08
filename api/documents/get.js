@@ -1,7 +1,17 @@
 module.exports = function(req, res) {
   
-    var collectionName = req.params.collectionName;
+    var token = req.query.token;
+    var prefix = (token) ? '' : 'live ';
 
-    res.status(200).send(`Get documents from '${collectionName}'`);
+    var collectionName = req.params.collectionName;
+    var docId = req.params.docId;
+
+
+    if(docId) {
+        res.status(200).send(`Get ${prefix}document '${docId}' from '${collectionName}'`);    
+    }
+    else {
+        res.status(200).send(`Get ${prefix}documents from '${collectionName}'`);    
+    }
 
 };

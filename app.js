@@ -56,23 +56,45 @@ app.use('/api/*', require('./api/middleware'));
 app.get('/api/ping', require('./api/ping.js'));
 app.get('/api/auth', require('./api/auth.js'));
 
+
 // Collections API
-app.get('/api/collections', 
+
+app.get('/api/jangle/collections',
     require('./api/collections/get'));
-app.post('/api/collections', 
+app.get('/api/jangle/collections/:collectionName', 
+    require('./api/collections/get'));
+
+app.post('/api/jangle/collections', 
     require('./api/collections/post'));
-app.put('/api/collections/:collectionName', 
+
+app.put('/api/jangle/collections', 
     require('./api/collections/put'));
-app.delete('/api/collections/:collectionName', 
+app.put('/api/jangle/collections/:collectionName', 
+    require('./api/collections/put'));
+
+app.delete('/api/jangle/collections', 
+    require('./api/collections/delete'));
+app.delete('/api/jangle/collections/:collectionName', 
     require('./api/collections/delete'));
 
+
 // Documents API
+
 app.get('/api/collections/:collectionName', 
     require('./api/documents/get'));
+app.get('/api/collections/:collectionName/:docId', 
+    require('./api/documents/get'));
+
 app.post('/api/collections/:collectionName', 
     require('./api/documents/post'));
+
+app.put('/api/collections/:collectionName', 
+    require('./api/documents/put'));
 app.put('/api/collections/:collectionName/:docId', 
     require('./api/documents/put'));
+
+app.delete('/api/collections/:collectionName', 
+    require('./api/documents/delete'));
 app.delete('/api/collections/:collectionName/:docId', 
     require('./api/documents/delete'));
 
