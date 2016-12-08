@@ -1,20 +1,6 @@
 # Jangle
 > Simple content management.
 
-### Table of Contents
-1. [What is Jangle?]()
-1. [API Documentation]()
-1. [Jangle Meta]()
-1. [Default Field Types]()
-
----
-
-### What is Jangle?
-
-Jangle is the name of my dog. All good dogs deserve a lightweight, flexible CMS named after them.
-
-![How it works](https://raw.github.com/ryannhg/jangle/resources/system.png)
-
 ---
 
 ### API Documentation
@@ -34,15 +20,14 @@ __Collections API__
 
 Method | URL | Result
 --- | --- | ---
-__`GET`__ |`/api/collections`| List collections.
-__`POST`__ |`/api/collections`| Create a new collection.
-__`PUT`__ |`/api/collections/some-example`| Update `some-example` collection.
-__`DELETE`__ |`/api/collections/some-example`| Delete `some-example` collection.
-| |
 __`GET`__ |`/api/collections/some-example`| List documents in `some-example` collection.
+__`GET`__ |`/api/collections/some-example/123`| Get document '123' in `some-example` collection.
 __`POST`__ |`/api/collections/some-example`| Create a new document in `some-example` collection.
+ | | 
+__`PUT`__ |`/api/collections/some-example`| Update documents in `some-example` collection.
 __`PUT`__ |`/api/collections/some-example/123`| Update document `123` from `some-example` collection.
-__`DELETE`__ |`/api/collections/some-example/123`| Delete document `123` from `some-example` collection.
+__`DELETE`__ |`/api/collections/some-example`| Remove documents in `some-example` collection.
+__`DELETE`__ |`/api/collections/some-example/123`| Remove document `123` from `some-example` collection.
 
 Method | Parameter | Description
 --- | --- | ---
@@ -55,6 +40,7 @@ __`POST`__ | `data` | Object to create.
 __`PUT`__ | `data` | Object containing fields to update.
 
 ---
+
 
 ### Jangle Meta
 
@@ -106,10 +92,11 @@ __Meta Document Properties__
 
 Property | Description
 --- | ---
-__`jangle.itemId`__ | Used to uniquely identify an document (across versions)
+__`jangle.id`__ | Used to uniquely identify an document (across versions)
 __`jangle.version`__ | The version of the document
 
 ---
+
 
 # Field Types
 

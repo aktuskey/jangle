@@ -59,44 +59,44 @@ app.get('/api/auth', require('./api/auth.js'));
 
 // Collections API
 
-app.get('/api/jangle/collections',
-    require('./api/collections/get'));
-app.get('/api/jangle/collections/:collectionName', 
-    require('./api/collections/get'));
+app.get('/api/jangle/:metaCollectionName',
+    require('./api/meta-collection'));
+app.get('/api/jangle/:metaCollectionName/:metaCollectionId',
+    require('./api/meta-collection'));
 
-app.post('/api/jangle/collections', 
-    require('./api/collections/post'));
+app.post('/api/jangle/:metaCollectionName',
+    require('./api/meta-collection'));
 
-app.put('/api/jangle/collections', 
-    require('./api/collections/put'));
-app.put('/api/jangle/collections/:collectionName', 
-    require('./api/collections/put'));
+app.put('/api/jangle/:metaCollectionName',
+    require('./api/meta-collection'));
+app.put('/api/jangle/:metaCollectionName/:metaCollectionId',
+    require('./api/meta-collection'));
 
-app.delete('/api/jangle/collections', 
-    require('./api/collections/delete'));
-app.delete('/api/jangle/collections/:collectionName', 
-    require('./api/collections/delete'));
+app.delete('/api/jangle/:metaCollectionName',
+    require('./api/meta-collection'));
+app.delete('/api/jangle/:metaCollectionName/:metaCollectionId',
+    require('./api/meta-collection'));
 
 
 // Documents API
 
 app.get('/api/collections/:collectionName', 
-    require('./api/documents/get'));
+    require('./api/collections/get'));
 app.get('/api/collections/:collectionName/:docId', 
-    require('./api/documents/get'));
+    require('./api/collections/get'));
 
 app.post('/api/collections/:collectionName', 
-    require('./api/documents/post'));
+    require('./api/collections/post'));
 
 app.put('/api/collections/:collectionName', 
-    require('./api/documents/put'));
+    require('./api/collections/put'));
 app.put('/api/collections/:collectionName/:docId', 
-    require('./api/documents/put'));
+    require('./api/collections/put'));
 
 app.delete('/api/collections/:collectionName', 
-    require('./api/documents/delete'));
+    require('./api/collections/delete'));
 app.delete('/api/collections/:collectionName/:docId', 
-    require('./api/documents/delete'));
+    require('./api/collections/delete'));
 
 
 //  Step 4: Run app
