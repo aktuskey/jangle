@@ -36,8 +36,13 @@ __`GET`__ | `filter` | Filters down listed results.
           | `sort` | Sort by a property.
           | `limit` | Limit number of returned results.
           | `skip` | Skip a certain number of results.
+ | | 
 __`POST`__ | `data` | Object to create.
+ | | 
 __`PUT`__ | `data` | Object containing fields to update.
+          | `filter` | Filters down documents to update.
+ | | 
+__`DELETE`__ | `filter` | Filters down documents to remove.
 
 ---
 
