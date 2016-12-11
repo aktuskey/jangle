@@ -68,7 +68,7 @@ function findDocuments(req, res, next, findOptions){
         status: 200,
         error: false,
         data: documents,
-        message: `Found ${documents.length} ${documentLabel} from '${collectionName}'`
+        message: `Found ${documents.length} ${documentLabel} in '${collectionName}'`
       };
     }
 
