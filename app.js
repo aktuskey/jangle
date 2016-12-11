@@ -23,6 +23,8 @@ try {
 
 
 //  Step 2: Set default values for config
+mongoose.Promise = global.Promise;
+
 global.config = {
 
     // For connecting to MongoDB
@@ -42,67 +44,57 @@ global.config = {
 var webApp = require('./web-app'),
     apiApp = require('./api-app');
 
+// Web app
 app.get('/', webApp);
 app.get('/sign-in', webApp);
 app.get('/app', webApp);
 app.get('/app/*', webApp);
 
+// API Docs
 app.get('/api', apiApp);
 
-// API Middleware
-app.use('/api/*', require('./api/middleware'));
+// API Before
+app.use('/api/*', require('./api/middleware/api/before'));
 
 // Public API
 app.get('/api/ping', require('./api/ping.js'));
 app.get('/api/auth', require('./api/auth.js'));
 
+// Meta Collections Middleware
+var metaBefore = require('./api/middleware/meta/before');
+
+app.get('/api/jangle/:metaCollectionName', metaBefore);
+app.get('/api/jangle/:metaCollectionName/:metaCollectionId', metaBefore);
+
+app.post('/api/jangle/:metaCollectionName', metaBefore);
+
+app.put('/api/jangle/:metaCollectionName', metaBefore);
+app.put('/api/jangle/:metaCollectionName/:metaCollectionId', metaBefore);
+
+app.delete('/api/jangle/:metaCollectionName', metaBefore);
+app.delete('/api/jangle/:metaCollectionName/:metaCollectionId', metaBefore);
 
 // Collections API
+app.get('/api/collections/:collectionName', require('./api/collections/get'));
+app.get('/api/collections/:collectionName/:docId', require('./api/collections/get'));
 
-app.get('/api/jangle/:metaCollectionName',
-    require('./api/meta-collection'));
-app.get('/api/jangle/:metaCollectionName/:metaCollectionId',
-    require('./api/meta-collection'));
+app.post('/api/collections/:collectionName', require('./api/collections/post'));
 
-app.post('/api/jangle/:metaCollectionName',
-    require('./api/meta-collection'));
+app.put('/api/collections/:collectionName', require('./api/collections/put'));
+app.put('/api/collections/:collectionName/:docId', require('./api/collections/put'));
 
-app.put('/api/jangle/:metaCollectionName',
-    require('./api/meta-collection'));
-app.put('/api/jangle/:metaCollectionName/:metaCollectionId',
-    require('./api/meta-collection'));
-
-app.delete('/api/jangle/:metaCollectionName',
-    require('./api/meta-collection'));
-app.delete('/api/jangle/:metaCollectionName/:metaCollectionId',
-    require('./api/meta-collection'));
+app.delete('/api/collections/:collectionName', require('./api/collections/delete'));
+app.delete('/api/collections/:collectionName/:docId', require('./api/collections/delete'));
 
 
-// Documents API
-
-app.get('/api/collections/:collectionName', 
-    require('./api/collections/get'));
-app.get('/api/collections/:collectionName/:docId', 
-    require('./api/collections/get'));
-
-app.post('/api/collections/:collectionName', 
-    require('./api/collections/post'));
-
-app.put('/api/collections/:collectionName', 
-    require('./api/collections/put'));
-app.put('/api/collections/:collectionName/:docId', 
-    require('./api/collections/put'));
-
-app.delete('/api/collections/:collectionName', 
-    require('./api/collections/delete'));
-app.delete('/api/collections/:collectionName/:docId', 
-    require('./api/collections/delete'));
+// API Cleanup
+app.use('/api/*', require('./api/middleware/api/after'));
 
 
 //  Step 4: Run app
 var port = process.env.PORT || 3000;
 
-app.listen(port, function(stuff) {
+app.listen(port, function() {
 
     console.log(`Jangle ready on port ${port}!`);
 

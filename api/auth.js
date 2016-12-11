@@ -1,9 +1,8 @@
-module.exports = function(req, res) {
+module.exports = function(req, res, next) {
 
-    res.status(200).json({
-        message: `Here's your token!`,
-        error: false,
-        data: [{token: '1234'}]
-    });
+    req.res.message = `Here's your token!`;
+    req.res.data = [{token: '1234'}];
+
+    next();
 
 };

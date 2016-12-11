@@ -1,9 +1,6 @@
-module.exports = function(req, res) {
+module.exports = function(req, res, next) {
 
-    res.status(200).json({
-        message: 'Connection successful.',
-        error: false,
-        data: []
-    });
+    req.res.message = 'Connection successful.';
 
+    next();
 };

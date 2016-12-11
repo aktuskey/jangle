@@ -1,7 +1,9 @@
-module.exports = function(req, res) {
+module.exports = function(req, res, next) {
   
     var collectionName = req.params.collectionName;
 
-    res.status(200).send(`Add new document to '${collectionName}'`);
+    req.res.message = (`Add new document to '${collectionName}'`);
+
+    next();
 
 };

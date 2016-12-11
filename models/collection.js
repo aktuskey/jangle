@@ -15,7 +15,7 @@ var CollectionSchema = new Schema(
         tags : [
             Schema.Types.ObjectId // Tag
         ],
-        defaultDisplayField: Number // Index into 'fields' structure?
+        defaultDisplayField: Number, // Index into 'fields' structure?
         ordered: Boolean
     }
 );

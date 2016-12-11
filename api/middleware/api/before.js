@@ -1,7 +1,17 @@
 var mongoose = require('mongoose');
+var apiAfter = include('api/middleware/api/after');
+
 const DISCONNECTED = 0, CONNECTED = 1;
 
 module.exports = function(req, res, next) {
+
+    // Set up default response
+    req.res = {
+        status: 200,
+        message: '',
+        error: false,
+        data: []
+    };
 
     console.log(`\n${req.method} ${req.originalUrl}`);
 
@@ -21,12 +31,14 @@ module.exports = function(req, res, next) {
             
             console.log(`|-> ${message}`);
 
-            res.status(401).json({
+            req.res = ({
+                status: 401,
                 message: message,
                 error: true,
                 data: []
             });
-            return;
+
+            return apiAfter(req,res);
         }
     }
     else
@@ -41,20 +53,20 @@ module.exports = function(req, res, next) {
 
     req.connection.open(connectionString, function(error) {
 
-        // TODO: Move this to the end of all API requests.
-        if(req.connection.readyState == CONNECTED)
-            req.connection.close();
-
         if(error)
         {
             var message = `Can't connect to the database.`;
 
             console.log(`|-> ${message}`);
-            res.status(500).json({
+
+            req.res = {
+                status: 500,
                 message: message,
                 error: true,
                 data: []
-            });
+            };
+
+            return apiAfter(req, res);
         }
         else
         {
