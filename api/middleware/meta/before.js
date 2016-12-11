@@ -5,8 +5,9 @@ module.exports = function(req, res, next) {
     var metaCollectionName = req.params.metaCollectionName;
     var metaCollectionId = req.params.metaCollectionId;
 
-    models.getPredefinedModel(metaCollectionName)
-    .then(function(model){
+    models
+    .getPredefinedModel(metaCollectionName)
+    .then(function(model) {
 
         req.model = model;
 
@@ -16,7 +17,7 @@ module.exports = function(req, res, next) {
             req.url = `/api/collections/jangle.${metaCollectionName}`;
 
         next();
-        
+
     });
 
 };

@@ -1,15 +1,13 @@
 var mongoose = require('mongoose');
 var apiAfter = include('api/middleware/api/after');
 
-const DISCONNECTED = 0, CONNECTED = 1;
-
 module.exports = function(req, res, next) {
 
     // Set up default response
     req.res = {
-        status: 200,
-        message: '',
-        error: false,
+        status: 404,
+        message: `Can't ${req.method} on ${req.baseUrl}`,
+        error: true,
         data: []
     };
 
@@ -28,7 +26,7 @@ module.exports = function(req, res, next) {
         if(req.method !== 'GET')
         {
             var message = `A token is required for ${req.method} requests on '${req.originalUrl}'`;
-            
+
             console.log(`|-> ${message}`);
 
             req.res = ({

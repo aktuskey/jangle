@@ -1,5 +1,5 @@
 module.exports = {
-    
+
     getPredefinedModel: function(collectionName) {
 
         var predefinedModel = null;
@@ -18,17 +18,14 @@ module.exports = {
 
     },
 
-    getModelFromCollections: function(collectionName) {
+    getModel: function(connection, collectionName) {
 
-        var collectionModel = include('models/collection.js');
+        var collection = connection.collection('jangle.collections');
 
-        console.log(`Can't find '${collectionName}'`);
-
-        return collectionModel
-            .findOne({name:collectionName})
-            .exec()
+        return collection.findOne({name:collectionName})
             .then(function(result){
-                console.log(result);
+                console.log(`Can't find '${collectionName}'`);
+                return result;
             });
 
     }

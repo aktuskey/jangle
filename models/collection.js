@@ -15,9 +15,9 @@ var CollectionSchema = new Schema(
         tags : [
             Schema.Types.ObjectId // Tag
         ],
-        defaultDisplayField: Number, // Index into 'fields' structure?
-        ordered: Boolean
+        defaultDisplayField: { type: Number, default: 0 }, // Index into 'fields' structure?
+        ordered: { type: Boolean, default: false}
     }
 );
 
-module.exports = mongoose.model('Collection', CollectionSchema);
+module.exports = mongoose.model('jangle.collections', CollectionSchema);
