@@ -2,33 +2,8 @@ var models = include('models');
 
 module.exports = function(req, res, next) {
 
-    var collectionName = req.params.collectionName;
-
-    if(req.model)
-    {
-      getDocuments(req,res,next);
-    }
-    else
-    {
-      models.getModel(req.connection, collectionName)
-      .then(function(model){
-        if(model)
-        {
-          req.model = model;
-          getDocuments(req,res,next);
-        }
-        else
-        {
-          req.res = {
-            status: 400,
-            error: true,
-            data: [],
-            message: `Cannot find collection '${collectionName}'`
-          };
-          next();
-        }
-      });
-    }
+  models.getCollectionModel(req, res, next)
+    .then(function(){ getDocuments(req,res,next) });
 
 };
 
@@ -39,11 +14,13 @@ function getDocuments(req, res, next){
     var prefix = req.query.token ? '' : 'live ';
     var model = req.model;
 
-    if(docId) {
+    if(docId)
+    {
 
         var docIdField = 'jangle.id';
 
-        switch(collectionName) {
+        switch(collectionName)
+        {
             case 'jangle.collections':
               docIdField = 'name';
               break;
@@ -55,7 +32,8 @@ function getDocuments(req, res, next){
         findDocuments(req, res, next, findOptions);
 
     }
-    else {
+    else
+    {
         findDocuments(req, res, next, {});
     }
 
@@ -83,6 +61,8 @@ function findDocuments(req, res, next, findOptions){
     {
       // TODO: Replace with singular/plural form
       var documentLabel = documents.length != 1 ? 'documents' : 'document';
+
+      console.log(`|-> ${documents.length} ${documentLabel}`);
 
       req.res = {
         status: 200,

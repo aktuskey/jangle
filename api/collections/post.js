@@ -2,37 +2,8 @@ var models = include('models');
 
 module.exports = function(req, res, next) {
 
-    var collectionName = req.params.collectionName;
-
-    if (req.model)
-    {
-      createDocument(req, res, next);
-    }
-    else
-    {
-      models
-      .getModel(req.connection, collectionName)
-      .then(function(model){
-
-        if (model == null)
-        {
-          req.res = {
-            status: 400,
-            error: true,
-            message: `Could not find collection '${collectionName}'`,
-            data: []
-          };
-
-          next();
-        }
-        else
-        {
-          req.model = model;
-          createDocument(req, res, next);
-        }
-
-      });
-    }
+    models.getCollectionModel(req, res, next)
+      .then(function(){ createDocument(req, res, next) })
 
 };
 
