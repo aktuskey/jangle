@@ -62,7 +62,7 @@ function findDocuments(req, res, next, findOptions){
       // TODO: Replace with singular/plural form
       var documentLabel = documents.length != 1 ? 'documents' : 'document';
 
-      console.log(`|-> ${documents.length} ${documentLabel}`);
+      console.log(`|-> ${documents.length} ${documentLabel} fetched.`);
 
       req.res = {
         status: 200,

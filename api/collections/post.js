@@ -22,25 +22,37 @@ function createDocument(req, res, next) {
       try {
 
         var Model = req.connection.model(model.modelName, model.schema);
-        var newDocument = new Model(parsedData);
 
-        newDocument.save(function(error, result, numAffected){
+        // Wait until indexes have been built
+        // or the model's index fields will be ignored.
+        Model.on('index', function(){
 
-            if(error)
-            {
-              handleCreateError(req, res, next, error, parsedData);
-            }
-            else
-            {
-              req.res = {
-                status: 200,
-                error: false,
-                data: [newDocument],
-                message: `Add new document to '${collectionName}'`
-              };
+          var newDocument = new Model(parsedData);
 
-              next();
-            }
+          newDocument.save(function(error, result, numAffected){
+
+              if(error)
+              {
+                handleCreateError(req, res, next, error, parsedData);
+              }
+              else
+              {
+                // TODO: Replace with singular/plural form on collection model
+                var documentLabel = numAffected != 1 ? 'documents' : 'document';
+
+                console.log(`|-> ${numAffected} ${documentLabel} created.`)
+
+                req.res = {
+                  status: 200,
+                  error: false,
+                  data: [newDocument],
+                  message: `Add new document to '${collectionName}'`
+                };
+
+                next();
+              }
+
+            });
 
           });
 
@@ -89,8 +101,6 @@ function createDocument(req, res, next) {
 function handleCreateError(req, res, next, error) {
 
   var message = `There was a problem creating the new document.`;
-
-  console.log(error);
 
   if(error.name == 'ValidationError')
   {

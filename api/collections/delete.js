@@ -63,7 +63,7 @@ function removeDocuments(req, res, next, findOptions) {
         // TODO: Replace with singular/plural form on collection model
         var documentLabel = documents.length != 1 ? 'documents' : 'document';
 
-        console.log(`|-> ${documents.length} ${documentLabel}`);
+        console.log(`|-> ${documents.length} ${documentLabel} removed.`);
 
         Model.remove(findOptions, function(error){
 
