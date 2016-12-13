@@ -28,8 +28,12 @@ function createDocument(req, res, next) {
         Model.on('index', function(){
 
           var newDocument = new Model(parsedData);
+          console.log('|-> ', parsedData)
 
+          // TODO: Create custom 'unique' validator to allow user to define unique fields.
           newDocument.save(function(error, result, numAffected){
+
+              console.log('wtf...');
 
               if(error)
               {
