@@ -1,34 +1,40 @@
-//  Step 1: Load app dependencies
+global.include = (path) => require(`${__dirname}/${path}`);
+
 try {
+
     var express = require('express'),
         app = express(),
-        mongoose = require('mongoose'),
-        jwt = require('jsonwebtoken');
-    global.include = (path) => require(`${__dirname}/${path}`);
-} catch (e) {
+        mongoose = require('mongoose');
+
+    mongoose.Promise = global.Promise;
+
+} catch (ignore) {
+
     console.log(`Please run 'npm install' first.`);
     return;
+
 }
+
+
+var config = {};
 
 try {
-    var config = require('./jangle-config');
 
-    if(config.mongodb == null) {
+    config = require('./jangle-config');
+
+    if (config.mongodb === undefined) {
         config.mongodb = {};
     }
-} catch (e) {
-    var config = {};
+
+} catch (ignore) {
+
     config.mongodb = {};
+
 }
-
-
-//  Step 2: Set default values for config
-mongoose.Promise = global.Promise;
 
 global.config = {
 
-    // For connecting to MongoDB
-    mongodb : {
+    mongodb: {
         host: config.mongodb.host || 'localhost',
         port: config.mongodb.port || 27017,
         contentDb: config.mongodb.contentDb || 'jangle',
@@ -40,9 +46,8 @@ global.config = {
 
 };
 
-//  Step 3: Set up routes
 var webApp = require('./web-app'),
-    apiApp = require('./api-app');
+    api = require('./api');
 
 // Web app
 app.get('/', webApp);
@@ -50,51 +55,45 @@ app.get('/sign-in', webApp);
 app.get('/app', webApp);
 app.get('/app/*', webApp);
 
-// API Docs
-app.get('/api', apiApp);
-
 // API Before
-app.use('/api/*', require('./api/middleware/api/before'));
+app.use('/api/*', api.middleware.all.before);
 
 // Public API
-app.get('/api/ping', require('./api/ping.js'));
-app.get('/api/auth', require('./api/auth.js'));
+app.get('/api/ping', api.public.ping);
+app.get('/api/auth', api.public.auth);
 
 // Meta Collections Middleware
-var metaBefore = require('./api/middleware/meta/before');
+app.get('/api/jangle/:metaCollectionName', api.middleware.meta.before);
+app.get('/api/jangle/:metaCollectionName/:metaCollectionId', api.middleware.meta.before);
 
-app.get('/api/jangle/:metaCollectionName', metaBefore);
-app.get('/api/jangle/:metaCollectionName/:metaCollectionId', metaBefore);
+app.post('/api/jangle/:metaCollectionName', api.middleware.meta.before);
 
-app.post('/api/jangle/:metaCollectionName', metaBefore);
+app.put('/api/jangle/:metaCollectionName', api.middleware.meta.before);
+app.put('/api/jangle/:metaCollectionName/:metaCollectionId', api.middleware.meta.before);
 
-app.put('/api/jangle/:metaCollectionName', metaBefore);
-app.put('/api/jangle/:metaCollectionName/:metaCollectionId', metaBefore);
-
-app.delete('/api/jangle/:metaCollectionName', metaBefore);
-app.delete('/api/jangle/:metaCollectionName/:metaCollectionId', metaBefore);
+app.delete('/api/jangle/:metaCollectionName', api.middleware.meta.before);
+app.delete('/api/jangle/:metaCollectionName/:metaCollectionId', api.middleware.meta.before);
 
 // Collections API
-app.get('/api/collections/:collectionName', require('./api/collections/get'));
-app.get('/api/collections/:collectionName/:docId', require('./api/collections/get'));
+app.get('/api/collections/:collectionName', api.collections.get);
+app.get('/api/collections/:collectionName/:docId', api.collections.get);
 
-app.post('/api/collections/:collectionName', require('./api/collections/post'));
+app.post('/api/collections/:collectionName', api.collections.post);
 
-app.put('/api/collections/:collectionName', require('./api/collections/put'));
-app.put('/api/collections/:collectionName/:docId', require('./api/collections/put'));
+app.put('/api/collections/:collectionName', api.collections.put);
+app.put('/api/collections/:collectionName/:docId', api.collections.put);
 
-app.delete('/api/collections/:collectionName', require('./api/collections/delete'));
-app.delete('/api/collections/:collectionName/:docId', require('./api/collections/delete'));
-
+app.delete('/api/collections/:collectionName', api.collections.delete);
+app.delete('/api/collections/:collectionName/:docId', api.collections.delete);
 
 // API Cleanup
-app.use('/api/*', require('./api/middleware/api/after'));
+app.use('/api/*', api.middleware.all.after);
 
 
-//  Step 4: Run app
 var port = process.env.PORT || 3000;
 
-app.listen(port, function() {
+app.listen(port, function () {
+    'use strict';
 
     console.log(`Jangle ready on port ${port}!`);
 

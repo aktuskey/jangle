@@ -1,7 +1,1 @@
-module.exports = {
-
-  mongodb: {
-
-  }
-
-};
+module.exports = {};

@@ -3,8 +3,10 @@ var R = require('ramda');
 
 module.exports = function(req, res, next) {
 
-      models.getCollectionModel(req, res, next)
-        .then(function(){ changeDocuments(req, res, next) })
+  models.getCollectionModel(req, res, next)
+    .then(function() {
+      changeDocuments(req, res, next)
+    })
 
 };
 
@@ -13,28 +15,24 @@ function changeDocuments(req, res, next) {
   var collectionName = req.params.collectionName;
   var docId = req.params.docId;
 
-  if(docId)
-  {
+  if (docId) {
 
-      var docIdField = 'jangle.id';
+    var docIdField = 'jangle.id';
 
-      switch(collectionName)
-      {
-          case 'jangle.collections':
-            docIdField = 'name';
-            break;
-      }
+    switch (collectionName) {
+      case 'jangle.collections':
+        docIdField = 'name';
+        break;
+    }
 
-      var findOptions = {};
-      findOptions[docIdField] = docId;
+    var findOptions = {};
+    findOptions[docIdField] = docId;
 
 
-      updateDocuments(req, res, next, findOptions);
+    updateDocuments(req, res, next, findOptions);
 
-  }
-  else
-  {
-      updateDocuments(req, res, next, {});
+  } else {
+    updateDocuments(req, res, next, {});
   }
 
 };
@@ -44,22 +42,18 @@ function updateDocuments(req, res, next, findOptions) {
   var data = req.query.data;
   var docId = req.params.docId;
 
-  if(data)
-  {
+  if (data) {
     try {
 
       var parsedData = JSON.parse(data);
 
-      if(Array.isArray(parsedData) || docId == undefined)
-      {
+      if (Array.isArray(parsedData) || docId == undefined) {
         updateManyDocuments(req, res, next, parsedData, findOptions);
-      }
-      else {
+      } else {
         updateSingleDocument(req, res, next, parsedData, findOptions);
       }
 
-    }
-    catch (e){
+    } catch (e) {
 
       req.res = {
         status: 400,
@@ -72,8 +66,7 @@ function updateDocuments(req, res, next, findOptions) {
 
     }
 
-  }
-  else {
+  } else {
 
     req.res = {
       status: 400,
@@ -114,16 +107,17 @@ function updateSingleDocument(req, res, next, parsedData, findOptions) {
 
     // Wait until indexes have been built
     // or the model's index fields will be ignored.
-    Model.on('index', function(){
+    Model.on('index', function() {
 
       var newDocument = parsedData;
 
-      var sortOptions = { 'jangle.version': -1 };
+      var sortOptions = {
+        'jangle.version': -1
+      };
 
       Model.find(findOptions).sort(sortOptions).limit(1).exec(function(fetchError, documents) {
 
-        if(fetchError)
-        {
+        if (fetchError) {
 
           console.log(fetchError);
 
@@ -136,8 +130,7 @@ function updateSingleDocument(req, res, next, parsedData, findOptions) {
 
           next();
 
-        }
-        else if (documents.length == 0) {
+        } else if (documents.length == 0) {
 
           var key = Object.keys(findOptions)[0];
           var val = findOptions[key];
@@ -151,14 +144,11 @@ function updateSingleDocument(req, res, next, parsedData, findOptions) {
 
           next();
 
-        }
-        else
-        {
+        } else {
           var oldDocument = documents[0]._doc;
           var updatedDocument = R.merge(oldDocument, newDocument);
 
-          if(R.equals(updatedDocument, oldDocument))
-          {
+          if (R.equals(updatedDocument, oldDocument)) {
             req.res = {
               status: 301,
               error: false,
@@ -166,9 +156,7 @@ function updateSingleDocument(req, res, next, parsedData, findOptions) {
               message: `No changes made, collection not modified.`
             }
             next();
-          }
-          else
-          {
+          } else {
 
             // Set jangle meta properties
             updatedDocument.jangle = {};
@@ -179,49 +167,44 @@ function updateSingleDocument(req, res, next, parsedData, findOptions) {
             }
 
             // Unset certain properties
-            for(var i in propertiesToUnset)
-            {
+            for (var i in propertiesToUnset) {
               var prop = propertiesToUnset[i];
               delete updatedDocument[prop];
             }
 
             var savedDocument = new Model(updatedDocument);
 
-            savedDocument.save(function(error, result, numAffected){
+            savedDocument.save(function(error, result, numAffected) {
 
-                if(error)
-                {
-                  handleCreateError(req, res, next, error);
-                }
-                else
-                {
-                  // TODO: Replace with singular/plural form on collection model
-                  var documentLabel = numAffected != 1 ? 'documents' : 'document';
+              if (error) {
+                handleCreateError(req, res, next, error);
+              } else {
+                // TODO: Replace with singular/plural form on collection model
+                var documentLabel = numAffected != 1 ? 'documents' : 'document';
 
-                  console.log(`|-> ${numAffected} ${documentLabel} updated.`)
+                console.log(`|-> ${numAffected} ${documentLabel} updated.`)
 
-                  req.res = {
-                    status: 200,
-                    error: false,
-                    data: [savedDocument],
-                    message: `Add new document to '${collectionName}'`
-                  };
+                req.res = {
+                  status: 200,
+                  error: false,
+                  data: [savedDocument],
+                  message: `Add new document to '${collectionName}'`
+                };
 
-                  next();
-                }
+                next();
+              }
 
-              });
-
-            }
+            });
 
           }
 
-        });
+        }
 
       });
 
-    }
-  catch(e) {
+    });
+
+  } catch (e) {
     console.log(e);
     req.res = {
       status: 400,
@@ -239,25 +222,20 @@ function handleCreateError(req, res, next, error) {
   console.log(error);
   var message = `There was a problem creating the new document.`;
 
-  if(error.name == 'ValidationError')
-  {
+  if (error.name == 'ValidationError') {
     message = `The 'data' option failed validation.`;
 
-    var errorList = Object.keys(error.errors).map( x => error.errors[x] );
-    var requiredFieldErrors = errorList.filter( x => x.kind == 'required');
+    var errorList = Object.keys(error.errors).map(x => error.errors[x]);
+    var requiredFieldErrors = errorList.filter(x => x.kind == 'required');
 
-    if(requiredFieldErrors.length > 0)
-    {
-      var missingRequiredFields = requiredFieldErrors.map( x => x.path );
+    if (requiredFieldErrors.length > 0) {
+      var missingRequiredFields = requiredFieldErrors.map(x => x.path);
       message = `Missing required fields: ${missingRequiredFields}`;
     }
-  }
-  else if(error.name == 'MongoError')
-  {
+  } else if (error.name == 'MongoError') {
     message = `There was a problem with MongoDB.`;
 
-    switch(error.code)
-    {
+    switch (error.code) {
       case 11000:
         message = `A document with that key already exists.`
         break;

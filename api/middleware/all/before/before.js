@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
-var apiAfter = include('api/middleware/api/after');
+var apiAfter = include('api/middleware/all/after');
 
-module.exports = function(req, res, next) {
+module.exports = function (req, res, next) {
 
     // Set up default response
     req.res = {
@@ -18,13 +18,11 @@ module.exports = function(req, res, next) {
     var noTokenProvided = token === undefined;
     var useLiveDatabase;
 
-    if(noTokenProvided)
-    {
+    if (noTokenProvided) {
         useLiveDatabase = true;
 
         // Only allow get requests to live database
-        if(req.method !== 'GET')
-        {
+        if (req.method !== 'GET') {
             var message = `A token is required for ${req.method} requests on '${req.originalUrl}'`;
 
             console.log(`|-> ${message}`);
@@ -36,11 +34,9 @@ module.exports = function(req, res, next) {
                 data: []
             });
 
-            return apiAfter(req,res);
+            return apiAfter(req, res);
         }
-    }
-    else
-    {
+    } else {
         useLiveDatabase = false;
     }
 
@@ -49,10 +45,9 @@ module.exports = function(req, res, next) {
 
     req.connection = mongoose.createConnection();
 
-    req.connection.open(connectionString, function(error) {
+    req.connection.open(connectionString, function (error) {
 
-        if(error)
-        {
+        if (error) {
             var message = `Can't connect to the database.`;
 
             console.log(`|-> ${message}`);
@@ -65,27 +60,62 @@ module.exports = function(req, res, next) {
             };
 
             return apiAfter(req, res);
-        }
-        else
-        {
-            next();
+        } else {
+            initializeJangleMetacollections(req.connection)
+                .then(next);
         }
     });
 
 };
 
-var getConnectionString = (useLiveDatabase) => {
+// Field types will be created if the collection is empty
+var initializeJangleMetacollections = function (connection) {
+
+    return new Promise(function (resolve, reject) {
+
+        var fieldTypeModel = include('models/field-type.js');
+        var FieldType = connection.model(fieldTypeModel.modelName, fieldTypeModel.schema);
+
+        FieldType.find(function (err, fieldTypes) {
+            if (err) {
+                console.log(err);
+            } else if (fieldTypes.length == []) {
+                return initializeFieldTypes(FieldType, resolve);
+            }
+
+            resolve();
+        });
+
+    });
+
+};
+
+var initializeFieldTypes = function (FieldType, resolve) {
+
+    var initialDocuments = include('models/initial/field-type.js');
+
+    FieldType.create(initialDocuments, function (error) {
+        if (error)
+            console.log(error);
+        else {
+            resolve();
+        }
+    });
+
+};
+
+global.getConnectionString = (useLiveDatabase) => {
 
     var mongodb = global.config.mongodb;
     var authPrefix;
     var database;
 
-    if(mongodb.auth)
+    if (mongodb.auth)
         authPrefix = `${mongodb.rootUser}:${mongodb.rootPassword}@`;
     else
         authPrefix = '';
 
-    if(useLiveDatabase)
+    if (useLiveDatabase)
         database = mongodb.liveDb;
     else
         database = mongodb.contentDb;
