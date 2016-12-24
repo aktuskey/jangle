@@ -1,7 +1,9 @@
 # Jangle
-> Simple content management.
-[![Coverage Status](https://coveralls.io/repos/github/RyanNHG/jangle/badge.svg?branch=master)](https://coveralls.io/github/RyanNHG/jangle?branch=master)
 [![Build Status](https://travis-ci.org/RyanNHG/jangle.svg?branch=master)](https://travis-ci.org/RyanNHG/jangle)
+[![Coverage Status](https://coveralls.io/repos/github/RyanNHG/jangle/badge.svg?branch=master)](https://coveralls.io/github/RyanNHG/jangle?branch=master)
+
+> Simple content management.
+
 
 ---
 
