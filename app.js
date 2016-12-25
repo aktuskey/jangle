@@ -15,37 +15,6 @@ try {
 
 }
 
-
-var config = {};
-
-try {
-
-    config = require('./jangle-config');
-
-    if (config.mongodb === undefined) {
-        config.mongodb = {};
-    }
-
-} catch (ignore) {
-
-    config.mongodb = {};
-
-}
-
-global.config = {
-
-    mongodb: {
-        host: config.mongodb.host || 'localhost',
-        port: config.mongodb.port || 27017,
-        contentDb: config.mongodb.contentDb || 'jangle',
-        liveDb: config.mongodb.liveDb || 'jangleLive',
-        auth: config.mongodb.auth || false,
-        rootUser: config.mongodb.rootUser || null,
-        rootPassword: config.mongodb.rootPassword || null
-    }
-
-};
-
 var webApp = require('./web-app'),
     api = require('./api');
 

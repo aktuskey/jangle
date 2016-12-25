@@ -1,13 +1,14 @@
-var models = include('models');
+var include = (include) ? include : (path) => require(`../../../../${path}`);
 
-module.exports = function(req, res, next) {
+var collectionModel = include('models/collection.js');
+
+module.exports = function (req, res, next) {
 
     var metaCollectionName = req.params.metaCollectionName;
     var metaCollectionId = req.params.metaCollectionId;
 
-    models
-        .getPredefinedModel(metaCollectionName)
-        .then(function(model) {
+    getPredefinedModel(metaCollectionName)
+        .then(function (model) {
 
             req.model = model;
 
@@ -19,5 +20,28 @@ module.exports = function(req, res, next) {
             next();
 
         });
+
+};
+
+var getPredefinedModel = function (collectionName) {
+
+    return new Promise(function (resolve, reject) {
+
+        var predefinedModel = null;
+
+        switch (collectionName) {
+
+        case 'collections':
+            predefinedModel = collectionModel;
+            break;
+
+        }
+
+        if (predefinedModel !== null)
+            resolve(predefinedModel);
+        else
+            reject(`Can't find 'jangle.${collectionName}'`);
+
+    });
 
 };

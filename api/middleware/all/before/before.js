@@ -1,9 +1,35 @@
-var mongoose = require('mongoose');
-var apiAfter = include('api/middleware/all/after');
+var include = (include) ?
+    include : (path) => require(`../../../../${path}`);
+
+var mongoose = require('mongoose'),
+    apiAfter = include('api/middleware/all/after'),
+    fieldTypeModel = include('models/field-type.js'),
+    initialDocuments = include('models/initial/field-type.js'),
+    jangleConfig = include('default-config.js');
 
 module.exports = function (req, res, next) {
 
-    // Set up default response
+    setDefaultResponse(req, res, next)
+        .then(function () {
+
+            return checkForUserToken(req, res, next);
+
+        })
+        .then(function () {
+
+            return getMongoConnection(req, res, next)
+                .then(next);
+
+        })
+        .catch(function () {
+
+        });
+
+
+};
+
+var setDefaultResponse = function (req, res, next) {
+
     req.res = {
         status: 404,
         message: `Can't ${req.method} on ${req.baseUrl}`,
@@ -11,61 +37,87 @@ module.exports = function (req, res, next) {
         data: []
     };
 
-    console.log(`\n${req.method} ${req.originalUrl}`);
+    return Promise.resolve();
 
-    // Check if user is authenticated
-    var token = req.query.token;
-    var noTokenProvided = token === undefined;
-    var useLiveDatabase;
+};
 
-    if (noTokenProvided) {
-        useLiveDatabase = true;
+var checkForUserToken = function (req, res, next) {
 
-        // Only allow get requests to live database
-        if (req.method !== 'GET') {
-            var message = `A token is required for ${req.method} requests on '${req.originalUrl}'`;
+    return new Promise(function (resolve, reject) {
 
-            console.log(`|-> ${message}`);
+        var noTokenProvided = req.query.token === undefined;
 
-            req.res = ({
-                status: 401,
-                message: message,
-                error: true,
-                data: []
-            });
+        if (noTokenProvided) {
 
-            return apiAfter(req, res);
-        }
-    } else {
-        useLiveDatabase = false;
-    }
+            req.useLiveDatabase = true;
 
-    // Attempt to connect to MongoDB
-    var connectionString = getConnectionString(useLiveDatabase);
+            // Only allow get requests to live database
+            if (req.method !== 'GET') {
 
-    req.connection = mongoose.createConnection();
+                var message = `A token is required for ${req.method} requests on '${req.originalUrl}'`;
 
-    req.connection.open(connectionString, function (error) {
+                req.res = ({
+                    status: 401,
+                    message: message,
+                    error: true,
+                    data: []
+                });
 
-        if (error) {
-            var message = `Can't connect to the database.`;
+                apiAfter(req, res);
+                reject();
 
-            console.log(`|-> ${message}`);
+            } else {
 
-            req.res = {
-                status: 500,
-                message: message,
-                error: true,
-                data: []
-            };
+                resolve();
 
-            return apiAfter(req, res);
+            }
+
         } else {
-            initializeJangleMetacollections(req.connection)
-                .then(next);
+
+            req.useLiveDatabase = false;
+
+            resolve();
+
         }
+
+
     });
 
+};
+
+var getMongoConnection = function (req, res, next) {
+
+    return new Promise(function (resolve, reject) {
+
+        var connectionString =
+            getConnectionString(req.useLiveDatabase, jangleConfig.mongodb);
+
+        req.connection = mongoose.createConnection();
+
+        req.connection.open(connectionString, function (error) {
+
+            if (error) {
+
+                var message = `Can't connect to the database.`;
+
+                req.res = {
+                    status: 500,
+                    message: message,
+                    error: true,
+                    data: []
+                };
+
+                return apiAfter(req, res, req.done);
+
+            } else {
+
+                initializeJangleMetacollections(req.connection)
+                    .then(resolve);
+
+            }
+        });
+
+    });
 };
 
 // Field types will be created if the collection is empty
@@ -73,14 +125,17 @@ var initializeJangleMetacollections = function (connection) {
 
     return new Promise(function (resolve, reject) {
 
-        var fieldTypeModel = include('models/field-type.js');
         var FieldType = connection.model(fieldTypeModel.modelName, fieldTypeModel.schema);
 
         FieldType.find(function (err, fieldTypes) {
             if (err) {
+
                 console.log(err);
+
             } else if (fieldTypes.length == []) {
+
                 return initializeFieldTypes(FieldType, resolve);
+
             }
 
             resolve();
@@ -92,35 +147,47 @@ var initializeJangleMetacollections = function (connection) {
 
 var initializeFieldTypes = function (FieldType, resolve) {
 
-    var initialDocuments = include('models/initial/field-type.js');
-
     FieldType.create(initialDocuments, function (error) {
-        if (error)
+        if (error) {
+
             console.log(error);
-        else {
+
+        } else {
+
             resolve();
+
         }
     });
 
 };
 
-global.getConnectionString = (useLiveDatabase) => {
+var getConnectionString = (useLiveDatabase, config) => {
 
-    var mongodb = global.config.mongodb;
-    var authPrefix;
-    var database;
+    var authPrefix,
+        database;
 
-    if (mongodb.auth)
-        authPrefix = `${mongodb.rootUser}:${mongodb.rootPassword}@`;
-    else
+    if (config.auth) {
+
+        authPrefix = `${config.rootUser}:${config.rootPassword}@`;
+
+    } else {
+
         authPrefix = '';
 
-    if (useLiveDatabase)
-        database = mongodb.liveDb;
-    else
-        database = mongodb.contentDb;
+    }
 
-    var connectionString = `mongodb://${authPrefix}${mongodb.host}:${mongodb.port}/${database}`;
+    if (useLiveDatabase) {
+
+        database = config.liveDb;
+
+    } else {
+
+        database = config.contentDb;
+
+    }
+
+    var connectionString =
+        `config://${authPrefix}${config.host}:${config.port}/${database}`;
 
     return connectionString;
 };

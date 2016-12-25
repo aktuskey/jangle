@@ -1,7 +1,6 @@
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
-
-var FieldSchema = include('models/schemas/field.js');
+var mongoose = require('mongoose'),
+	Schema = mongoose.Schema,
+	FieldSchema = require('./schemas/field.js');
 
 var SingletonSchema = new Schema({
 	name: {
@@ -17,7 +16,10 @@ var SingletonSchema = new Schema({
 		trim: true
 	},
 	fields: [FieldSchema],
-	tags: [Schema.Types.ObjectId] // Tag
+	tags: [Schema.Types.ObjectId]
 });
 
-module.exports = mongoose.model('jangle.singletons', SingletonSchema);
+var Singleton = mongoose.model('jangle.singletons') ?
+	mongoose.model('jangle.singletons') : mongoose.model('jangle.singletons', SingletonSchema);
+
+module.exports = Singleton;

@@ -1,7 +1,8 @@
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+var mongoose = require('mongoose'),
+	Schema = mongoose.Schema;
 
 var FieldTypeSchema = new Schema({
+
 	name: {
 		type: String,
 		required: true,
@@ -9,20 +10,28 @@ var FieldTypeSchema = new Schema({
 		trim: true,
 		unique: true
 	},
+
 	label: {
 		type: String,
 		required: true,
 		trim: true
 	},
+
 	type: {
 		type: String,
 		required: true,
 		trim: true
-	}, // DataType
+	},
+
 	options: {
 		type: Schema.Types.Mixed,
 		required: true
 	}
+
 });
 
-module.exports = mongoose.model('jangle.fieldTypes', FieldTypeSchema);
+try {
+	module.exports = mongoose.model('jangle.fieldTypes', FieldTypeSchema);
+} catch (ignore) {
+	module.exports = mongoose.model('jangle.fieldTypes');
+}
