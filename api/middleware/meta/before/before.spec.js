@@ -16,7 +16,7 @@ describe('middleware/meta/before', function () {
 			assert.notEqual(req.model, undefined);
 			assert.equal(req.url, `/api/collections/jangle.${req.params.metaCollectionName}`);
 			done();
-		})
+		});
 
 	});
 
@@ -33,7 +33,24 @@ describe('middleware/meta/before', function () {
 			assert.notEqual(req.model, undefined);
 			assert.equal(req.url, `/api/collections/jangle.${req.params.metaCollectionName}/${req.params.metaCollectionId}`);
 			done();
-		})
+		});
+
+	});
+
+	it('rejects invalid meta collections', function (done) {
+
+		var req = {
+			params: {
+				metaCollectionName: 'fakeCollections',
+				metaCollectionId: null
+			}
+		};
+
+		before(req, {}, function () {
+
+			done();
+
+		});
 
 	});
 
