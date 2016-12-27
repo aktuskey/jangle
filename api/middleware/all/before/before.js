@@ -45,7 +45,8 @@ var checkForUserToken = function (req, res, next) {
 
     return new Promise(function (resolve, reject) {
 
-        var noTokenProvided = req.query.token === undefined;
+        var token = req.query.token;
+        var noTokenProvided = token === undefined;
 
         if (noTokenProvided) {
 
@@ -76,10 +77,27 @@ var checkForUserToken = function (req, res, next) {
 
             req.useLiveDatabase = false;
 
-            resolve();
+            // TODO: Legitimate authentication pls.
+            var ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'token';
+
+            if (token != ADMIN_TOKEN) {
+
+                req.res = {
+                    status: 401,
+                    message: 'Invalid token.',
+                    data: []
+                };
+
+                apiAfter(req, res);
+                reject();
+
+            } else {
+
+                resolve();
+
+            }
 
         }
-
 
     });
 
@@ -187,7 +205,7 @@ var getConnectionString = (useLiveDatabase, config) => {
     }
 
     var connectionString =
-        `config://${authPrefix}${config.host}:${config.port}/${database}`;
+        `mongodb://${authPrefix}${config.host}:${config.port}/${database}`;
 
     return connectionString;
 };

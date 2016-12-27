@@ -111,12 +111,12 @@ describe('middleware/all/before', function () {
 	});
 
 
-	it('allows PUT with token', function (done) {
+	it('allows PUT with valid token', function (done) {
 
 		req.method = 'PUT';
 
 		req.query = {
-			token: 'test'
+			token: 'token'
 		};
 
 		req.done = function () {
@@ -124,6 +124,36 @@ describe('middleware/all/before', function () {
 			try {
 
 				assert.notEqual(req.res.status, 401);
+				assert.equal(req.useLiveDatabase, false);
+
+				done();
+
+			} catch (e) {
+
+				done(e);
+
+			}
+
+		};
+
+		before(req, res, req.done);
+
+	});
+
+
+	it('disallows PUT with invalid token', function (done) {
+
+		req.method = 'PUT';
+
+		req.query = {
+			token: 'badtoken'
+		};
+
+		req.done = function () {
+
+			try {
+
+				assert.equal(req.res.status, 401);
 				assert.equal(req.useLiveDatabase, false);
 
 				done();
