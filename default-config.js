@@ -14,8 +14,8 @@ module.exports = {
 		contentDb: config.mongodb.contentDb || 'jangle',
 		liveDb: config.mongodb.liveDb || 'jangleLive',
 		auth: config.mongodb.auth || false,
-		rootUser: config.mongodb.rootUser || null,
-		rootPassword: config.mongodb.rootPassword || null
+		rootUser: config.mongodb.rootUser || 'admin',
+		rootPassword: config.mongodb.rootPassword || 'password'
 	}
 
 }

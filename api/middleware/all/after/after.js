@@ -1,7 +1,7 @@
 const DISCONNECTED = 0,
     CONNECTED = 1;
 
-module.exports = function (req, res) {
+module.exports = function(req, res) {
 
     // Close open connections
     if (req.connection && req.connection.readyState === CONNECTED) {
@@ -11,7 +11,7 @@ module.exports = function (req, res) {
     }
 
     // Set error
-    var error = true;
+    let error = true;
 
     if (req.res.error !== undefined) {
 
@@ -27,11 +27,9 @@ module.exports = function (req, res) {
         .status(req.res.status || 500)
         .json({
             message: req.res.message || '',
-            error: error,
+            error: error || true,
             data: req.res.data || []
         });
 
-    if (req.done)
-        req.done();
 
 };

@@ -1,8 +1,8 @@
-var mongoose = require('mongoose'),
+let mongoose = require('mongoose'),
 	Schema = mongoose.Schema,
 	FieldSchema = require('./schemas/field.js');
 
-var SingletonSchema = new Schema({
+let SingletonSchema = new Schema({
 	name: {
 		type: String,
 		required: true,
@@ -19,7 +19,7 @@ var SingletonSchema = new Schema({
 	tags: [Schema.Types.ObjectId]
 });
 
-var Singleton = mongoose.model('jangle.singletons') ?
+let Singleton = mongoose.model('jangle.singletons') ?
 	mongoose.model('jangle.singletons') : mongoose.model('jangle.singletons', SingletonSchema);
 
 module.exports = Singleton;

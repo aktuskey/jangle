@@ -1,9 +1,9 @@
-var assert = require('assert'),
+let assert = require('assert'),
 	auth = require('./auth');
 
 describe('auth', function () {
 
-	var req = {};
+	let req = {};
 
 	beforeEach(function () {
 
@@ -50,7 +50,7 @@ describe('auth', function () {
 
 	it('provides different message on missing credentials', function (done) {
 
-		var badCredentialsMessage = '',
+		let badCredentialsMessage = '',
 			missingCredentialsMessage = '';
 
 		req.query.username = 'incorrect';

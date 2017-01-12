@@ -1,1 +1,3 @@
-module.exports = require('./post.js');
+module.exports = {
+    one: require('./one.js')
+};

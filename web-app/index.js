@@ -1,5 +1,9 @@
-module.exports = function (ignore, res) {
-    'use strict';
-    res.status(200).json('Jangle front end.');
+var path = require('path');
+
+module.exports = function (req, res) {
+
+	res.status(200).sendFile(
+		path.join(__dirname + '/index.html')
+	);
 
 };

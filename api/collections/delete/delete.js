@@ -1,33 +1,31 @@
-var models = global.include('models');
+let self = this;
 
-var self = this;
-
-module.exports = function (req, res, next) {
+module.exports = function(req, res, next) {
     'use strict';
     models.getCollectionModel(req, res, next)
-        .then(function () {
+        .then(function() {
             self.deleteDocuments(req, next);
         });
 
 };
 
-self.deleteDocuments = function (req, next) {
+self.deleteDocuments = function(req, next) {
     'use strict';
 
-    var collectionName = req.params.collectionName;
-    var docId = req.params.docId;
+    let collectionName = req.params.collectionName;
+    let docId = req.params.docId;
 
     if (docId) {
 
-        var docIdField = 'jangle.id';
+        let docIdField = 'jangle.id';
 
         switch (collectionName) {
-        case 'jangle.collections':
-            docIdField = 'name';
-            break;
+            case 'jangle.collections':
+                docIdField = 'name';
+                break;
         }
 
-        var findOptions = {};
+        let findOptions = {};
         findOptions[docIdField] = docId;
 
         self.removeDocuments(req, next, findOptions);
@@ -38,16 +36,16 @@ self.deleteDocuments = function (req, next) {
 
 };
 
-self.removeDocuments = function (req, next, findOptions) {
+self.removeDocuments = function(req, next, findOptions) {
     'use strict';
 
-    var model = req.model;
-    var collectionName = req.params.collectionName;
+    let model = req.model;
+    let collectionName = req.params.collectionName;
 
-    var Model = req.connection.model(model.modelName, model.schema);
+    let Model = req.connection.model(model.modelName, model.schema);
 
     // Get documents that will be removed.
-    Model.find(findOptions, function (error, documents) {
+    Model.find(findOptions, function(error, documents) {
 
         if (error) {
             req.res = {
@@ -59,11 +57,14 @@ self.removeDocuments = function (req, next, findOptions) {
             next();
         } else {
 
-            var documentLabel = (documents.length !== 1) ? 'documents' : 'document';
+            let documentLabel = (documents.length !== 1) ?
+                'documents' : 'document';
 
-            console.log(`|-> ${documents.length} ${documentLabel} removed.`);
+            console.log(
+                `|-> ${documents.length} ${documentLabel} removed.`
+            );
 
-            Model.remove(findOptions, function (error) {
+            Model.remove(findOptions, function(error) {
 
                 if (error) {
                     req.res = {

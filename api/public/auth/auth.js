@@ -1,12 +1,12 @@
-module.exports = function (req, res, next) {
+module.exports = function(req, res, next) {
 
-	var username = req.query.username;
-	var password = req.query.password;
+	let username = req.query.username;
+	let password = req.query.password;
 
 	// TODO: Legitimate authentication pls.
-	var ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
-	var ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'password';
-	var ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'token';
+	let ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
+	let ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'password';
+	let ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'token';
 
 	if (username == null || password == null) {
 

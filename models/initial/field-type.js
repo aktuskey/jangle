@@ -1,8 +1,7 @@
-var types = {
+let types = {
     String: 'String',
     Number: 'Number',
     Date: 'Date',
-    Buffer: 'Buffer',
     Boolean: 'Boolean',
     Mixed: 'Mixed',
     ObjectId: 'ObjectId',

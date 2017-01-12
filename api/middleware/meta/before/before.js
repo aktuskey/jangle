@@ -1,48 +1,14 @@
-var include = (include) ? include : (path) => require(`../../../../${path}`);
+let include = global.include || ((path) => require(`../../../../${path}`));
 
-var collectionModel = include('models/collection.js');
+module.exports = function(req, res, next) {
 
-module.exports = function (req, res, next) {
+    let metaCollectionName = req.params.metaCollectionName;
+    let metaCollectionId = req.params.metaCollectionId;
 
-    var metaCollectionName = req.params.metaCollectionName;
-    var metaCollectionId = req.params.metaCollectionId;
+    req.url = (metaCollectionId) ?
+        `/api/collections/jangle.${metaCollectionName}/${metaCollectionId}` :
+        `/api/collections/jangle.${metaCollectionName}`;
 
-    getPredefinedModel(metaCollectionName)
-        .then(function (model) {
-
-            req.model = model;
-
-            if (metaCollectionId)
-                req.url = `/api/collections/jangle.${metaCollectionName}/${metaCollectionId}`;
-            else
-                req.url = `/api/collections/jangle.${metaCollectionName}`;
-
-            next();
-
-        })
-        .catch(next);
-
-};
-
-var getPredefinedModel = function (collectionName) {
-
-    return new Promise(function (resolve, reject) {
-
-        var predefinedModel = null;
-
-        switch (collectionName) {
-
-        case 'collections':
-            predefinedModel = collectionModel;
-            break;
-
-        }
-
-        if (predefinedModel !== null)
-            resolve(predefinedModel);
-        else
-            reject(`Can't find 'jangle.${collectionName}'`);
-
-    });
+    next();
 
 };

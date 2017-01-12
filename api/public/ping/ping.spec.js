@@ -1,9 +1,9 @@
-var assert = require('assert'),
+let assert = require('assert'),
 	ping = require('./ping');
 
 describe('ping', function () {
 
-	var req = {};
+	let req = {};
 
 	beforeEach(function () {
 

@@ -1,1 +1,4 @@
-module.exports = require('./put.js');
+module.exports = {
+    one: require('./put.js'),
+    many: require('./put.js')
+};

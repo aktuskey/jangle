@@ -1,5 +1,5 @@
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+let mongoose = require('mongoose');
+let Schema = mongoose.Schema;
 
 module.exports = new Schema({
     name: {
@@ -21,10 +21,11 @@ module.exports = new Schema({
     }, // FieldType
     required: {
         type: Boolean,
-        required: true
+        required: true,
+        default: false
     },
     // If not detecting Mixed field changes: markModified
-    defaultValue: Schema.Types.Mixed,
+    default: Schema.Types.Mixed,
     helpText: {
         type: String,
         trim: true

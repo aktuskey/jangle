@@ -1,7 +1,7 @@
-var mongoose = require('mongoose'),
+let mongoose = require('mongoose'),
 	Schema = mongoose.Schema;
 
-var FieldTypeSchema = new Schema({
+let FieldTypeSchema = new Schema({
 
 	name: {
 		type: String,

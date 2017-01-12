@@ -1,11 +1,11 @@
-var assert = require('assert'),
+let assert = require('assert'),
 	after = require('./after'),
 	DISCONNECTED = 0,
 	CONNECTED = 1;
 
 describe('middleware/all/after', function () {
 
-	var req = {},
+	let req = {},
 		res = {};
 
 	beforeEach(function () {

@@ -1,14 +1,15 @@
-var mongoose = require('mongoose'),
+let mongoose = require('mongoose'),
     Schema = mongoose.Schema,
     FieldSchema = require('./schemas/field.js'),
     JangleMetaSchema = require('./schemas/jangle-meta.js');
 
-var CollectionSchema = new Schema({
-    // TODO: Make use 'unique' validator
+let CollectionSchema = new Schema({
+
+    // TODO: Make name field use 'unique' validator
+    // It will need to make sure no other collection has a name
     name: {
         type: String,
         required: true,
-        lowercase: true,
         trim: true,
         index: true
     },
@@ -27,22 +28,6 @@ var CollectionSchema = new Schema({
     },
 
     fields: [FieldSchema],
-
-    parent: Schema.Types.ObjectId,
-
-    tags: [
-        Schema.Types.ObjectId
-    ],
-
-    defaultDisplayField: {
-        type: Number,
-        default: 0
-    }, // Index into 'fields' structure?
-
-    ordered: {
-        type: Boolean,
-        default: false
-    },
 
     jangle: {
         type: JangleMetaSchema,
