@@ -1,11 +1,11 @@
 module.exports = function(req, res, next) {
 
     let handleRejection = (err) => {
-        console.log(err);
+        console.log('Rejection:', req.res.message);
         req.done(req, res);
     };
 
-    req.helpers.getCollectionModel(req, res, next)
+    req.helpers.mongoose.getCollectionModel(req, res, next)
         .then(
             () => {
                 getDocuments(req, res, next)
@@ -24,11 +24,11 @@ let getDocuments = function(req, res, next) {
     let model = req.model;
     let collectionName = req.params.collectionName;
 
-    let Model = req.connection.model(model.modelName, model.schema);
-
     var findOptions = {};
 
     return new Promise((resolve, reject) => {
+
+        let Model = req.connection.model(model.modelName, model.schema);
 
         Model.find(findOptions, function(error, documents) {
 

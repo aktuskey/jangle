@@ -21,9 +21,7 @@ module.exports = function(req, res, next) {
                         },
                         handleRejection
                     )
-            },
-            handleRejection
-        );
+            });
 
 
 };
@@ -33,7 +31,6 @@ let setDefaultResponse = function(req, res, next) {
     req.res = {
         status: 404,
         message: `Can't ${req.method} on ${req.baseUrl}`,
-        error: true,
         data: []
     };
 
@@ -46,9 +43,8 @@ let checkForUserToken = function(req, res, next) {
     return new Promise(function(resolve, reject) {
 
         let token = req.query.token;
-        let noTokenProvided = (token === undefined);
 
-        if (noTokenProvided) {
+        if (token === undefined) {
 
             req.useLiveDatabase = true;
 
@@ -105,7 +101,7 @@ let getMongoConnection = function(req, res, next) {
 
     return new Promise(function(resolve, reject) {
 
-        let connectionString = req.helpers.getConnectionString(
+        let connectionString = req.helpers.mongoose.getConnectionString(
             req.useLiveDatabase,
             req.jangleConfig.mongodb
         );
@@ -114,24 +110,26 @@ let getMongoConnection = function(req, res, next) {
 
         req.connection.open(connectionString, function(error) {
 
-                if (error) {
+            console.log("Connection opened.")
 
-                    let message =
-                        `Can't connect to the database.`;
+            if (error) {
 
-                    req.res = {
-                        status: 500,
-                        message: message,
-                        data: []
-                    };
+                let message =
+                    `Can't connect to the database.`;
 
-                } else {
+                req.res = {
+                    status: 500,
+                    message: message,
+                    data: []
+                };
 
-                    resolve();
+            } else {
 
-                }
-            })
-            .catch(reject);
+                resolve();
+
+            }
+            
+        }).catch(reject);
 
     });
 };

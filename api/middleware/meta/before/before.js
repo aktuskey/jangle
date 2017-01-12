@@ -1,5 +1,3 @@
-let include = global.include || ((path) => require(`../../../../${path}`));
-
 module.exports = function(req, res, next) {
 
     let metaCollectionName = req.params.metaCollectionName;

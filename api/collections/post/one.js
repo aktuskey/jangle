@@ -1,11 +1,11 @@
 module.exports = function(req, res, next) {
 
     let handleRejection = (err) => {
-        console.log(err);
+        console.log('Rejection:', req.res.message);
         req.done(req, res);
     };
 
-    req.helpers.getCollectionModel(req, res, next)
+    req.helpers.mongoose.getCollectionModel(req, res, next)
         .then(
             () => {
                 createDocument(req, res, next)
@@ -19,7 +19,7 @@ module.exports = function(req, res, next) {
 
 };
 
-var createDocument = function(req, res, next) {
+let createDocument = function(req, res, next) {
 
     let model = req.model;
     let data = req.query.data;
@@ -32,13 +32,10 @@ var createDocument = function(req, res, next) {
             try {
 
                 let parsedData = JSON.parse(data);
+                let Model =
+                    req.connection.model(model.modelName, model.schema);
 
                 try {
-
-                    let Model = req.connection.model(
-                        model.modelName,
-                        model.schema
-                    );
 
                     let saveTheThing = function() {
 
@@ -62,7 +59,7 @@ var createDocument = function(req, res, next) {
                                 req.res = {
                                     status: 200,
                                     data: [ newDocument ],
-                                    message: `Add new document to '${collectionName}'`
+                                    message: `Added ${numAffected} ${documentLabel} to '${collectionName}'`
                                 };
 
                                 resolve();
@@ -84,6 +81,8 @@ var createDocument = function(req, res, next) {
                     }
 
                 } catch (e) {
+
+                    console.log(e);
 
                     req.res = {
                         status: 400,
@@ -123,9 +122,9 @@ var createDocument = function(req, res, next) {
 
 };
 
-function handleCreateError(req, error) {
+let handleCreateError = function (req, error) {
 
-    let message = `There was a problem creating the new document.`;
+    let message = `There was a problem adding the new document.`;
 
     if (error.name == 'ValidationError') {
 
@@ -140,8 +139,12 @@ function handleCreateError(req, error) {
             let missingRequiredFields =
                 requiredFieldErrors.map(x => x.path);
 
-            message =
-                `Missing required fields: ${missingRequiredFields}`;
+            message = `Missing required fields: ${missingRequiredFields}`;
+
+        } else if(error.errors.name) {
+
+            message = error.errors.name.message;
+
         }
 
     } else if (error.name == 'MongoError') {

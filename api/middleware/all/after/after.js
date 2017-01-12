@@ -6,30 +6,23 @@ module.exports = function(req, res) {
     // Close open connections
     if (req.connection && req.connection.readyState === CONNECTED) {
 
-        req.connection.close();
+        req.connection.close().then(() => {
 
-    }
+            if (req.connection.readyState === DISCONNECTED) {
 
-    // Set error
-    let error = true;
+                console.log("Closed connection.");
 
-    if (req.res.error !== undefined) {
+            }
 
-        error = req.res.error;
-
-    } else if (req.res.status !== undefined) {
-
-        error = req.res.status >= 400;
-
-    }
-
-    res
-        .status(req.res.status || 500)
-        .json({
-            message: req.res.message || '',
-            error: error || true,
-            data: req.res.data || []
         });
 
+    }
+
+    let status = req.res.status || 500,
+        message = req.res.message || '',
+        data = req.res.data || [],
+        error = status >= 400;
+
+    res.status(status).json({ message, error, data });
 
 };
