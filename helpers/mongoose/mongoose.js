@@ -66,7 +66,7 @@ module.exports = {
 
                     req.res = {
                         status: 404,
-                        message: `Can't find meta collection '${collectionName}'.`,
+                        message: `Can't find 'jangle.${collectionName}'.`,
                         data: []
                     };
 
@@ -104,7 +104,7 @@ module.exports = {
 
                         req.res = {
                             status: 404,
-                            message: `Could not find collection '${collectionName}'.`,
+                            message: `Could not find '${collectionName}'`,
                             data: []
                         };
 
@@ -175,6 +175,11 @@ module.exports = {
                 collectionDocument.fields,
                 fieldTypes
             );
+
+        req.metaLabels = {
+            singular: collectionDocument.labels.singular.toLowerCase(),
+            plural: collectionDocument.labels.plural.toLowerCase(),
+        };
 
         if(schema === undefined) {
 
@@ -454,8 +459,6 @@ module.exports = {
 
         }
 
-        console.log(filterOptions);
-
         return filterOptions;
 
     },
@@ -631,11 +634,6 @@ module.exports = {
                 update = true;
                 break;
         }
-        //
-        // console.log('action', action);
-        // console.log('find', find);
-        // console.log('remove', remove);
-        // console.log('update', update);
 
         return function(req, res, next){
 
@@ -703,11 +701,7 @@ module.exports = {
 
                 }
 
-                console.log('yea boiiii');
-
                 Model.exec(function(error, response) {
-
-                    console.log('inside the death tart');
 
                     if (error) {
 
@@ -725,13 +719,14 @@ module.exports = {
 
                         console.log(response.result);
 
-                        let documentLabel = response.result.n !== 1 ?
-                            'documents' : 'document';
+                        let documentLabel = response.result.n !== 1
+                            ? (req.metaLabels ? req.metaLabels.plural : 'collections')
+                            : (req.metaLabels ? req.metaLabels.singular : 'collection');
 
                         req.res = {
                             status: 200,
                             data: [],
-                            message: `Removed ${response.result.n} ${documentLabel} in '${collectionName}'`
+                            message: `Removed ${response.result.n} ${documentLabel}.`
                         };
 
                         resolve();
@@ -739,15 +734,14 @@ module.exports = {
                     }
                     else if(update) {
 
-                        console.log(response);
-
-                        let documentLabel = response.n !== 1 ?
-                            'documents' : 'document';
+                        let documentLabel = response.n !== 1
+                            ? (req.metaLabels ? req.metaLabels.plural : 'collections')
+                            : (req.metaLabels ? req.metaLabels.singular : 'collection');
 
                         req.res = {
                             status: 200,
                             data: [],
-                            message: `Updated ${response.n} ${documentLabel} in '${collectionName}'`
+                            message: `Updated ${response.n} ${documentLabel}.`
                         };
 
                         resolve();
@@ -755,13 +749,14 @@ module.exports = {
                     }
                     else {
 
-                        let documentLabel = response.length !== 1 ?
-                            'documents' : 'document';
+                        let documentLabel = response.length !== 1
+                            ? (req.metaLabels ? req.metaLabels.plural : 'collections')
+                            : (req.metaLabels ? req.metaLabels.singular : 'collection');
 
                         req.res = {
                             status: 200,
                             data: response,
-                            message: `Found ${response.length} ${documentLabel} in '${collectionName}'`
+                            message: `Found ${response.length} ${documentLabel}.`
                         };
 
                         resolve();

@@ -52,14 +52,14 @@ let createDocument = function(req, res, next) {
 
                             } else {
 
-                                // TODO: Replace with singular/plural form on collection model
-                                let documentLabel = (numAffected != 1)
-                                    ? 'documents' : 'document';
+                                let documentLabel = numAffected !== 1
+                                    ? (req.metaLabels ? req.metaLabels.plural : 'collections')
+                                    : (req.metaLabels ? req.metaLabels.singular : 'collection');
 
                                 req.res = {
                                     status: 200,
                                     data: [ newDocument ],
-                                    message: `Added ${numAffected} ${documentLabel} to '${collectionName}'`
+                                    message: `Added ${numAffected} ${documentLabel}.`
                                 };
 
                                 resolve();
