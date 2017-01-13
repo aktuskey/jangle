@@ -1,6 +1,4 @@
 # Jangle
-[![Build Status](https://travis-ci.org/RyanNHG/jangle.svg?branch=master)](https://travis-ci.org/RyanNHG/jangle)
-[![Coverage Status](https://coveralls.io/repos/github/RyanNHG/jangle/badge.svg?branch=master)](https://coveralls.io/github/RyanNHG/jangle?branch=master)
 
 > Simple content management.
 
@@ -27,7 +25,7 @@ Method | URL | Result
 __`GET`__ |`/api/collections/some-example`| List documents in `some-example` collection.
 __`GET`__ |`/api/collections/some-example/123`| Get document '123' in `some-example` collection.
 __`POST`__ |`/api/collections/some-example`| Create a new document in `some-example` collection.
- | | 
+ | |
 __`PUT`__ |`/api/collections/some-example`| Update documents in `some-example` collection.
 __`PUT`__ |`/api/collections/some-example/123`| Update document `123` from `some-example` collection.
 __`DELETE`__ |`/api/collections/some-example`| Remove documents in `some-example` collection.
@@ -35,18 +33,19 @@ __`DELETE`__ |`/api/collections/some-example/123`| Remove document `123` from `s
 
 Method | Parameter | Description
 --- | --- | ---
-__`GET`__ | `filter` | Filters down listed results.
+__`GET`__ | `where` | Filters down listed results.
           | `select` | Select properties to return.
           | `sort` | Sort by a property.
           | `limit` | Limit number of returned results.
           | `skip` | Skip a certain number of results.
- | | 
+ | |
 __`POST`__ | `data` | Object to create.
- | | 
-__`PUT`__ | `data` | Object containing fields to update.
-          | `filter` | Filters down documents to update.
- | | 
-__`DELETE`__ | `filter` | Filters down documents to remove.
+ | |
+__`PUT`__ | `set` | Select fields to update.
+          | `unset` | Select fields to remove.
+          | `where` | Filters down documents to update.
+ | |
+__`DELETE`__ | `where` | Filters down documents to remove.
 
 ---
 
@@ -55,9 +54,9 @@ __`DELETE`__ | `filter` | Filters down documents to remove.
 
 __What is ' Jangle Meta'?__
 
-In addition to storing your content in collections, Jangle creates a couple "meta collections" that maintain information about your Jangle configuration. For example, the `jangle.collections` meta collection keeps track of all of your collection information (the name, the fields, etc). It is Jangle's responsibility to maintain a relationship with the MongoDB instance to ensure that these collections reflect the true state of your content.
+In addition to storing your content in collections, Jangle creates a couple "meta collections" that maintain information about your Jangle configuration.
 
-To maintain information for documents, all documents have jangle "meta properties". For example, `jangle.version` is necessary to allow you to review changes to a specific document.
+To maintain information for documents, all documents have jangle "meta properties". For example, `jangle.version` will allow the system to track changes for a specific document.
 
 __Meta Collections__
 > A list of Jangle's meta collections.
@@ -72,30 +71,16 @@ __`jangle.collections`__ | `name` | The actual name of the Mongo collection
                          | `fields[i].label` | Display name
                          | `fields[i].type` | Related [FieldType]
                          | `fields[i].required` | True if the field is required
-                         | `fields[i].defaultValue` | Default value for a new document
+                         | `fields[i].default` | Default value for that field
                          | `fields[i].exampleValue` | Example value for content admins
                          | `fields[i].options` | FieldType related options
-                         | `parent` | Collection with fields to inherit from
-                         | `tags` | Helps group collections
-                         | `defaultDisplayField` | Default field to display when in an option list
-                         | `ordered` | Does the collection ordering matter?
                          | |
 __`jangle.fieldTypes`__ | `name` | unique name of field type
                         | `label` | display name
                         | `options` | settings for field type
                         | `type` | data type to store in mongo
                         | |
-__`jangle.singletons`__ | `name` | unique name of the singleton
-                        | `label` | display name for singleton (singular label)
-                        | `fields` | An array of singleton fields
-                        | `fields[i].name` | Property name of the document
-                        | `fields[i].label` | Display name
-                        | `fields[i].type` | Related [FieldType]()
-                        | `fields[i].required` | True if the field is required
-                        | `fields[i].defaultValue` | Default value for a new document
-                        | `fields[i].options` | FieldType related options
-                        | `tags` | Helps group singletons
-                        
+
 __Meta Document Properties__
 > Properties on all collection and singleton documents.
 
@@ -103,6 +88,7 @@ Property | Description
 --- | ---
 __`jangle.id`__ | Used to uniquely identify an document (across versions)
 __`jangle.version`__ | The version of the document
+__`jangle.published`__ | Is this version anonymously visible?
 
 ---
 
@@ -118,7 +104,7 @@ __`options`__
 
 `type` - is this a `phone`, `email`, or just a simple `text` field?
 
-`richText` - can content admins add style to the text?
+`isMarkdown` - can content admins add style to the text?
 
 
 __Multi Line Text__
@@ -126,7 +112,7 @@ __Multi Line Text__
 
 __`options`__
 
-`richText` - can content admins add style to the text?
+`isMarkdown` - can content admins add style to the text?
 
 
 __Whole Number__
@@ -134,9 +120,9 @@ __Whole Number__
 
 __`options`__
 
-`minValue` - lowest possible numeric value.
+`min` - lowest possible numeric value.
 
-`maxValue` - highest possible numeric value.
+`max` - highest possible numeric value.
 
 
 __Decimal Number__
@@ -144,9 +130,9 @@ __Decimal Number__
 
 __`options`__
 
-`minValue` - lowest possible numeric value.
+`min` - lowest possible numeric value.
 
-`maxValue` - highest possible numeric value.
+`max` - highest possible numeric value.
 
 `decimalPlaces` - set number of decimal places.
 
@@ -177,5 +163,3 @@ __`options`__
 `collection` - collection relating this option to.
 
 `displayField` - other collections field to see in UI.
-
-
