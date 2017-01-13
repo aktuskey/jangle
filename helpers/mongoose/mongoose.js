@@ -380,6 +380,47 @@ module.exports = {
 
         let filterOptions = {};
 
+
+        // TODO: Better WHERE (gt, lt, eq, ne, contains, etc.)
+        if(req.query.where !== undefined) {
+
+            filterOptions.where = this.getWhereOptions(req.query.where);
+
+        }
+        else {
+
+            filterOptions.where = {};
+
+        }
+
+        if(req.params.docId !== undefined) {
+
+            let idField = req.idField || '_id';
+
+            filterOptions.where[idField] = req.params.docId;
+
+        }
+
+        // TODO: SET
+        if(req.query.set !== undefined) {
+
+            let set = this.getSetOptions(req.query.set);
+
+            if(set !== undefined)
+                filterOptions.set = set;
+
+        }
+
+        // UNSET
+        if(req.query.unset !== undefined) {
+
+            let unset = this.getUnsetOptions(req.query.unset);
+
+            if(unset !== undefined)
+                filterOptions.unset = unset;
+
+        }
+
         // SORT
         if(req.query.sort !== undefined) {
 
@@ -410,26 +451,6 @@ module.exports = {
 
         // TODO: POPULATE
         if(req.query.populate !== undefined) {
-
-        }
-
-        // TODO: Better WHERE (gt, lt, eq, ne, contains, etc.)
-        if(req.query.where !== undefined) {
-
-            filterOptions.where = this.getWhereOptions(req.query.where);
-
-        }
-        else {
-
-            filterOptions.where = {};
-
-        }
-
-        if(req.params.docId !== undefined) {
-
-            let idField = req.idField || '_id';
-
-            filterOptions.where[idField] = req.params.docId;
 
         }
 
@@ -552,7 +573,69 @@ module.exports = {
 
     },
 
-    findOrRemoveDocuments: function(remove) {
+    // "{ "name": "dave", age: 27 }" -> { $set: { name: 5, age: 27 } }
+    getSetOptions: function(setQuery) {
+
+        try {
+
+            return JSON.parse(setQuery);
+
+        } catch (ignore) {
+
+            console.log('invalid set parameter');
+            return undefined;
+
+        }
+
+    },
+
+    // _id,name -> { $unset: { _id: 1, name: 1 } }
+    getUnsetOptions: function(unsetQuery) {
+
+        let unsetQueryParts = unsetQuery.split(',');
+
+        let unsetOptions = {};
+
+        unsetQueryParts.map(function(part) {
+
+            unsetOptions[part] = 1;
+
+        });
+
+        if(unsetQueryParts.length === 0) {
+
+            return undefined;
+
+        } else {
+
+            return unsetOptions;
+
+        }
+
+    },
+
+    changeDocuments: function(action) {
+
+        let find = false,
+            remove = false,
+            update = false;
+
+        switch (action) {
+            case 'find':
+                find = true;
+                break;
+            case 'remove':
+                remove = true;
+                break;
+            case 'update':
+                update = true;
+                break;
+        }
+        //
+        // console.log('action', action);
+        // console.log('find', find);
+        // console.log('remove', remove);
+        // console.log('update', update);
 
         return function(req, res, next){
 
@@ -567,26 +650,64 @@ module.exports = {
 
                 if(remove)
                     Model = Model.remove(filterOptions.where);
-                else
+                else if(find)
                     Model = Model.find(filterOptions.where);
 
-                if(filterOptions.skip !== undefined) {
-                    Model = Model.skip(filterOptions.skip);
+                if(update) {
+
+                    let updateOptions = {
+                        $inc: { 'jangle.version': 1 }
+                    };
+
+                    if (filterOptions.set !== undefined) {
+
+                        updateOptions.$set = filterOptions.set;
+
+                    }
+
+                    if (filterOptions.unset !== undefined) {
+
+                        updateOptions.$unset = filterOptions.unset;
+
+                    }
+
+
+
+                    // TODO: Only update latest versions
+                    Model = Model.update(
+                        filterOptions.where,
+                        updateOptions,
+                        {
+                            multi: true,
+                            overwrite: false
+                        }
+                    );
+
+                } else {
+
+                    if(filterOptions.skip !== undefined) {
+                        Model = Model.skip(filterOptions.skip);
+                    }
+
+                    if(filterOptions.limit !== undefined) {
+                        Model = Model.limit(filterOptions.limit);
+                    }
+
+                    if(filterOptions.sort !== undefined) {
+                        Model = Model.sort(filterOptions.sort);
+                    }
+
+                    if(filterOptions.select !== undefined) {
+                        Model = Model.select(filterOptions.select);
+                    }
+
                 }
 
-                if(filterOptions.limit !== undefined) {
-                    Model = Model.limit(filterOptions.limit);
-                }
-
-                if(filterOptions.sort !== undefined) {
-                    Model = Model.sort(filterOptions.sort);
-                }
-
-                if(filterOptions.select !== undefined) {
-                    Model = Model.select(filterOptions.select);
-                }
+                console.log('yea boiiii');
 
                 Model.exec(function(error, response) {
+
+                    console.log('inside the death tart');
 
                     if (error) {
 
@@ -615,7 +736,24 @@ module.exports = {
 
                         resolve();
 
-                    } else {
+                    }
+                    else if(update) {
+
+                        console.log(response);
+
+                        let documentLabel = response.n !== 1 ?
+                            'documents' : 'document';
+
+                        req.res = {
+                            status: 200,
+                            data: [],
+                            message: `Updated ${response.n} ${documentLabel} in '${collectionName}'`
+                        };
+
+                        resolve();
+
+                    }
+                    else {
 
                         let documentLabel = response.length !== 1 ?
                             'documents' : 'document';
@@ -633,6 +771,51 @@ module.exports = {
 
             })
 
+        };
+
+    },
+
+    handleCreateError: function (req, error) {
+
+        let message = `There was a problem adding the new document.`;
+
+        if (error.name == 'ValidationError') {
+
+            message = `The 'data' option failed validation.`;
+
+            let errorList = Object.keys(error.errors).map(x => error.errors[x]);
+
+            let requiredFieldErrors = errorList.filter(x => x.kind == 'required');
+
+            if (requiredFieldErrors.length > 0) {
+
+                let missingRequiredFields =
+                    requiredFieldErrors.map(x => x.path);
+
+                message = `Missing required fields: ${missingRequiredFields}`;
+
+            } else if(error.errors.name) {
+
+                message = error.errors.name.message;
+
+            }
+
+        } else if (error.name == 'MongoError') {
+
+            message = `There was a problem with MongoDB.`;
+
+            switch (error.code) {
+                case 11000:
+                    message = `A document with that key already exists.`
+                    break;
+            }
+
+        }
+
+        req.res = {
+            status: 400,
+            data: [],
+            message: message
         };
 
     }

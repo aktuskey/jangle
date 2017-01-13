@@ -26,9 +26,7 @@
   "homepage": "https://github.com/ryannhg/jangle#readme",
   "dependencies": {
     "express": "^4.14.0",
-    "jsonwebtoken": "^7.1.9",
-    "mongoose": "^4.7.1",
-    "ramda": "^0.22.1"
+    "mongoose": "^4.7.1"
   },
   "devDependencies": {
     "cors": "^2.8.1",

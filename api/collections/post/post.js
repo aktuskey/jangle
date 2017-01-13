@@ -46,7 +46,7 @@ let createDocument = function(req, res, next) {
 
                             if (error) {
 
-                                handleCreateError(req, error);
+                                req.helpers.mongoose.handleCreateError(req, error);
 
                                 reject();
 
@@ -119,50 +119,5 @@ let createDocument = function(req, res, next) {
 
 
     });
-
-};
-
-let handleCreateError = function (req, error) {
-
-    let message = `There was a problem adding the new document.`;
-
-    if (error.name == 'ValidationError') {
-
-        message = `The 'data' option failed validation.`;
-
-        let errorList = Object.keys(error.errors).map(x => error.errors[x]);
-
-        let requiredFieldErrors = errorList.filter(x => x.kind == 'required');
-
-        if (requiredFieldErrors.length > 0) {
-
-            let missingRequiredFields =
-                requiredFieldErrors.map(x => x.path);
-
-            message = `Missing required fields: ${missingRequiredFields}`;
-
-        } else if(error.errors.name) {
-
-            message = error.errors.name.message;
-
-        }
-
-    } else if (error.name == 'MongoError') {
-
-        message = `There was a problem with MongoDB.`;
-
-        switch (error.code) {
-            case 11000:
-                message = `A document with that key already exists.`
-                break;
-        }
-
-    }
-
-    req.res = {
-        status: 400,
-        data: [],
-        message: message
-    };
 
 };

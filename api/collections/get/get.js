@@ -6,7 +6,7 @@ module.exports = function(req, res, next) {
     };
 
     let getDocuments =
-        req.helpers.mongoose.findOrRemoveDocuments(false);
+        req.helpers.mongoose.changeDocuments('find');
 
     req.helpers.mongoose.getCollectionModel(req, res, next)
         .then(

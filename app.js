@@ -71,10 +71,10 @@ app.get('/api/collections/:collectionName/:docId',
 app.post('/api/collections/:collectionName',
 	api.collections.post);
 //
-// app.put('/api/collections/:collectionName',
-// 	api.collections.put.many);
-// app.put('/api/collections/:collectionName/:docId',
-// 	api.collections.put.one);
+app.put('/api/collections/:collectionName',
+	api.collections.put);
+app.put('/api/collections/:collectionName/:docId',
+	api.collections.put);
 //
 app.delete('/api/collections/:collectionName',
 	api.collections.delete);
