@@ -413,10 +413,10 @@ module.exports = {
 
         }
 
-        // TODO: WHERE
+        // TODO: Better WHERE (gt, lt, eq, ne, contains, etc.)
         if(req.query.where !== undefined) {
 
-            filterOptions.where = {};
+            filterOptions.where = this.getWhereOptions(req.query.where);
 
         }
         else {
@@ -428,6 +428,22 @@ module.exports = {
         console.log(filterOptions);
 
         return filterOptions;
+
+    },
+
+    getWhereOptions: function(whereQuery) {
+
+        try {
+
+            return JSON.parse(whereQuery);
+
+        } catch(ignore) {
+
+            console.log('Could not parse where query.');
+
+            return {};
+
+        }
 
     },
 
