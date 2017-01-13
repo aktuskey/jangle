@@ -374,6 +374,158 @@ module.exports = {
 
         return validator;
 
+    },
+
+    getFilterOptions: function(req) {
+
+        let filterOptions = {};
+
+        // SORT
+        if(req.query.sort !== undefined) {
+
+            filterOptions.sort = this.getSortOptions(req.query.sort);
+
+        }
+
+        // SELECT
+        if(req.query.select !== undefined) {
+
+            filterOptions.select = this.getSelectOptions(req.query.select);
+
+        }
+
+        // LIMIT
+        if(req.query.limit !== undefined) {
+
+            filterOptions.limit = this.getLimitOption(req.query.limit);
+
+        }
+
+        // SKIP
+        if(req.query.skip !== undefined) {
+
+            filterOptions.skip = this.getSkipOption(req.query.skip);
+
+        }
+
+        // TODO: POPULATE
+        if(req.query.populate !== undefined) {
+
+        }
+
+        // TODO: WHERE
+        if(req.query.where !== undefined) {
+
+            filterOptions.where = {};
+
+        }
+        else {
+
+            filterOptions.where = {};
+
+        }
+
+        console.log(filterOptions);
+
+        return filterOptions;
+
+    },
+
+    // "-name,age,+created" -> { 'name': -1, 'age': 1, 'created': 1 }
+    getSortOptions: function(sortQuery) {
+
+        // Weirdness: '+' is replaced with ' '.
+        //   This turns all ' ' back into '+'.
+        sortQuery = sortQuery.split(' ').join('+');
+
+        let sortQueryParts = sortQuery.split(',');
+
+        let sortOptions = {}
+
+        sortQueryParts.map(function(part) {
+
+            if(part.indexOf('-') === 0) {
+
+                let propName = part.substring(1);
+
+                sortOptions[propName] = -1;
+
+            } else if (part.indexOf('+') === 0) {
+
+                let propName = part.substring(1);
+
+                sortOptions[propName] = 1;
+
+            } else {
+
+                let propName = part;
+
+                sortOptions[propName] = 1;
+
+            }
+
+        });
+
+        return sortOptions;
+
+    },
+
+    getSelectOptions: function(selectQuery) {
+
+        let selectQueryParts = selectQuery.split(',');
+
+        let selectOptions = {};
+
+        selectQueryParts.map(function(part) {
+
+            if(part.indexOf('-') == 0) {
+
+                let propName = part;
+
+                selectOptions[propName] = 0;
+
+            } else {
+
+                let propName = part;
+
+                selectOptions[propName] = 1;
+
+            }
+
+        });
+
+        return selectOptions;
+
+    },
+
+    getLimitOption: function(limitQuery) {
+
+        try {
+
+            return parseInt(limitQuery);
+
+        } catch (ignore) {
+
+            console.log('invalid limit parameter');
+            return -1;
+
+        }
+
+    },
+
+    getSkipOption: function(skipQuery) {
+
+        try {
+
+            return parseInt(skipQuery);
+
+        } catch (ignore) {
+
+            console.log('invalid skip parameter');
+            return -1;
+
+        }
+
     }
 
 };
