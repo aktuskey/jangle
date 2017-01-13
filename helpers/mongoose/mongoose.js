@@ -425,6 +425,14 @@ module.exports = {
 
         }
 
+        if(req.params.docId !== undefined) {
+
+            let idField = req.idField || '_id';
+
+            filterOptions.where[idField] = req.params.docId;
+
+        }
+
         console.log(filterOptions);
 
         return filterOptions;

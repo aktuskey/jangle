@@ -1,6 +1,7 @@
 module.exports = function(req, res, next) {
 
-    res.status(200)
-        .json('Fetch one thing')
+    var many = require('./many');
+
+    many(req, res, next);
 
 };

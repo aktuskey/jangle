@@ -65,8 +65,8 @@ app.all('/api/jangle/:metaCollectionName/:metaCollectionId',
 // Collections API
 app.get('/api/collections/:collectionName',
 	api.collections.get.many);
-// app.get('/api/collections/:collectionName/:docId',
-// 	api.collections.get.one);
+app.get('/api/collections/:collectionName/:docId',
+	api.collections.get.many);
 //
 app.post('/api/collections/:collectionName',
 	api.collections.post.one);
