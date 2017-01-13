@@ -550,6 +550,91 @@ module.exports = {
 
         }
 
+    },
+
+    findOrRemoveDocuments: function(remove) {
+
+        return function(req, res, next){
+
+            let model = req.model;
+            let collectionName = req.params.collectionName;
+
+            let filterOptions = req.helpers.mongoose.getFilterOptions(req);
+
+            return new Promise((resolve, reject) => {
+
+                let Model = req.connection.model(model.modelName, model.schema);
+
+                if(remove)
+                    Model = Model.remove(filterOptions.where);
+                else
+                    Model = Model.find(filterOptions.where);
+
+                if(filterOptions.skip !== undefined) {
+                    Model = Model.skip(filterOptions.skip);
+                }
+
+                if(filterOptions.limit !== undefined) {
+                    Model = Model.limit(filterOptions.limit);
+                }
+
+                if(filterOptions.sort !== undefined) {
+                    Model = Model.sort(filterOptions.sort);
+                }
+
+                if(filterOptions.select !== undefined) {
+                    Model = Model.select(filterOptions.select);
+                }
+
+                Model.exec(function(error, response) {
+
+                    if (error) {
+
+                        console.log(error);
+
+                        req.res = {
+                            status: 400,
+                            data: [],
+                            message: `${error}`
+                        };
+
+                        reject();
+
+                    } else if(remove) {
+
+                        console.log(response.result);
+
+                        let documentLabel = response.result.n !== 1 ?
+                            'documents' : 'document';
+
+                        req.res = {
+                            status: 200,
+                            data: [],
+                            message: `Removed ${response.result.n} ${documentLabel} in '${collectionName}'`
+                        };
+
+                        resolve();
+
+                    } else {
+
+                        let documentLabel = response.length !== 1 ?
+                            'documents' : 'document';
+
+                        req.res = {
+                            status: 200,
+                            data: response,
+                            message: `Found ${response.length} ${documentLabel} in '${collectionName}'`
+                        };
+
+                        resolve();
+                    }
+
+                });
+
+            })
+
+        };
+
     }
 
 };

@@ -1,4 +1,1 @@
-module.exports = {
-    one: require('./one.js'),
-    many: require('./many.js')
-};
+module.exports = require('./get.js');

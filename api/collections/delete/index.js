@@ -1,4 +1,1 @@
-module.exports = {
-    one: require('./delete.js'),
-    many: require('./delete.js')
-};
+module.exports = require('./delete.js');

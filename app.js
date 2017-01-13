@@ -64,22 +64,22 @@ app.all('/api/jangle/:metaCollectionName/:metaCollectionId',
 
 // Collections API
 app.get('/api/collections/:collectionName',
-	api.collections.get.many);
+	api.collections.get);
 app.get('/api/collections/:collectionName/:docId',
-	api.collections.get.many);
+	api.collections.get);
 //
 app.post('/api/collections/:collectionName',
-	api.collections.post.one);
+	api.collections.post);
 //
 // app.put('/api/collections/:collectionName',
 // 	api.collections.put.many);
 // app.put('/api/collections/:collectionName/:docId',
 // 	api.collections.put.one);
 //
-// app.delete('/api/collections/:collectionName',
-// 	api.collections.delete.many);
-// app.delete('/api/collections/:collectionName/:docId',
-// 	api.collections.delete.one);
+app.delete('/api/collections/:collectionName',
+	api.collections.delete);
+app.delete('/api/collections/:collectionName/:docId',
+	api.collections.delete);
 
 // API Cleanup
 app.use('/api/*', api.middleware.all.after);
