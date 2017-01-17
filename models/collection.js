@@ -42,6 +42,16 @@ let CollectionSchema = new Schema({
         type: JangleMetaSchema,
         required: true,
         default: {}
+    },
+
+    defaultValue: {
+        type: String,
+        required: false
+    },
+
+    helpText: {
+        type: String,
+        required: false
     }
 
 }, {
