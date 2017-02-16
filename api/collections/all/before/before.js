@@ -1,5 +1,3 @@
-let include = global.include || ((path) => require(`../../../../${path}`));
-
 module.exports = function(req, res, next) {
 
     let handleRejection = (err) => {
@@ -128,7 +126,7 @@ let getMongoConnection = function(req, res, next) {
                 resolve();
 
             }
-            
+
         }).catch(reject);
 
     });

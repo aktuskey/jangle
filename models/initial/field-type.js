@@ -76,7 +76,7 @@ module.exports = [
     {
         name: 'multi-option',
         label: 'Multi Option',
-        type: types.ObjectId,
+        type: types.Array,
         options: {
             'collection': types.String,
             'displayField': types.String,
