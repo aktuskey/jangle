@@ -1,8 +1,7 @@
 module.exports = function(req, res, next) {
 
-	let username = req.query.username,
-		password = req.query.password,
-		// TODO: Legitimate authentication pls.
+	let username = req.query.username || req.body.username,
+		password = req.query.password || req.body.password,
 		ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin',
 		ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'password',
 		ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'token'

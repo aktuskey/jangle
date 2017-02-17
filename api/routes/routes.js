@@ -1,11 +1,11 @@
 module.exports = function(api, router) {
 
     // Alias API
-    router.route('/jangle/:metaCollectionName')
-        .all(api.alias.metaCollection)
-
     router.route('/jangle/:metaCollectionName/:id')
         .all(api.alias.metaCollectionWithId)
+
+    router.route('/jangle/:metaCollectionName')
+        .all(api.alias.metaCollection)
 
     router.route('/collections/:collectionName/:id')
         .all(api.alias.collectionWithId)

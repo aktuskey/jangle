@@ -1,1 +1,1 @@
-module.exports = require('./mongoose.js');
+module.exports = require('./mongoose.js')

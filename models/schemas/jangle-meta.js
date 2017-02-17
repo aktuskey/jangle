@@ -1,24 +1,30 @@
-let mongoose = require('mongoose');
-let Schema = mongoose.Schema;
+let mongoose = require('mongoose'),
+    Schema = mongoose.Schema
 
 module.exports = new Schema({
+
     id: {
         type: Schema.Types.ObjectId,
         required: true,
         default: function () {
-            return mongoose.Types.ObjectId();
+            return mongoose.Types.ObjectId()
         }
     },
+
     version: {
         type: Number,
         required: true,
         default: 1
     },
+
     published: {
         type: Boolean,
         required: true,
         default: false
     }
+
 }, {
+
     _id: false
-});
+
+})

@@ -1,285 +1,186 @@
 module.exports = {
 
-    getConnectionString: (useLiveDatabase, config) => {
+    getConnectionString: (config) => {
 
-        let authPrefix,
-            database;
+        let authPrefix = (config.auth)
+            ? `${config.rootUser}:${config.rootPassword}@`
+            : ''
 
-        if (config.auth) {
+        return `mongodb://${authPrefix}${config.host}:${config.port}/${config.database}`
 
-            authPrefix = `${config.rootUser}:${config.rootPassword}@`;
-
-        } else {
-
-            authPrefix = '';
-
-        }
-
-        if (useLiveDatabase) {
-
-            database = config.liveDb;
-
-        } else {
-
-            database = config.contentDb;
-
-        }
-
-        let connectionString =
-            `mongodb://${authPrefix}${config.host}:${config.port}/${database}`;
-
-        return connectionString;
     },
 
-    getCollectionModel: function(req, res, next) {
+    getCollectionModel: function(collectionName, models, connection) {
 
-        let metaPrefix = 'jangle.',
-            collectionName = req.params.collectionName,
-            isMetaCollection = (collectionName.indexOf(metaPrefix) ===
-                0);
+        let self = this,
+            metaPrefix = 'jangle.',
+            isMetaCollection = collectionName.indexOf(metaPrefix) === 0,
+            model = undefined
 
         return new Promise(function(resolve, reject) {
 
             if (isMetaCollection) {
 
-                let model;
-
                 switch (collectionName) {
+
                     case 'jangle.collections':
-                        model = include('models/collection');
-                        break;
+                        model = models.collections
+                        break
+
                     case 'jangle.fieldType':
-                        model = include('models/field-type');
-                        break;
-                    default:
-                        model = undefined;
-                        break;
+                        model = models.fieldType
+                        break
+
                 }
 
                 if (model !== undefined) {
 
-                    req.model = model;
-
-                    resolve();
+                    resolve(model)
 
                 } else {
 
-                    req.res = {
-                        status: 404,
-                        message: `Can't find 'jangle.${collectionName}'.`,
-                        data: []
-                    };
-
-                    reject();
+                    reject(`Can't find 'jangle.${collectionName}'.`)
                 }
 
             } else {
 
-                let jangleCollectionsModel =
-                    include('models/collection');
-
-                let fieldTypesModel =
-                    include('models/field-type');
-
                 let JangleCollectionsModel =
-                    req.connection.model(
-                        jangleCollectionsModel.modelName,
-                        jangleCollectionsModel.schema
-                    );
+                        connection.model(
+                            models.collection.modelName,
+                            models.collection.schema
+                        ),
+                    FieldTypesModel =
+                        connection.model(
+                            models.fieldType.modelName,
+                            models.fieldType.schema
+                        )
 
-                let FieldTypesModel =
-                    req.connection.model(
-                        fieldTypesModel.modelName,
-                        fieldTypesModel.schema
-                    );
-
-                // TODO: Sort by version/last published.
                 let findOptions = {
                     name: collectionName
-                };
+                    //published: true
+                }
 
-                JangleCollectionsModel.findOne(findOptions, function(err, collectionMeta) {
+                JangleCollectionsModel
+                    .findOne(findOptions)
+                    .sort('-jangle.version')
+                    .exec( function(err, collectionMeta) {
 
-                    if (err || collectionMeta == undefined) {
+                    if (err || collectionMeta === undefined) {
 
-                        req.res = {
-                            status: 404,
-                            message: `Could not find '${collectionName}'`,
-                            data: []
-                        };
-
-                        reject();
+                        reject(`Could not find '${collectionName}'`)
 
                     } else {
 
-                        let collectionDocument = collectionMeta.toObject();
+                        let collectionDocument = collectionMeta.toObject()
 
                         FieldTypesModel.find().exec(function(err, fieldTypes) {
 
-                            if (err || fieldTypes.length == 0) {
+                            if (err || fieldTypes.length === 0) {
 
-                                req.helpers.mongoose.attemptToCreateFieldTypes(req, res, function(createdFieldTypes){
+                                self.createFieldTypes(models, connection)
+                                    .then( function (createdFieldTypes) {
 
-                                    fieldTypes = createdFieldTypes;
+                                        fieldTypes = createdFieldTypes
 
-                                    req.helpers.mongoose.setModel({
-                                        collectionMeta,
-                                        req,
-                                        collectionDocument,
-                                        fieldTypes,
-                                        resolve,
-                                        reject
-                                    });
+                                        resolve(self.getModel(collectionDocument, connection))
 
-                                }, function(err){
-
-                                    req.res = {
-                                        status: 500,
-                                        message: `Could not get field types.`,
-                                        data: []
-                                    };
-
-                                    reject();
-
-                                });
+                                    }, reject)
 
                             } else {
 
-                                req.helpers.mongoose.setModel({
-                                    collectionMeta,
-                                    req,
-                                    collectionDocument,
-                                    fieldTypes,
-                                    resolve,
-                                    reject
-                                });
+                                resolve(self.getModel(collectionDocument, connection))
 
                             }
 
-                        });
+                        })
                     }
 
-                });
+                })
             }
 
-        });
+        })
 
     },
 
-    setModel: function({collectionMeta, req, collectionDocument, fieldTypes, resolve, reject}) {
+    getModel: function(collectionDocument, connection) {
 
-        let modelName = collectionMeta.name;
-
-        let schema =
-            req.helpers.mongoose.getSchemaFromCollection(
-                collectionDocument.fields,
-                fieldTypes
-            );
-
-        req.metaLabels = {
-            singular: collectionDocument.labels.singular.toLowerCase(),
-            plural: collectionDocument.labels.plural.toLowerCase(),
-        };
+        let self = this,
+            name = collectionDocument.name,
+            schema =
+                self.getSchemaFromCollection(
+                    collectionDocument.fields,
+                    fieldTypes
+                )
 
         if(schema === undefined) {
 
-            reject();
+            return undefined
 
         } else {
 
-            // TODO: Check for indexed fields in the future
-            req.ignoreIndexedFields = true;
-
-            schema.jangle = {
-                id: {
-                    type: req.mongoose.Schema.Types.ObjectId,
-                    required: true,
-                    default: function () {
-                        return req.mongoose.Types.ObjectId();
-                    }
-                },
-                version: {
-                    type: Number,
-                    required: true,
-                    default: 1
-                },
-                published: {
-                    type: Boolean,
-                    required: true,
-                    default: false
-                }
-            }
-
-            try {
-
-            	req.model = req.mongoose.model(
-                    modelName,
-                    new req.mongoose.Schema(schema)
-                );
-
-            } catch (ignore) {
-
-            	req.model = req.mongoose.model(modelName);
-
-            }
-
-            resolve();
+                return connection.model(
+                    name,
+                    new connection.Schema(schema)
+                )
 
         }
 
     },
 
-    attemptToCreateFieldTypes: function(req, res, resolve, reject) {
+    createFieldTypes: function(models, connection) {
 
-        let fieldTypesModel = include('models/field-type'),
-            initialFieldTypes = include('models/initial/field-type');
+        let initialFieldTypes = models.initial.fieldType,
+            FieldTypesModel =
+                connection.model(
+                    models.fieldType.modelName,
+                    models.fieldType.schema
+                )
 
-        let FieldTypesModel =
-            req.connection.model(
-                fieldTypesModel.modelName,
-                fieldTypesModel.schema
-            );
+        return new Promise( (resolve, reject) => {
 
-        FieldTypesModel.create(initialFieldTypes, function (error, results) {
-            if (error) {
+            FieldTypesModel.create(initialFieldTypes, function (error, fieldTypes) {
 
-                reject(error);
+                if (error || fieldTypes === undefined) {
 
-            } else {
+                    reject(error)
 
-                console.log(results);
-                resolve(results);
+                } else {
 
-            }
-        });
+                    resolve(fieldTypes)
+
+                }
+            })
+
+        })
 
     },
 
     getSchemaFromCollection: function(collectionFields, fieldTypes) {
 
-        let schemaObject = {};
+        let schemaObject = {}
 
         for (let i in collectionFields) {
 
-            let field = collectionFields[i];
+            let field = collectionFields[i]
 
-            schemaObject[field.name] = {};
+            schemaObject[field.name] = {}
 
             // required
             if (field.required !== undefined) {
-                schemaObject[field.name].required = field.required;
+                schemaObject[field.name].required = field.required
             }
 
             // default
             if (field.default !== undefined) {
-                schemaObject[field.name].default = field.default;
+                schemaObject[field.name].default = field.default
             }
 
             // type
-            let type = fieldTypes.filter((fieldType) => fieldType.name == field.type)[0];
+            let types = fieldTypes.filter((fieldType) => fieldType.name == field.type),
+                type = types[0]
 
             if (type !== undefined && type.type !== undefined) {
-                schemaObject[field.name].type = type.type;
+                schemaObject[field.name].type = type.type
             }
 
             //console.log(`schemaObject[${field.name}]`)
@@ -289,22 +190,22 @@ module.exports = {
 
                 for (let optionIndex in field.options) {
 
-                    let optionKey = field.options[optionIndex].key;
+                    let optionKey = field.options[optionIndex].key
 
                     switch (optionKey) {
 
                         case 'isMarkdown':
-                            break;
+                            break
                         case 'min':
-                            break;
+                            break
                         case 'max':
-                            break;
+                            break
                         case 'decimalPlaces':
-                            break;
+                            break
                         case 'collection':
-                            break;
+                            break
                         case 'displayField':
-                            break;
+                            break
                     }
                 }
 
@@ -312,7 +213,7 @@ module.exports = {
 
         }
 
-        return schemaObject;
+        return schemaObject
 
     },
 
@@ -320,35 +221,35 @@ module.exports = {
 
         let handleConnectionError = function() {
 
-            console.log('Could not connect to database.');
+            console.log('Could not connect to database.')
 
-            respond(false);
+            respond(false)
 
-        };
+        }
 
-        let mongooseHelpers = this;
+        let mongooseHelpers = this
 
         let validator = function(value, respond) {
 
-            let jangleId = this.jangle.id;
+            let jangleId = this.jangle.id
 
             let connectionString = mongooseHelpers.getConnectionString(
                 false, jangleConfig.mongodb
-            );
+            )
 
-            let connection = mongoose.createConnection();
+            let connection = mongoose.createConnection()
 
             connection.open(connectionString, function(error) {
 
                 if (error) {
 
-                    handleConnectionError();
+                    handleConnectionError()
 
                 } else {
 
-                    let findOptions = {};
+                    let findOptions = {}
 
-                    findOptions[uniquePropertyName] = value;
+                    findOptions[uniquePropertyName] = value
 
                     connection.model(collectionName).find(
                         findOptions,
@@ -356,15 +257,15 @@ module.exports = {
 
                         if(err) {
 
-                            respond(false);
+                            respond(false)
 
                         } else if (results.length > 0) {
 
-                            respond(false);
+                            respond(false)
 
                         } else {
 
-                            respond(true);
+                            respond(true)
 
                         }
 
@@ -373,84 +274,84 @@ module.exports = {
                 }
 
             })
-            .catch(handleConnectionError);
+            .catch(handleConnectionError)
 
-        };
+        }
 
-        return validator;
+        return validator
 
     },
 
     getFilterOptions: function(req) {
 
-        let filterOptions = {};
+        let filterOptions = {}
 
 
         // TODO: Better WHERE (gt, lt, eq, ne, contains, etc.)
         if(req.query.where !== undefined) {
 
-            filterOptions.where = this.getWhereOptions(req.query.where);
+            filterOptions.where = this.getWhereOptions(req.query.where)
 
         }
         else {
 
-            filterOptions.where = {};
+            filterOptions.where = {}
 
         }
 
         if(req.params.docId !== undefined) {
 
-            let idField = req.idField || '_id';
+            let idField = req.idField || '_id'
 
-            filterOptions.where[idField] = req.params.docId;
+            filterOptions.where[idField] = req.params.docId
 
         }
 
         // TODO: SET
         if(req.query.set !== undefined) {
 
-            let set = this.getSetOptions(req.query.set);
+            let set = this.getSetOptions(req.query.set)
 
             if(set !== undefined)
-                filterOptions.set = set;
+                filterOptions.set = set
 
         }
 
         // UNSET
         if(req.query.unset !== undefined) {
 
-            let unset = this.getUnsetOptions(req.query.unset);
+            let unset = this.getUnsetOptions(req.query.unset)
 
             if(unset !== undefined)
-                filterOptions.unset = unset;
+                filterOptions.unset = unset
 
         }
 
         // SORT
         if(req.query.sort !== undefined) {
 
-            filterOptions.sort = this.getSortOptions(req.query.sort);
+            filterOptions.sort = this.getSortOptions(req.query.sort)
 
         }
 
         // SELECT
         if(req.query.select !== undefined) {
 
-            filterOptions.select = this.getSelectOptions(req.query.select);
+            filterOptions.select = this.getSelectOptions(req.query.select)
 
         }
 
         // LIMIT
         if(req.query.limit !== undefined) {
 
-            filterOptions.limit = this.getLimitOption(req.query.limit);
+            filterOptions.limit = this.getLimitOption(req.query.limit)
 
         }
 
         // SKIP
         if(req.query.skip !== undefined) {
 
-            filterOptions.skip = this.getSkipOption(req.query.skip);
+            filterOptions.skip = this.getSkipOption(req.query.skip)
 
         }
 
@@ -459,7 +360,7 @@ module.exports = {
 
         }
 
-        return filterOptions;
+        return filterOptions
 
     },
 
@@ -467,13 +368,13 @@ module.exports = {
 
         try {
 
-            return JSON.parse(whereQuery);
+            return JSON.parse(whereQuery)
 
         } catch(ignore) {
 
-            console.log('Could not parse where query.');
+            console.log('Could not parse where query.')
 
-            return {};
+            return {}
 
         }
 
@@ -484,9 +385,9 @@ module.exports = {
 
         // Weirdness: '+' is replaced with ' '.
         //   This turns all ' ' back into '+'.
-        sortQuery = sortQuery.split(' ').join('+');
+        sortQuery = sortQuery.split(' ').join('+')
 
-        let sortQueryParts = sortQuery.split(',');
+        let sortQueryParts = sortQuery.split(',')
 
         let sortOptions = {}
 
@@ -494,55 +395,55 @@ module.exports = {
 
             if(part.indexOf('-') === 0) {
 
-                let propName = part.substring(1);
+                let propName = part.substring(1)
 
-                sortOptions[propName] = -1;
+                sortOptions[propName] = -1
 
             } else if (part.indexOf('+') === 0) {
 
-                let propName = part.substring(1);
+                let propName = part.substring(1)
 
-                sortOptions[propName] = 1;
+                sortOptions[propName] = 1
 
             } else {
 
-                let propName = part;
+                let propName = part
 
-                sortOptions[propName] = 1;
+                sortOptions[propName] = 1
 
             }
 
-        });
+        })
 
-        return sortOptions;
+        return sortOptions
 
     },
 
     getSelectOptions: function(selectQuery) {
 
-        let selectQueryParts = selectQuery.split(',');
+        let selectQueryParts = selectQuery.split(',')
 
-        let selectOptions = {};
+        let selectOptions = {}
 
         selectQueryParts.map(function(part) {
 
             if(part.indexOf('-') == 0) {
 
-                let propName = part;
+                let propName = part
 
-                selectOptions[propName] = 0;
+                selectOptions[propName] = 0
 
             } else {
 
-                let propName = part;
+                let propName = part
 
-                selectOptions[propName] = 1;
+                selectOptions[propName] = 1
 
             }
 
-        });
+        })
 
-        return selectOptions;
+        return selectOptions
 
     },
 
@@ -550,12 +451,12 @@ module.exports = {
 
         try {
 
-            return parseInt(limitQuery);
+            return parseInt(limitQuery)
 
         } catch (ignore) {
 
-            console.log('invalid limit parameter');
-            return -1;
+            console.log('invalid limit parameter')
+            return -1
 
         }
 
@@ -565,12 +466,12 @@ module.exports = {
 
         try {
 
-            return parseInt(skipQuery);
+            return parseInt(skipQuery)
 
         } catch (ignore) {
 
-            console.log('invalid skip parameter');
-            return -1;
+            console.log('invalid skip parameter')
+            return -1
 
         }
 
@@ -581,12 +482,12 @@ module.exports = {
 
         try {
 
-            return JSON.parse(setQuery);
+            return JSON.parse(setQuery)
 
         } catch (ignore) {
 
-            console.log('invalid set parameter');
-            return undefined;
+            console.log('invalid set parameter')
+            return undefined
 
         }
 
@@ -595,23 +496,23 @@ module.exports = {
     // _id,name -> { $unset: { _id: 1, name: 1 } }
     getUnsetOptions: function(unsetQuery) {
 
-        let unsetQueryParts = unsetQuery.split(',');
+        let unsetQueryParts = unsetQuery.split(',')
 
-        let unsetOptions = {};
+        let unsetOptions = {}
 
         unsetQueryParts.map(function(part) {
 
-            unsetOptions[part] = 1;
+            unsetOptions[part] = 1
 
-        });
+        })
 
         if(unsetQueryParts.length === 0) {
 
-            return undefined;
+            return undefined
 
         } else {
 
-            return unsetOptions;
+            return unsetOptions
 
         }
 
@@ -621,51 +522,51 @@ module.exports = {
 
         let find = false,
             remove = false,
-            update = false;
+            update = false
 
         switch (action) {
             case 'find':
-                find = true;
-                break;
+                find = true
+                break
             case 'remove':
-                remove = true;
-                break;
+                remove = true
+                break
             case 'update':
-                update = true;
-                break;
+                update = true
+                break
         }
 
         return function(req, res, next){
 
-            let model = req.model;
-            let collectionName = req.params.collectionName;
+            let model = req.model
+            let collectionName = req.params.collectionName
 
-            let filterOptions = req.helpers.mongoose.getFilterOptions(req);
+            let filterOptions = req.helpers.mongoose.getFilterOptions(req)
 
             return new Promise((resolve, reject) => {
 
-                let Model = req.connection.model(model.modelName, model.schema);
+                let Model = req.connection.model(model.modelName, model.schema)
 
                 if(remove)
-                    Model = Model.remove(filterOptions.where);
+                    Model = Model.remove(filterOptions.where)
                 else if(find)
-                    Model = Model.find(filterOptions.where);
+                    Model = Model.find(filterOptions.where)
 
                 if(update) {
 
                     let updateOptions = {
                         $inc: { 'jangle.version': 1 }
-                    };
+                    }
 
                     if (filterOptions.set !== undefined) {
 
-                        updateOptions.$set = filterOptions.set;
+                        updateOptions.$set = filterOptions.set
 
                     }
 
                     if (filterOptions.unset !== undefined) {
 
-                        updateOptions.$unset = filterOptions.unset;
+                        updateOptions.$unset = filterOptions.unset
 
                     }
 
@@ -679,24 +580,24 @@ module.exports = {
                             multi: true,
                             overwrite: false
                         }
-                    );
+                    )
 
                 } else {
 
                     if(filterOptions.skip !== undefined) {
-                        Model = Model.skip(filterOptions.skip);
+                        Model = Model.skip(filterOptions.skip)
                     }
 
                     if(filterOptions.limit !== undefined) {
-                        Model = Model.limit(filterOptions.limit);
+                        Model = Model.limit(filterOptions.limit)
                     }
 
                     if(filterOptions.sort !== undefined) {
-                        Model = Model.sort(filterOptions.sort);
+                        Model = Model.sort(filterOptions.sort)
                     }
 
                     if(filterOptions.select !== undefined) {
-                        Model = Model.select(filterOptions.select);
+                        Model = Model.select(filterOptions.select)
                     }
 
                 }
@@ -705,104 +606,104 @@ module.exports = {
 
                     if (error) {
 
-                        console.log(error);
+                        console.log(error)
 
                         req.res = {
                             status: 400,
                             data: [],
                             message: `${error}`
-                        };
+                        }
 
-                        reject();
+                        reject()
 
                     } else if(remove) {
 
-                        console.log(response.result);
+                        console.log(response.result)
 
                         let documentLabel = response.result.n !== 1
                             ? (req.metaLabels ? req.metaLabels.plural : 'collections')
-                            : (req.metaLabels ? req.metaLabels.singular : 'collection');
+                            : (req.metaLabels ? req.metaLabels.singular : 'collection')
 
                         req.res = {
                             status: 200,
                             data: [],
                             message: `Removed ${response.result.n} ${documentLabel}.`
-                        };
+                        }
 
-                        resolve();
+                        resolve()
 
                     }
                     else if(update) {
 
                         let documentLabel = response.n !== 1
                             ? (req.metaLabels ? req.metaLabels.plural : 'collections')
-                            : (req.metaLabels ? req.metaLabels.singular : 'collection');
+                            : (req.metaLabels ? req.metaLabels.singular : 'collection')
 
                         req.res = {
                             status: 200,
                             data: [],
                             message: `Updated ${response.n} ${documentLabel}.`
-                        };
+                        }
 
-                        resolve();
+                        resolve()
 
                     }
                     else {
 
                         let documentLabel = response.length !== 1
                             ? (req.metaLabels ? req.metaLabels.plural : 'collections')
-                            : (req.metaLabels ? req.metaLabels.singular : 'collection');
+                            : (req.metaLabels ? req.metaLabels.singular : 'collection')
 
                         req.res = {
                             status: 200,
                             data: response,
                             message: `Found ${response.length} ${documentLabel}.`
-                        };
+                        }
 
-                        resolve();
+                        resolve()
                     }
 
-                });
+                })
 
             })
 
-        };
+        }
 
     },
 
     handleCreateError: function (req, error) {
 
-        let message = `There was a problem adding the new document.`;
+        let message = `There was a problem adding the new document.`
 
         if (error.name == 'ValidationError') {
 
-            message = `The 'data' option failed validation.`;
+            message = `The 'data' option failed validation.`
 
-            let errorList = Object.keys(error.errors).map(x => error.errors[x]);
+            let errorList = Object.keys(error.errors).map(x => error.errors[x])
 
-            let requiredFieldErrors = errorList.filter(x => x.kind == 'required');
+            let requiredFieldErrors = errorList.filter(x => x.kind == 'required')
 
             if (requiredFieldErrors.length > 0) {
 
                 let missingRequiredFields =
-                    requiredFieldErrors.map(x => x.path);
+                    requiredFieldErrors.map(x => x.path)
 
-                message = `Missing required fields: ${missingRequiredFields}`;
+                message = `Missing required fields: ${missingRequiredFields}`
 
             } else if(error.errors.name) {
 
-                message = error.errors.name.message;
+                message = error.errors.name.message
 
             }
 
         } else if (error.name == 'MongoError') {
 
-            message = `There was a problem with MongoDB.`;
+            message = `There was a problem with MongoDB.`
 
             switch (error.code) {
                 case 11000:
                     message = `A document with that key already exists.`
-                    break;
+                    break
             }
 
         }
@@ -811,8 +712,8 @@ module.exports = {
             status: 400,
             data: [],
             message: message
-        };
+        }
 
     }
 
-};
+}
