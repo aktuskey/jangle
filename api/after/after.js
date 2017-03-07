@@ -6,15 +6,7 @@ module.exports = function(req, res) {
     // Close open connections
     if (req.connection && req.connection.readyState === CONNECTED) {
 
-        req.connection.close().then(() => {
-
-            if (req.connection.readyState === DISCONNECTED) {
-
-                console.info('...closed connection.')
-
-            }
-
-        })
+        req.connection.close()
 
     }
 
@@ -24,6 +16,8 @@ module.exports = function(req, res) {
         message = req.res.message || '',
         data = req.res.data || [],
         error = status >= 400
+
+    console.info(`...\t` + message + '\n')
 
     res.status(status).json({ message, error, data })
 

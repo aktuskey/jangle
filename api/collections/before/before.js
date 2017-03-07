@@ -12,7 +12,13 @@ module.exports = function(done) {
         checkForUserTokenTask()
             .success(getMongoConnectionTask)
             .success(getModelTask)
-            .then(next, handleRejection)
+            .then(() => {
+
+                console.info(`\n${req.method}:\t${req.params.collectionName}`)
+
+                next()
+
+            }, handleRejection)
 
     }
 
@@ -95,8 +101,6 @@ let getMongoConnection = function (req) {
 
                 } else {
 
-                    console.info('Opened connection...')
-
                     resolve()
 
                 }
@@ -116,15 +120,18 @@ let getModel = function (req) {
 
             let collectionName = req.params.collectionName
 
-            console.log(`Getting model for '${collectionName}'...`)
-
             req.utilities.database.getModel(
                 req,
                 collectionName,
                 function(model) {
 
                     req.model = model
-                    
+
+                    req.Model = req.connection.model(
+                        model.modelName,
+                        model.schema
+                    )
+
                     resolve()
 
                 },

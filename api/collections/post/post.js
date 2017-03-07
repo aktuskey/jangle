@@ -1,10 +1,6 @@
 module.exports = function(req, res, next) {
 
-    let model = req.model,
-        Model = req.connection.model(
-            model.modelName,
-            model.schema
-        ),
+    let Model = req.Model,
         documents = req.query.documents,
         newDocuments = undefined,
         parseError = false

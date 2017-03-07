@@ -346,7 +346,7 @@ module.exports = {
 
     },
 
-    // "{ "name": "dave", "age": 27 }" -> { $set: { name: 5, age: 27 } }
+    // '{ "name": "dave", "age": 27 }' -> { name: 5, age: 27 }
     getSetOptions: function(setQuery) {
 
         try {
@@ -384,6 +384,82 @@ module.exports = {
             return unsetOptions
 
         }
+
+    },
+
+    getDeltas: function (documents, set, unset) {
+
+        let setFields = set === undefined ? [] : Object.keys(set),
+            unsetFields = unset === undefined ? [] : Object.keys(unset)
+
+        if (setFields.length === 0 && unsetFields.length === 0)
+            return []
+
+        let fancyShit = (props, currentValue) => {
+
+            let obj = {}
+
+            if (props.length === 0) {
+
+                return currentValue
+
+            } else if (props.length === 1) {
+
+                obj[props[0]] = currentValue
+
+                return obj
+
+            } else {
+
+                let nextProp = props.shift()
+
+                obj[nextProp] = fancyShit(props, currentValue)
+
+                return obj;
+
+            }
+
+        }
+
+        let mapFields = (document, deltaDocument) => {
+
+            return (field) => {
+
+                //  field:               props:
+                // 'labels.singular' -> ['labels', 'singular']
+                let props = field.split('.'),
+                    currentValue = document,
+                    firstProp = props[0]
+
+                for(let i in props) {
+
+                    let prop = props[i]
+
+                    currentValue = currentValue[prop]
+
+                }
+
+                props.shift()
+
+                deltaDocument[firstProp] = fancyShit(props, currentValue)
+
+            }
+
+        }
+
+        let deltaDocuments = documents.map( (document) => {
+
+            var deltaDocument = {}
+
+            setFields.map(mapFields(document, deltaDocument))
+
+            unsetFields.map(mapFields(document, deltaDocument))
+
+            return deltaDocument
+
+        })
+
+        return deltaDocuments
 
     },
 

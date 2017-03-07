@@ -3,14 +3,6 @@ let mongoose = require('mongoose'),
 
 module.exports = new Schema({
 
-    id: {
-        type: Schema.Types.ObjectId,
-        required: true,
-        default: function () {
-            return mongoose.Types.ObjectId()
-        }
-    },
-
     previousVersions: {
         type: Schema.Types.Array,
         required: true,

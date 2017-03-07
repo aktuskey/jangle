@@ -8,8 +8,9 @@ module.exports = new Schema(
             type: String,
             required: true,
             trim: true,
-            index: true,
-            unique: true
+            index: {
+                unique: true
+            }
         },
 
         labels: {
