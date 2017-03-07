@@ -25,7 +25,7 @@ app.use((req, res, next) => {
 
     req.res = {
         status: 404,
-        message: `Can't ${req.method} at ${req.baseUrl}`,
+        message: `Can't ${req.method} at ${req.path}`,
         data: []
     }
 

@@ -116,9 +116,20 @@ let getModel = function (req) {
 
             let collectionName = req.params.collectionName
 
-            console.log(collectionName)
+            console.log(`Getting model for '${collectionName}'...`)
 
-            resolve()
+            req.utilities.database.getModel(
+                req,
+                collectionName,
+                function(model) {
+
+                    req.model = model
+                    
+                    resolve()
+
+                },
+                reject
+            )
 
         })
 

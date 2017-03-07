@@ -11,7 +11,7 @@ module.exports = new Schema({
         }
     },
 
-    versions: {
+    previousVersions: {
         type: Schema.Types.Array,
         required: true,
         default: []

@@ -10,118 +10,51 @@ module.exports = {
 
     },
 
-    getCollectionModel: function(collectionName, models, connection) {
+    getModel: function(req, collectionName, onSuccess, onFailure) {
 
-        let self = this,
-            metaPrefix = 'jangle.',
-            isMetaCollection = collectionName.indexOf(metaPrefix) === 0,
-            model = undefined
+        let metaPrefix = req.config.mongodb.metaPrefix,
+            isMetaCollection = collectionName.indexOf(metaPrefix) === 0
 
-        return new Promise(function(resolve, reject) {
+        if (isMetaCollection) {
 
-            if (isMetaCollection) {
+            let metaCollectionName = collectionName.substring(metaPrefix.length)
 
-                switch (collectionName) {
-
-                    case 'jangle.collections':
-                        model = models.collections
-                        break
-
-                    case 'jangle.fieldType':
-                        model = models.fieldType
-                        break
-
-                }
-
-                if (model !== undefined) {
-
-                    resolve(model)
-
-                } else {
-
-                    reject(`Can't find 'jangle.${collectionName}'.`)
-                }
-
-            } else {
-
-                let JangleCollectionsModel =
-                        connection.model(
-                            models.collection.modelName,
-                            models.collection.schema
-                        ),
-                    FieldTypesModel =
-                        connection.model(
-                            models.fieldType.modelName,
-                            models.fieldType.schema
-                        )
-
-                let findOptions = {
-                    name: collectionName
-                    //published: true
-                }
-
-                JangleCollectionsModel
-                    .findOne(findOptions)
-                    .sort('-jangle.version')
-                    .exec( function(err, collectionMeta) {
-
-                    if (err || collectionMeta === undefined) {
-
-                        reject(`Could not find '${collectionName}'`)
-
-                    } else {
-
-                        let collectionDocument = collectionMeta.toObject()
-
-                        FieldTypesModel.find().exec(function(err, fieldTypes) {
-
-                            if (err || fieldTypes.length === 0) {
-
-                                self.createFieldTypes(models, connection)
-                                    .then( function (createdFieldTypes) {
-
-                                        fieldTypes = createdFieldTypes
-
-                                        resolve(self.getModel(collectionDocument, connection))
-
-                                    }, reject)
-
-                            } else {
-
-                                resolve(self.getModel(collectionDocument, connection))
-
-                            }
-
-                        })
-                    }
-
-                })
+            switch (metaCollectionName)
+            {
+                case 'collections':
+                    onSuccess(req.models.collection)
+                    break
+                case 'field-types':
+                    onSuccess(req.models.fieldTypes)
+                    break
+                default:
+                    onFailure(`Could not find meta collection '${collectionName}'.`)
+                    break
             }
-
-        })
-
-    },
-
-    getModel: function(collectionDocument, connection) {
-
-        let self = this,
-            name = collectionDocument.name,
-            schema =
-                self.getSchemaFromCollection(
-                    collectionDocument.fields,
-                    fieldTypes
-                )
-
-        if(schema === undefined) {
-
-            return undefined
 
         } else {
 
-                return connection.model(
-                    name,
-                    new connection.Schema(schema)
+            let collectionModel = req.models.collection,
+                Collection = req.connection.model(
+                    collectionModel.name,
+                    collectionModel.schema
                 )
+
+            Collection
+                .find({ name: collectionName })
+                .exec(function (err, collections) {
+
+                    if (err || collections.length === 0) {
+
+                        onFailure(`Could not find collection '${collectionName}'.`)
+
+                    } else {
+
+                        onSuccess(collections[0])
+
+                    }
+
+                })
 
         }
 
@@ -176,11 +109,13 @@ module.exports = {
             }
 
             // type
-            let types = fieldTypes.filter((fieldType) => fieldType.name == field.type),
-                type = types[0]
+            let matchingFieldTypes = fieldTypes.filter( (fieldType) =>
+                    fieldType.name == field.type
+                ),
+                matchingFieldType = matchingFieldTypes[0]
 
-            if (type !== undefined && type.type !== undefined) {
-                schemaObject[field.name].type = type.type
+            if (matchingFieldType !== undefined && matchingFieldType.type !== undefined) {
+                schemaObject[field.name].type = matchingFieldType.type
             }
 
             //console.log(`schemaObject[${field.name}]`)
@@ -411,7 +346,7 @@ module.exports = {
 
     },
 
-    // "{ "name": "dave", age: 27 }" -> { $set: { name: 5, age: 27 } }
+    // "{ "name": "dave", "age": 27 }" -> { $set: { name: 5, age: 27 } }
     getSetOptions: function(setQuery) {
 
         try {
@@ -436,7 +371,7 @@ module.exports = {
 
         unsetQueryParts.map(function(part) {
 
-            unsetOptions[part] = 1
+            unsetOptions[part.trim()] = 1
 
         })
 
@@ -452,7 +387,7 @@ module.exports = {
 
     },
 
-    handleCreateError: function (req, error) {
+    getCreateErrorMessage: function (error) {
 
         let message = `There was a problem adding the new document.`
 
@@ -489,11 +424,7 @@ module.exports = {
 
         }
 
-        req.res = {
-            status: 400,
-            data: [],
-            message: message
-        }
+        return message
 
     }
 
