@@ -9,7 +9,7 @@ module.exports = function(req, res, next) {
 
     req.query['where'] = `{"${metaCollectionIdField}": "${metaCollectionId}" }`
 
-    req.url = `/api/jangle/${metaCollectionName}`
+    req.url = `/jangle/${metaCollectionName}`
 
     next()
 

@@ -28,7 +28,8 @@ module.exports = function(api, router) {
         .delete(api.collections.delete)
 
 
-    router.all(api.after)
+    router.route('*')
+        .all(api.after)
 
     return router
 

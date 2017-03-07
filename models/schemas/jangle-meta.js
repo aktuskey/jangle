@@ -11,16 +11,16 @@ module.exports = new Schema({
         }
     },
 
-    version: {
-        type: Number,
+    versions: {
+        type: Schema.Types.Array,
         required: true,
-        default: 1
+        default: []
     },
 
-    published: {
-        type: Boolean,
+    publishedVersion: {
+        type: Number,
         required: true,
-        default: false
+        default: -1
     }
 
 }, {

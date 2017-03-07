@@ -1,6 +1,5 @@
 module.exports = {
-	all: require('./all'),
-	meta: require('./meta'),
+	before: require('./before'),
 	get: require('./get'),
 	post: require('./post'),
 	put: require('./put'),

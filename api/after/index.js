@@ -1,1 +1,1 @@
-module.exports = require('./after.js');
+module.exports = require('./after')

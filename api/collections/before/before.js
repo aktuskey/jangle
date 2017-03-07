@@ -2,51 +2,31 @@ module.exports = function(done) {
 
     return function(req, res, next) {
 
-        let handleRejection = (reason) => {
-            console.info(reason)
-            done(req, res)
-        }
+        let handleRejection =
+            req.utilities.logging.handleRejection(req, res, done)
 
-        let setDefaultResponseTask = setDefaultResponse(req),
-            checkForUserTokenTask = checkForUserToken(req),
-            getMongoConnectionTask = getMongoConnection(req)
+        let checkForUserTokenTask = checkForUserToken(req),
+            getMongoConnectionTask = getMongoConnection(req),
+            getModelTask = getModel(req)
 
-        setDefaultResponseTask()
-            .success(checkForUserTokenTask)
+        checkForUserTokenTask()
             .success(getMongoConnectionTask)
+            .success(getModelTask)
             .then(next, handleRejection)
 
     }
 
 }
 
-let setDefaultResponse = function(req) {
+let checkForUserToken = function (req) {
 
     return function() {
 
-        req.res = {
-            status: 404,
-            message: `Can't ${req.method} at ${req.baseUrl}`,
-            data: []
-        }
+        return new req.promise(function(resolve, reject) {
 
-        return Promise.resolve()
+            req.token = req.query.token || req.body.token
 
-    }
-
-}
-
-let checkForUserToken = function(req) {
-
-    return function() {
-
-        return new Promise(function(resolve, reject) {
-
-            let token = req.query.token || req.body.token
-
-            if (token === undefined) {
-
-                req.usePublicData = true
+            if (req.token === undefined) {
 
                 // Only allow get requests to live database
                 if (req.method !== 'GET') {
@@ -70,11 +50,9 @@ let checkForUserToken = function(req) {
 
             } else {
 
-                req.usePublicData = false
+                let ADMIN_TOKEN = req.env.ADMIN_TOKEN || 'token'
 
-                let ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'token'
-
-                if (token !== ADMIN_TOKEN) {
+                if (req.token !== ADMIN_TOKEN) {
 
                     req.res = {
                         status: 401,
@@ -98,17 +76,14 @@ let checkForUserToken = function(req) {
 
 }
 
-let getMongoConnection = function(req) {
+let getMongoConnection = function (req) {
 
     return function() {
 
-        return new Promise(function(resolve, reject) {
+        return new req.promise(function(resolve, reject) {
 
-            // TODO: Remove global helpers, config, and mongoose object
-            let connectionString = req.helpers.mongoose.getConnectionString(
-                req.usePublicData,
-                req.jangleConfig.mongodb
-            )
+            let connectionString =
+                req.utilities.database.getConnectionString(req.config)
 
             req.connection = req.mongoose.createConnection()
 
@@ -116,39 +91,53 @@ let getMongoConnection = function(req) {
 
                 if (error) {
 
-                    let message =
-                        `Can't connect to the database.`
-
-                    req.res = {
-                        status: 500,
-                        message: message,
-                        data: []
-                    }
-
-                    reject(message)
+                    handleConnectionError(req, reject)
 
                 } else {
+
+                    console.info('Opened connection...')
 
                     resolve()
 
                 }
 
-            }).catch( () => {
-
-                let message =
-                    `Can't open connection to the database.`
-
-                req.res = {
-                    status: 500,
-                    message: message,
-                    data: []
-                }
-
-                reject(message)
-
-            })
+            }).catch( () => handleConnectionError(req, reject) )
 
         })
 
     }
+}
+
+let getModel = function (req) {
+
+    return function () {
+
+        return new req.promise( function (resolve, reject) {
+
+            let collectionName = req.params.collectionName
+
+            console.log(collectionName)
+
+            resolve()
+
+        })
+
+
+    }
+
+}
+
+let handleConnectionError =  function (req, reject) {
+
+    let message =
+        `Can't connect to the database.`
+
+    req.res = {
+        status: 500,
+        message: message,
+        data: []
+    }
+
+    reject(message)
+
 }

@@ -1,1 +1,1 @@
-module.exports = require('./put.js');
+module.exports = require('./put')

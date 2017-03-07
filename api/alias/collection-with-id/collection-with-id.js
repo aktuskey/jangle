@@ -8,7 +8,7 @@ module.exports = function(req, res, next) {
 
     req.query['where'] = `{"jangle.id": "${collectionId}" }`
 
-    req.url = `/api/collections/${collectionName}`
+    req.url = `/collections/${collectionName}`
 
     next()
 

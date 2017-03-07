@@ -2,11 +2,11 @@ module.exports = {
 
     getConnectionString: (config) => {
 
-        let authPrefix = (config.auth)
-            ? `${config.rootUser}:${config.rootPassword}@`
+        let authPrefix = (config.mongodb.auth)
+            ? `${config.mongodb.rootUser}:${config.mongodb.rootPassword}@`
             : ''
 
-        return `mongodb://${authPrefix}${config.host}:${config.port}/${config.database}`
+        return `mongodb://${authPrefix + config.mongodb.host}:${config.mongodb.port}/${config.mongodb.database}`
 
     },
 
@@ -217,71 +217,6 @@ module.exports = {
 
     },
 
-    getUniqueValidator: function(jangleConfig, mongoose, collectionName, uniquePropertyName) {
-
-        let handleConnectionError = function() {
-
-            console.log('Could not connect to database.')
-
-            respond(false)
-
-        }
-
-        let mongooseHelpers = this
-
-        let validator = function(value, respond) {
-
-            let jangleId = this.jangle.id
-
-            let connectionString = mongooseHelpers.getConnectionString(
-                false, jangleConfig.mongodb
-            )
-
-            let connection = mongoose.createConnection()
-
-            connection.open(connectionString, function(error) {
-
-                if (error) {
-
-                    handleConnectionError()
-
-                } else {
-
-                    let findOptions = {}
-
-                    findOptions[uniquePropertyName] = value
-
-                    connection.model(collectionName).find(
-                        findOptions,
-                        function(err, results){
-
-                        if(err) {
-
-                            respond(false)
-
-                        } else if (results.length > 0) {
-
-                            respond(false)
-
-                        } else {
-
-                            respond(true)
-
-                        }
-
-                    })
-
-                }
-
-            })
-            .catch(handleConnectionError)
-
-        }
-
-        return validator
-
-    },
-
     getFilterOptions: function(req) {
 
         let filterOptions = {}
@@ -292,8 +227,7 @@ module.exports = {
 
             filterOptions.where = this.getWhereOptions(req.query.where)
 
-        }
-        else {
+        } else {
 
             filterOptions.where = {}
 
@@ -513,159 +447,6 @@ module.exports = {
         } else {
 
             return unsetOptions
-
-        }
-
-    },
-
-    changeDocuments: function(action) {
-
-        let find = false,
-            remove = false,
-            update = false
-
-        switch (action) {
-            case 'find':
-                find = true
-                break
-            case 'remove':
-                remove = true
-                break
-            case 'update':
-                update = true
-                break
-        }
-
-        return function(req, res, next){
-
-            let model = req.model
-            let collectionName = req.params.collectionName
-
-            let filterOptions = req.helpers.mongoose.getFilterOptions(req)
-
-            return new Promise((resolve, reject) => {
-
-                let Model = req.connection.model(model.modelName, model.schema)
-
-                if(remove)
-                    Model = Model.remove(filterOptions.where)
-                else if(find)
-                    Model = Model.find(filterOptions.where)
-
-                if(update) {
-
-                    let updateOptions = {
-                        $inc: { 'jangle.version': 1 }
-                    }
-
-                    if (filterOptions.set !== undefined) {
-
-                        updateOptions.$set = filterOptions.set
-
-                    }
-
-                    if (filterOptions.unset !== undefined) {
-
-                        updateOptions.$unset = filterOptions.unset
-
-                    }
-
-
-
-                    // TODO: Only update latest versions
-                    Model = Model.update(
-                        filterOptions.where,
-                        updateOptions,
-                        {
-                            multi: true,
-                            overwrite: false
-                        }
-                    )
-
-                } else {
-
-                    if(filterOptions.skip !== undefined) {
-                        Model = Model.skip(filterOptions.skip)
-                    }
-
-                    if(filterOptions.limit !== undefined) {
-                        Model = Model.limit(filterOptions.limit)
-                    }
-
-                    if(filterOptions.sort !== undefined) {
-                        Model = Model.sort(filterOptions.sort)
-                    }
-
-                    if(filterOptions.select !== undefined) {
-                        Model = Model.select(filterOptions.select)
-                    }
-
-                }
-
-                Model.exec(function(error, response) {
-
-                    if (error) {
-
-                        console.log(error)
-
-                        req.res = {
-                            status: 400,
-                            data: [],
-                            message: `${error}`
-                        }
-
-                        reject()
-
-                    } else if(remove) {
-
-                        console.log(response.result)
-
-                        let documentLabel = response.result.n !== 1
-                            ? (req.metaLabels ? req.metaLabels.plural : 'collections')
-                            : (req.metaLabels ? req.metaLabels.singular : 'collection')
-
-                        req.res = {
-                            status: 200,
-                            data: [],
-                            message: `Removed ${response.result.n} ${documentLabel}.`
-                        }
-
-                        resolve()
-
-                    }
-                    else if(update) {
-
-                        let documentLabel = response.n !== 1
-                            ? (req.metaLabels ? req.metaLabels.plural : 'collections')
-                            : (req.metaLabels ? req.metaLabels.singular : 'collection')
-
-                        req.res = {
-                            status: 200,
-                            data: [],
-                            message: `Updated ${response.n} ${documentLabel}.`
-                        }
-
-                        resolve()
-
-                    }
-                    else {
-
-                        let documentLabel = response.length !== 1
-                            ? (req.metaLabels ? req.metaLabels.plural : 'collections')
-                            : (req.metaLabels ? req.metaLabels.singular : 'collection')
-
-                        req.res = {
-                            status: 200,
-                            data: response,
-                            message: `Found ${response.length} ${documentLabel}.`
-                        }
-
-                        resolve()
-                    }
-
-                })
-
-            })
 
         }
 

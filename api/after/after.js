@@ -10,7 +10,7 @@ module.exports = function(req, res) {
 
             if (req.connection.readyState === DISCONNECTED) {
 
-                console.info('Closed open connection.')
+                console.info('...closed connection.')
 
             }
 
@@ -27,4 +27,4 @@ module.exports = function(req, res) {
 
     res.status(status).json({ message, error, data })
 
-};
+}

@@ -1,1 +1,1 @@
-module.exports = require('./delete.js');
+module.exports = require('./delete')
