@@ -1,94 +1,43 @@
-global.include = (path) => require(`${__dirname}/${path}`);
+var express = require('express'),
+	app = express(),
+	mongoose = require('mongoose'),
+	bodyParser = require('body-parser'),
+	api = require('./api'),
+	utilities = require('./utilities'),
+	models = require('./models'),
+	userConfig = require('./jangle-config'),
+	config = require('./default-config')(userConfig)
+ 	promise = utilities.promise(global.Promise)
 
-// Make sure all dependencies are available
-try {
+mongoose.Promise = promise
 
-	var express = require('express'),
-		app = express(),
-		mongoose = require('mongoose');
+app.use(bodyParser.json())
 
-	if (process.env.NODE_ENV != 'production') {
+app.use((req, res, next) => {
 
-		var cors = require('cors');
-		app.use(cors());
+	req.models = models
+	req.config = config
+	req.utilities = utilities
 
-	}
+	req.promise = promise
+	req.env = process.env
+	req.mongoose = mongoose
 
-	mongoose.Promise = global.Promise;
+    req.res = {
+        status: 404,
+        message: `Can't ${req.method} at ${req.path}`,
+        data: []
+    }
 
-} catch (ignore) {
+	next()
 
-	console.log(`Please run 'npm install' first.`);
-	return;
+})
 
-}
-
-// Set up routes
-var webApp = require('./web-app'),
-	api = require('./api');
-
-// Frontend Web Application
-app.use('/static', express.static('web-app/static'));
-
-app.get('/', webApp);
-app.get('/sign-in', webApp);
-app.get('/dashboard', webApp);
-app.get('/collections', webApp);
-app.get('/collections/:collectionName', webApp);
-
-// API
-app.use('/api/*', (req, res, next) => {
-
-	req.mongoose = mongoose;
-	req.helpers = require('./helpers');
-	req.jangleConfig = require('./default-config.js');
-	req.done = require('./api/middleware/all/after');
-
-	next();
-
-});
-
-app.use('/api/*', api.middleware.all.before);
-
-// Public API
-app.get('/api/ping', api.public.ping);
-app.get('/api/auth', api.public.auth);
-
-// Meta Collections Middleware
-// (/api/jangle/abc --> /api/collections/jangle.abc)
-// (/api/jangle/abc/def --> /api/collections/jangle.abc/def)
-app.all('/api/jangle/:metaCollectionName',
-	api.middleware.meta.before);
-app.all('/api/jangle/:metaCollectionName/:metaCollectionId',
-	api.middleware.meta.before);
-
-// Collections API
-app.get('/api/collections/:collectionName',
-	api.collections.get);
-app.get('/api/collections/:collectionName/:docId',
-	api.collections.get);
-//
-app.post('/api/collections/:collectionName',
-	api.collections.post);
-//
-app.put('/api/collections/:collectionName',
-	api.collections.put);
-app.put('/api/collections/:collectionName/:docId',
-	api.collections.put);
-//
-app.delete('/api/collections/:collectionName',
-	api.collections.delete);
-app.delete('/api/collections/:collectionName/:docId',
-	api.collections.delete);
-
-// API Cleanup
-app.use('/api/*', api.middleware.all.after);
+app.use('/api', api.routes(api, new express.Router()))
 
 
-var port = process.env.PORT || 3000;
+app.set('port', process.env.PORT || 3000)
 
-app.listen(port, function() {
-
-	console.log(`Jangle ready on port ${port}!`);
-
-});
+app.listen(app.get('port'), () =>
+	console.info(`Jangle ready on port ${app.get('port')}!`)
+)

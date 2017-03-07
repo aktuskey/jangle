@@ -1,9 +1,9 @@
 let assert = require('assert'),
-	ping = require('./ping');
+	ping = require('./ping')
 
 describe('ping', function () {
 
-	let req = {};
+	let req = {}
 
 	beforeEach(function () {
 
@@ -11,30 +11,30 @@ describe('ping', function () {
 			status: 404,
 			data: [1, 2, 3],
 			message: ''
-		};
+		}
 
-	});
+	})
 
 	it('returns status code 200', function (done) {
 
 		ping(req, {}, function () {
 
-			assert.strictEqual(req.res.status, 200);
-			done();
+			assert.strictEqual(req.res.status, 200)
+			done()
 
-		});
+		})
 
-	});
+	})
 
 	it('returns an empty data array', function (done) {
 
 		ping(req, {}, function () {
 
-			assert.strictEqual(req.res.data.length, 0);
-			done();
+			assert.strictEqual(req.res.data.length, 0)
+			done()
 
-		});
+		})
 
 	})
 
-});
+})

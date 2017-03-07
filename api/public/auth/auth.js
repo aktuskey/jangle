@@ -1,22 +1,20 @@
 module.exports = function(req, res, next) {
 
-	let username = req.query.username;
-	let password = req.query.password;
+	let username = req.query.username || req.body.username,
+		password = req.query.password || req.body.password,
+		ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin',
+		ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'password',
+		ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'token'
 
-	// TODO: Legitimate authentication pls.
-	let ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
-	let ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'password';
-	let ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'token';
-
-	if (username == null || password == null) {
+	if (username === undefined || password === undefined) {
 
 		req.res = {
 			status: 400,
 			message: 'Please provide username and password.',
 			data: []
-		};
+		}
 
-	} else if (username == ADMIN_USERNAME && password == ADMIN_PASSWORD) {
+	} else if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
 
 		req.res = {
 			status: 200,
@@ -24,16 +22,16 @@ module.exports = function(req, res, next) {
 			data: [{
 				token: ADMIN_TOKEN
 			}]
-		};
+		}
 
 	} else {
 		req.res = {
 			status: 400,
 			message: 'Authentication failed.',
 			data: []
-		};
+		}
 	}
 
-	next();
+	next()
 
 };

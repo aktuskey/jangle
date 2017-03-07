@@ -1,123 +1,72 @@
 module.exports = function(req, res, next) {
 
-    let handleRejection = (err) => {
-        console.log('Rejection:', req.res.message);
-        req.done(req, res);
-    };
+    let Model = req.Model,
+        documents = req.query.documents,
+        newDocuments = undefined,
+        parseError = false
 
-    req.helpers.mongoose.getCollectionModel(req, res, next)
-        .then(
-            () => {
-                createDocument(req, res, next)
-                    .then(
-                        next,
-                        handleRejection
-                    )
-            },
-            handleRejection
-        );
+    try {
 
-};
+        newDocuments = JSON.parse(documents)
 
-let createDocument = function(req, res, next) {
+    } catch (ignore) {
 
-    let model = req.model;
-    let data = req.query.data;
-    let collectionName = req.params.collectionName;
+        parseError = true
 
-    return new Promise(function (resolve, reject) {
+    }
 
-        if (data) {
+    if (newDocuments !== undefined && newDocuments.length > 0) {
 
-            try {
+        let count = newDocuments.length,
+            units = count === 1 ? 'document' : 'documents'
 
-                let parsedData = JSON.parse(data);
-                let Model =
-                    req.connection.model(model.modelName, model.schema);
+        Model.create(newDocuments, function(err, documents) {
 
-                try {
+            if(err) {
 
-                    let saveTheThing = function() {
-
-                        let newDocument = new Model(parsedData);
-
-                        // TODO: Create custom 'unique' validator to allow user to define unique fields.
-                        newDocument.save(function(error, result, numAffected) {
-
-                            if (error) {
-
-                                req.helpers.mongoose.handleCreateError(req, error);
-
-                                reject();
-
-                            } else {
-
-                                let documentLabel = numAffected !== 1
-                                    ? (req.metaLabels ? req.metaLabels.plural : 'collections')
-                                    : (req.metaLabels ? req.metaLabels.singular : 'collection');
-
-                                req.res = {
-                                    status: 200,
-                                    data: [ newDocument ],
-                                    message: `Added ${numAffected} ${documentLabel}.`
-                                };
-
-                                resolve();
-                            }
-
-                        });
-
-                    };
-
-                    // Wait until indexes have been built or the model's index fields will be ignored.
-                    if(req.ignoreIndexedFields) {
-
-                        saveTheThing();
-
-                    } else {
-
-                        Model.on('index', saveTheThing);
-
-                    }
-
-                } catch (e) {
-
-                    console.log(e);
-
-                    req.res = {
-                        status: 400,
-                        data: [ parsedData ],
-                        message: `Exception was thrown in POST on save.`
-                    };
-
-                    reject();
-
-                }
-
-            } catch (e) {
+                var getCreateErrorMessage =
+                    req.utilities.database.getCreateErrorMessage
 
                 req.res = {
                     status: 400,
-                    data: [],
-                    message: `The 'data' query option is not valid JSON.`
-                };
+                    message: getCreateErrorMessage(err),
+                    data: []
+                }
 
-                reject();
+            } else {
+
+                req.res = {
+                    status: 201,
+                    message: `Added ${count} ${units}.`,
+                    data: documents
+                }
 
             }
 
-        } else {
+            next()
 
-            req.res = {
-                status: 400,
-                data: [],
-                message: `Please include the 'data' query option`
-            };
+        })
 
-            reject();
+    } else if (parseError) {
+
+        req.res = {
+            status: 400,
+            message: `Could not parse the 'documents' parameter.`,
+            data: []
         }
 
+        next()
 
-    });
+    } else {
 
-};
+        req.res = {
+            status: 400,
+            message: `Please include the 'documents' parameter.`,
+            data: []
+        }
+
+        next()
+
+    }
+
+}

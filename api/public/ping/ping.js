@@ -4,7 +4,8 @@ module.exports = function (req, res, next) {
 		status: 200,
 		message: 'Connection successful.',
 		data: []
-	};
+	}
 
-	next();
-};
+	next()
+
+}

@@ -1,23 +1,38 @@
 module.exports = function(req, res, next) {
 
-    let handleRejection = (err) => {
-        console.log('Rejection:', req.res.message);
-        req.done(req, res);
-    };
+    let Model = req.Model,
+        queryOptions = req.utilities.database.getFilterOptions(req)
 
-    let getDocuments =
-        req.helpers.mongoose.changeDocuments('find');
+    Model.find(queryOptions.where)
+        .exec(function (err, documents) {
 
-    req.helpers.mongoose.getCollectionModel(req, res, next)
-        .then(
-            () => {
-                getDocuments(req, res, next)
-                    .then(
-                        next,
-                        handleRejection
-                    )
-            },
-            handleRejection
-        );
+            if (err) {
 
-};
+                console.error(`Error in GET: `, err)
+
+                req.res = {
+                    status: 500,
+                    message: `Could not get documents.`,
+                    data: []
+                }
+
+            } else {
+
+                let count = documents.length,
+                    units = count === 1 ? 'document' : 'documents'
+
+                req.res = {
+                    status: 200,
+                    message: `Found ${count} ${units}.`,
+                    data: documents
+                }
+
+            }
+
+            next()
+
+        })
+
+
+
+}

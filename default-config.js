@@ -1,21 +1,23 @@
-var config = require('./jangle-config.js');
+module.exports = function(config) {
 
-if (config.mongodb === undefined) {
+	if (config.mongodb === undefined) {
 
-	config.mongodb = {};
+		config.mongodb = {}
 
-}
+	}
 
-module.exports = {
+	return {
 
-	mongodb: {
-		host: config.mongodb.host || 'localhost',
-		port: config.mongodb.port || 27017,
-		contentDb: config.mongodb.contentDb || 'jangle',
-		liveDb: config.mongodb.liveDb || 'jangleLive',
-		auth: config.mongodb.auth || false,
-		rootUser: config.mongodb.rootUser || 'admin',
-		rootPassword: config.mongodb.rootPassword || 'password'
+		mongodb: {
+			host: config.mongodb.host || 'localhost',
+			port: config.mongodb.port || 27017,
+			database: config.mongodb.database || 'jangle',
+			metaPrefix: config.mongodb.metaPrefix || 'jangle.',
+			auth: config.mongodb.auth || false,
+			rootUser: config.mongodb.rootUser || 'admin',
+			rootPassword: config.mongodb.rootPassword || 'password'
+		}
+
 	}
 
 }

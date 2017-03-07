@@ -1,1 +1,1 @@
-module.exports = require('./ping.js');
+module.exports = require('./ping.js')

@@ -3,49 +3,74 @@
 > Simple content management.
 
 
----
 
 ### API Documentation
+
+
 
 __Public API__
 > These routes don't require an authentication token.
 
-Method | URL | Result
+ | URL | Result
 --- | --- | ---
-__`GET`__ |`/api`| Jangle API documentation.
+__`GET`__ |`/api/ping`| Tests connection to Jangle.
 __`GET`__ |`/api/auth`| Used to retrieve an authentication `token` for all other api requests.
-__`GET`__ |`/api/collections/some-example`| List __published__ documents in `some-example` collection.
 
 
 __Collections API__
-> For managing content.
+> These routes require an authenticated user.
 
-Method | URL | Result
---- | --- | ---
-__`GET`__ |`/api/collections/some-example`| List documents in `some-example` collection.
-__`GET`__ |`/api/collections/some-example/123`| Get document '123' in `some-example` collection.
-__`POST`__ |`/api/collections/some-example`| Create a new document in `some-example` collection.
- | |
-__`PUT`__ |`/api/collections/some-example`| Update documents in `some-example` collection.
-__`PUT`__ |`/api/collections/some-example/123`| Update document `123` from `some-example` collection.
-__`DELETE`__ |`/api/collections/some-example`| Remove documents in `some-example` collection.
-__`DELETE`__ |`/api/collections/some-example/123`| Remove document `123` from `some-example` collection.
+__`GET`__:
 
-Method | Parameter | Description
---- | --- | ---
-__`GET`__ | `where` | Filters down listed results.
-          | `select` | Select properties to return.
-          | `sort` | Sort by a property.
-          | `limit` | Limit number of returned results.
-          | `skip` | Skip a certain number of results.
- | |
-__`POST`__ | `data` | Object to create.
- | |
-__`PUT`__ | `set` | Select fields to update.
-          | `unset` | Select fields to remove.
-          | `where` | Filters down documents to update.
- | |
-__`DELETE`__ | `where` | Filters down documents to remove.
+URL | Result
+--- | ---
+ `/api/collections/puppies`| Lists all documents in `puppies` collection.
+`/api/collections/puppies/123`| Gets document '123' in `puppies` collection.
+
+Parameter | Description
+--- | ---
+`where` | Filters down listed results.
+`select` | Selects properties to return.
+`sort` | Sorts by a property.
+`limit` | Limits number of returned results.
+`skip` | Skips a certain number of results.
+
+
+__`POST`__:
+
+ URL | Result
+--- | ---
+`/api/collections/puppies`| Creates new documents in `puppies` collection.
+
+Parameter | Description
+--- | ---
+`documents` | Specifies new documents to add.
+
+
+__`PUT`__:
+
+URL | Result
+--- | ---
+`/api/collections/puppies`| Updates documents in `puppies` collection.
+`/api/collections/puppies/123`| Updates document `123` from `puppies` collection.
+
+Parameter | Description
+--- | ---
+`where` | Filters down documents to update.
+`set` | Specifies fields to update.
+`unset` | Specifies fields to remove.
+
+
+__`DELETE`__:
+
+URL | Result
+--- | ---
+`/api/collections/puppies`| Removes documents in `puppies` collection.
+`/api/collections/puppies/123`| Removes document `123` from `puppies` collection.
+
+Parameter | Description
+--- | ---
+`where` | Filters down documents to remove.
 
 ---
 

@@ -1,65 +1,11 @@
 let mongoose = require('mongoose'),
-    Schema = mongoose.Schema,
-    helpers = include('helpers'),
-    jangleConfig = include('default-config.js')
-    FieldSchema = require('./schemas/field.js'),
-    JangleMetaSchema = require('./schemas/jangle-meta.js');
-
-let CollectionSchema = new Schema({
-
-    name: {
-        type: String,
-        required: true,
-        trim: true,
-        index: true,
-        validate: {
-            validator: helpers.mongoose.getUniqueValidator(
-                jangleConfig,
-                mongoose,
-                'jangle.collections',
-                'name'
-            ),
-            msg: 'Collection with that name already exists.'
-        }
-    },
-
-    labels: {
-        singular: {
-            type: String,
-            required: true,
-            trim: true
-        },
-        plural: {
-            type: String,
-            required: true,
-            trim: true
-        }
-    },
-
-    fields: [FieldSchema],
-
-    jangle: {
-        type: JangleMetaSchema,
-        required: true,
-        default: {}
-    },
-
-    defaultValue: {
-        type: String,
-        required: false
-    },
-
-    helpText: {
-        type: String,
-        required: false
-    }
-
-}, {
-    versionKey: false
-});
+    schema = require('./schemas/collection.js'),
+    model = undefined
 
 try {
-    module.exports = mongoose.model('jangle.collections', CollectionSchema);
+    model = mongoose.model('jangle.collections', schema);
 } catch (ignore) {
-    module.exports = mongoose.model('jangle.collections');
+    model = mongoose.model('jangle.collections');
 }
+
+module.exports = model

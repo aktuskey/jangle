@@ -1,23 +1,36 @@
 module.exports = function(req, res, next) {
 
-    let handleRejection = (err) => {
-        console.log('Rejection:', req.res.message);
-        req.done(req, res);
-    };
+    let Model = req.Model,
+        filterOptions = req.utilities.database.getFilterOptions(req)
 
-    let removeDocuments =
-        req.helpers.mongoose.changeDocuments('remove');
+    Model.remove(filterOptions.where)
+        .remove(function(err, writeOpResult) {
 
-    req.helpers.mongoose.getCollectionModel(req, res, next)
-        .then(
-            () => {
-                removeDocuments(req, res, next)
-                    .then(
-                        next,
-                        handleRejection
-                    )
-            },
-            handleRejection
-        );
+            if (err) {
 
-};
+                console.error(err)
+
+                req.res = {
+                    status: 400,
+                    message: 'Error deleting documents.',
+                    data: []
+                }
+
+            } else {
+
+                let count = writeOpResult.result.n,
+                    units = count === 1 ? 'document' : 'documents'
+
+                req.res = {
+                    status: 200,
+                    message: `Removed ${count} ${units}.`,
+                    data: []
+                }
+
+            }
+
+            next()
+
+        })
+
+}
