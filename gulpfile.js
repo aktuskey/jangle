@@ -2,9 +2,14 @@ let gulp = require('gulp'),
     elm = require('gulp-elm')
 
 gulp.task('elm', function () {
-  gulp.src('public/elm/*.elm')
-    .pipe(elm())
-    .pipe(gulp.dest('public/'));
+
+  gulp.src('public/elm/Main.elm')
+    .pipe(elm({
+        debug: true
+    }))
+    .on('error', console.error)
+    .pipe(gulp.dest('public/'))
+
 })
 
 gulp.task('elm-watch', ['elm'], function () {

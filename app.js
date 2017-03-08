@@ -1,11 +1,10 @@
 var express = require('express'),
-	session = require('express-session'),
 	app = express(),
+	session = require('express-session'),
 	mongoose = require('mongoose'),
 	bodyParser = require('body-parser'),
 	passport = require('passport'),
 	LocalStrategy = require('passport-local').Strategy,
-
 	api = require('./api'),
 	utilities = require('./utilities'),
 	models = require('./models'),
@@ -14,13 +13,29 @@ var express = require('express'),
 	config = require('./default-config')(userConfig)
  	promise = utilities.promise(global.Promise)
 
+app.set('port', process.env.PORT || 3000)
+
+
+// MONGOOSE
 mongoose.Promise = promise
 
+
+// BODY PARSER
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({extended: false}))
+
+
+// PUG
+app.set('view engine', 'pug')
+app.set('views', './public')
+
+
+// PASSPORT
 passport.use(new LocalStrategy(
 
   function(username, password, done) {
 
-	  if ( username === config.rootUser && password === config.rootPassword ) {
+	  if ( username === config.mongodb.rootUser && password === config.mongodb.rootPassword ) {
 
 		  done(null, {
 			  name: {
@@ -37,20 +52,37 @@ passport.use(new LocalStrategy(
 	  }
   }
 
-));
+))
 
-app.use(bodyParser.json())
+passport.serializeUser(function(user, done) {
+  done(null, user.username)
+})
+
+passport.deserializeUser(function(username, done) {
+  if (username === config.mongodb.rootUser) {
+	  return {
+		  name: {
+			  first: 'Admin',
+			  last: 'User'
+		  },
+		  username: username
+	  }
+  } else return null
+})
+
 app.use(session({
 	secret: process.env.COOKIE_SECRET || 'some-cookie-secret',
 	resave: false,
 	saveUninitialized: true,
 	cookie: { secure: true }
-}));
+}))
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Static files
+
+// STATIC FILES
 app.use(express.static('public'))
+
 
 // API
 app.use('/api', (req, res, next) => {
@@ -75,18 +107,28 @@ app.use('/api', (req, res, next) => {
 
 app.use('/api', api.routes(api, new express.Router()))
 
-// WEB APP
-app.post('/sign-in', passport.authenticate('local', {
-	successRedirect: '/dashboard',
-    failureRedirect: '/sign-in'
-}))
 
-app.get('*', (req, res) => {
-	res.sendFile( __dirname + '/public/index.html' )
+// AUTHENTICATION
+app.post('/sign-in', passport.authenticate('local'), (req, res) => {
+	res.send(req.user)
 })
 
-app.set('port', process.env.PORT || 3000)
 
+// WEB APP
+app.get('*', (req, res) => {
+
+	if (req.user === undefined)
+		req.user = null
+
+	res.render('index', {
+		flags: JSON.stringify({
+			user: req.user
+		})
+	})
+})
+
+
+// START APP
 let initializeThen = function (onSuccess, onFailure) {
 
 	utilities.database
