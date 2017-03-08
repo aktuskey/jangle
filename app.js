@@ -1,7 +1,11 @@
 var express = require('express'),
+	session = require('express-session'),
 	app = express(),
 	mongoose = require('mongoose'),
 	bodyParser = require('body-parser'),
+	passport = require('passport'),
+	LocalStrategy = require('passport-local').Strategy,
+
 	api = require('./api'),
 	utilities = require('./utilities'),
 	models = require('./models'),
@@ -12,9 +16,44 @@ var express = require('express'),
 
 mongoose.Promise = promise
 
-app.use(bodyParser.json())
+passport.use(new LocalStrategy(
 
-app.use((req, res, next) => {
+  function(username, password, done) {
+
+	  if ( username === config.rootUser && password === config.rootPassword ) {
+
+		  done(null, {
+			  name: {
+				  first: 'Admin',
+				  last: 'User'
+			  },
+			  username: username
+		  })
+
+	  } else {
+
+		  done(null, false)
+
+	  }
+  }
+
+));
+
+app.use(bodyParser.json())
+app.use(session({
+	secret: process.env.COOKIE_SECRET || 'some-cookie-secret',
+	resave: false,
+	saveUninitialized: true,
+	cookie: { secure: true }
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Static files
+app.use(express.static('public'))
+
+// API
+app.use('/api', (req, res, next) => {
 
 	req.models = models
 	req.config = config
@@ -36,6 +75,25 @@ app.use((req, res, next) => {
 
 app.use('/api', api.routes(api, new express.Router()))
 
+// WEB APP
+app.post('/sign-in', passport.authenticate('local', {
+	successRedirect: '/dashboard',
+    failureRedirect: '/sign-in'
+}))
+
+app.get('/', (req, res, next) => {
+
+	if (req.user) {
+		next()
+	} else {
+		res.redirect('/sign-in')
+	}
+
+})
+
+app.get('*', (req, res) => {
+	res.sendFile( __dirname + '/public/index.html' )
+})
 
 app.set('port', process.env.PORT || 3000)
 

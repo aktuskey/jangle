@@ -1,4 +1,13 @@
+# NodeJS
 .env
 node_modules
+
+# Coveralls
 coverage
+
+# OSX
 *.DS_Store
+
+# Elm Things
+elm-stuff
+public/Main.js

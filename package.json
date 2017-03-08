@@ -27,10 +27,15 @@
   "dependencies": {
     "body-parser": "^1.17.1",
     "express": "^4.14.0",
-    "mongoose": "^4.7.1"
+    "express-session": "^1.15.1",
+    "mongoose": "^4.7.1",
+    "passport": "^0.3.2",
+    "passport-local": "^1.0.0"
   },
   "devDependencies": {
     "coveralls": "^2.11.15",
+    "gulp": "^3.9.1",
+    "gulp-elm": "^0.6.1",
     "istanbul": "^0.4.5",
     "mocha": "^3.2.0",
     "mocha-lcov-reporter": "^1.2.0",
