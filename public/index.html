@@ -7,8 +7,22 @@
         <main></main>
         <script type="text/javascript" src="/Main.js"></script>
         <script type="text/javascript">
+
             var main = document.querySelector('main');
-            var app = Elm.Main.embed(main);
+
+            // TODO: Server side render this
+            var user = {
+                name: {
+                    first: 'Ryan',
+                    last: 'Haskell'
+                },
+                username: 'RyanNHG'
+            };
+
+            var app = Elm.Main.embed(main, {
+                user: user
+            });
+
         </script>
     </body>
 </html>

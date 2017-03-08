@@ -81,22 +81,11 @@ app.post('/sign-in', passport.authenticate('local', {
     failureRedirect: '/sign-in'
 }))
 
-app.get('/', (req, res, next) => {
-
-	if (req.user) {
-		next()
-	} else {
-		res.redirect('/sign-in')
-	}
-
-})
-
 app.get('*', (req, res) => {
 	res.sendFile( __dirname + '/public/index.html' )
 })
 
 app.set('port', process.env.PORT || 3000)
-
 
 let initializeThen = function (onSuccess, onFailure) {
 
