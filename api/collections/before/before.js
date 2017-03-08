@@ -6,7 +6,7 @@ module.exports = function(done) {
             req.utilities.logging.handleRejection(req, res, done)
 
         let checkForUserTokenTask = checkForUserToken(req),
-            getMongoConnectionTask = getMongoConnection(req),
+            getMongoConnectionTask = req.utilities.database.getMongoConnection(req),
             getModelTask = getModel(req)
 
         checkForUserTokenTask()
@@ -82,36 +82,6 @@ let checkForUserToken = function (req) {
 
 }
 
-let getMongoConnection = function (req) {
-
-    return function() {
-
-        return new req.promise(function(resolve, reject) {
-
-            let connectionString =
-                req.utilities.database.getConnectionString(req.config)
-
-            req.connection = req.mongoose.createConnection()
-
-            req.connection.open(connectionString, function(error) {
-
-                if (error) {
-
-                    handleConnectionError(req, reject)
-
-                } else {
-
-                    resolve()
-
-                }
-
-            }).catch( () => handleConnectionError(req, reject) )
-
-        })
-
-    }
-}
-
 let getModel = function (req) {
 
     return function () {
@@ -142,20 +112,5 @@ let getModel = function (req) {
 
 
     }
-
-}
-
-let handleConnectionError =  function (req, reject) {
-
-    let message =
-        `Can't connect to the database.`
-
-    req.res = {
-        status: 500,
-        message: message,
-        data: []
-    }
-
-    reject(message)
 
 }

@@ -1,10 +1,10 @@
 module.exports = function(req, res, next) {
 
     let Model = req.Model,
-        filterOptions = req.utilities.database.getFilterOptions(req),
+        queryOptions = req.utilities.database.getQueryOptions(req),
         getDeltas = req.utilities.database.getDeltas
 
-    Model.find(filterOptions.where).exec(function (err, documents) {
+    Model.find(queryOptions.where).exec(function (err, documents) {
 
         if (err) {
 
@@ -32,7 +32,7 @@ module.exports = function(req, res, next) {
 
             let count = documents.length,
                 units = count === 1 ? 'document' : 'documents',
-                deltas = getDeltas(documents, filterOptions.set, filterOptions.unset),
+                deltas = getDeltas(documents, queryOptions.set, queryOptions.unset),
                 documentsProcessed = 0,
                 documentsUpdated = 0,
                 newDocuments = []
@@ -44,13 +44,13 @@ module.exports = function(req, res, next) {
 
                 var updates = {}
 
-                if(filterOptions.set !== undefined && Object.keys(filterOptions.set).length > 0)
-                    updates.$set = filterOptions.set
+                if(queryOptions.set !== undefined && Object.keys(queryOptions.set).length > 0)
+                    updates.$set = queryOptions.set
 
-                if(filterOptions.unset !== undefined && Object.keys(filterOptions.unset).length > 0)
-                    updates.$unset = filterOptions.unset
+                if(queryOptions.unset !== undefined && Object.keys(queryOptions.unset).length > 0)
+                    updates.$unset = queryOptions.unset
 
-                if(filterOptions.set && Object.keys(filterOptions.set).length > 0)
+                if(queryOptions.set && Object.keys(queryOptions.set).length > 0)
                     updates['jangle.previousVersions'] = document.jangle.previousVersions
 
                 Model.update({ '_id': document._id }, updates, function (err, result) {

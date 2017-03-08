@@ -3,9 +3,9 @@ let mongoose = require('mongoose'),
 	model = undefined
 
 try {
-	model = mongoose.model('jangle.fieldTypes', schema);
+	model = mongoose.model('jangle.fieldTypes', schema)
 } catch (ignore) {
-	model = mongoose.model('jangle.fieldTypes');
+	model = mongoose.model('jangle.fieldTypes')
 }
 
 module.exports = model

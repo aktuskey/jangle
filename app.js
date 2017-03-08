@@ -5,6 +5,7 @@ var express = require('express'),
 	api = require('./api'),
 	utilities = require('./utilities'),
 	models = require('./models'),
+	initials = require('./models/initial'),
 	userConfig = require('./jangle-config'),
 	config = require('./default-config')(userConfig)
  	promise = utilities.promise(global.Promise)
@@ -38,6 +39,19 @@ app.use('/api', api.routes(api, new express.Router()))
 
 app.set('port', process.env.PORT || 3000)
 
-app.listen(app.get('port'), () =>
-	console.info(`Jangle ready on port ${app.get('port')}!`)
-)
+
+let initializeThen = function (onSuccess, onFailure) {
+
+	utilities.database
+		.initializeDatabase({ config, models, utilities, promise, mongoose, initials })
+		.then(onSuccess, onFailure)
+
+}
+
+initializeThen(() => {
+
+	app.listen(app.get('port'), () =>
+		console.info(`Jangle ready on port ${app.get('port')}!`)
+	)
+
+}, console.error)

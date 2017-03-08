@@ -20,30 +20,35 @@ module.exports = function(req, res, next) {
         let count = newDocuments.length,
             units = count === 1 ? 'document' : 'documents'
 
-        Model.create(newDocuments, function(err, documents) {
+        // TODO: Might need to fix if Model doesn't fire index event
+        Model.on('index', () => {
 
-            if(err) {
+            Model.create(newDocuments, function(err, documents) {
 
-                var getCreateErrorMessage =
-                    req.utilities.database.getCreateErrorMessage
+                if(err) {
 
-                req.res = {
-                    status: 400,
-                    message: getCreateErrorMessage(err),
-                    data: []
+                    var handleCreateError =
+                        req.utilities.logging.handleCreateError
+
+                    req.res = {
+                        status: 400,
+                        message: handleCreateError(err),
+                        data: []
+                    }
+
+                } else {
+
+                    req.res = {
+                        status: 201,
+                        message: `Added ${count} ${units}.`,
+                        data: documents
+                    }
+
                 }
 
-            } else {
+                next()
 
-                req.res = {
-                    status: 201,
-                    message: `Added ${count} ${units}.`,
-                    data: documents
-                }
-
-            }
-
-            next()
+            })
 
         })
 

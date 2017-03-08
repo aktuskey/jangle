@@ -1,9 +1,9 @@
 module.exports = function(req, res, next) {
 
     let Model = req.Model,
-        filterOptions = req.utilities.database.getFilterOptions(req)
+        queryOptions = req.utilities.database.getQueryOptions(req)
 
-    Model.remove(filterOptions.where)
+    Model.remove(queryOptions.where)
         .remove(function(err, writeOpResult) {
 
             if (err) {

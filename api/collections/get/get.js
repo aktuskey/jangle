@@ -1,7 +1,7 @@
 module.exports = function(req, res, next) {
 
     let Model = req.Model,
-        queryOptions = req.utilities.database.getFilterOptions(req)
+        queryOptions = req.utilities.database.getQueryOptions(req)
 
     Model.find(queryOptions.where)
         .exec(function (err, documents) {

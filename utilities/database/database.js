@@ -1,5 +1,116 @@
 module.exports = {
 
+    initializeDatabase: ({ config, models, utilities, promise, mongoose, initials }) => {
+
+        return new promise((resolve, reject) => {
+
+            console.info()
+
+            let req = { promise, utilities, config, mongoose }
+
+            utilities.database
+                .getMongoConnection(req)()
+                .then(() => {
+
+                    let Models = Object.keys(models).map( (key) => {
+
+                            return {
+                                initial: initials[key] || [],
+                                model: models[key]
+                            }
+
+                        }),
+                        count = Models.length,
+                        modelsProcessed = 0,
+                        modelsInitialized = 0
+
+                    let modelProcessed = () => {
+
+                        modelsProcessed++
+
+                        if(modelsProcessed === count) {
+
+                            let units = modelsInitialized === 1 ?
+                                'collection' : 'collections'
+
+                            console.info(`    ${modelsInitialized} ${units} initialized.\n`)
+
+                            req.connection.close(resolve)
+
+                        }
+
+                    }
+
+                    Models.map( ({ model, initial }) => {
+
+
+                        let Model = req.connection.model( model.modelName, model.schema )
+
+                        if(Model !== undefined && initial.length > 0) {
+
+
+                            Model.on('index', () => {
+                                Model.create(initial, function (error, results) {
+
+                                    if (!error && results !== undefined) {
+
+                                        console.info(`Initializing ${model.modelName}...`)
+
+                                        modelsInitialized++
+
+                                    }
+
+                                    modelProcessed()
+
+                                })
+                            })
+
+                        } else {
+
+                            modelProcessed()
+
+                        }
+
+                    })
+
+                })
+                .catch(reject)
+
+
+        })
+
+    },
+
+    getMongoConnection: function (req) {
+
+        return function() {
+
+            return new req.promise(function(resolve, reject) {
+
+                let connectionString =
+                    req.utilities.database.getConnectionString(req.config)
+
+                req.connection = req.mongoose.createConnection()
+
+                req.connection.open(connectionString, function(error) {
+
+                    if (error) {
+
+                        req.utilities.logging.handleConnectionError(req, reject)
+
+                    } else {
+
+                        resolve()
+
+                    }
+
+                }).catch( () => req.utilities.logging.handleConnectionError(req, reject) )
+
+            })
+
+        }
+    },
+
     getConnectionString: (config) => {
 
         let authPrefix = (config.mongodb.auth)
@@ -152,19 +263,19 @@ module.exports = {
 
     },
 
-    getFilterOptions: function(req) {
+    getQueryOptions: function(req) {
 
-        let filterOptions = {}
+        let queryOptions = {}
 
 
         // TODO: Better WHERE (gt, lt, eq, ne, contains, etc.)
         if(req.query.where !== undefined) {
 
-            filterOptions.where = this.getWhereOptions(req.query.where)
+            queryOptions.where = this.getWhereOptions(req.query.where)
 
         } else {
 
-            filterOptions.where = {}
+            queryOptions.where = {}
 
         }
 
@@ -172,7 +283,7 @@ module.exports = {
 
             let idField = req.idField || '_id'
 
-            filterOptions.where[idField] = req.params.docId
+            queryOptions.where[idField] = req.params.docId
 
         }
 
@@ -182,7 +293,7 @@ module.exports = {
             let set = this.getSetOptions(req.query.set)
 
             if(set !== undefined)
-                filterOptions.set = set
+                queryOptions.set = set
 
         }
 
@@ -192,35 +303,35 @@ module.exports = {
             let unset = this.getUnsetOptions(req.query.unset)
 
             if(unset !== undefined)
-                filterOptions.unset = unset
+                queryOptions.unset = unset
 
         }
 
         // SORT
         if(req.query.sort !== undefined) {
 
-            filterOptions.sort = this.getSortOptions(req.query.sort)
+            queryOptions.sort = this.getSortOptions(req.query.sort)
 
         }
 
         // SELECT
         if(req.query.select !== undefined) {
 
-            filterOptions.select = this.getSelectOptions(req.query.select)
+            queryOptions.select = this.getSelectOptions(req.query.select)
 
         }
 
         // LIMIT
         if(req.query.limit !== undefined) {
 
-            filterOptions.limit = this.getLimitOption(req.query.limit)
+            queryOptions.limit = this.getLimitOption(req.query.limit)
 
         }
 
         // SKIP
         if(req.query.skip !== undefined) {
 
-            filterOptions.skip = this.getSkipOption(req.query.skip)
+            queryOptions.skip = this.getSkipOption(req.query.skip)
 
         }
 
@@ -229,7 +340,7 @@ module.exports = {
 
         }
 
-        return filterOptions
+        return queryOptions
 
     },
 
@@ -460,47 +571,6 @@ module.exports = {
         })
 
         return deltaDocuments
-
-    },
-
-    getCreateErrorMessage: function (error) {
-
-        let message = `There was a problem adding the new document.`
-
-        if (error.name == 'ValidationError') {
-
-            message = `The 'data' option failed validation.`
-
-            let errorList = Object.keys(error.errors).map(x => error.errors[x])
-
-            let requiredFieldErrors = errorList.filter(x => x.kind == 'required')
-
-            if (requiredFieldErrors.length > 0) {
-
-                let missingRequiredFields =
-                    requiredFieldErrors.map(x => x.path)
-
-                message = `Missing required fields: ${missingRequiredFields}`
-
-            } else if(error.errors.name) {
-
-                message = error.errors.name.message
-
-            }
-
-        } else if (error.name == 'MongoError') {
-
-            message = `There was a problem with MongoDB.`
-
-            switch (error.code) {
-                case 11000:
-                    message = `A document with that key already exists.`
-                    break
-            }
-
-        }
-
-        return message
 
     }
 
