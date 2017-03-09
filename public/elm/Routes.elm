@@ -1,4 +1,4 @@
-module Routes exposing (Page(..), getPage, getPath, getNewLocation)
+module Routes exposing (Page(..), getPage, getPath, getLink, getNewLocation)
 
 import Navigation exposing (Location)
 import UrlParser as Url exposing (top, s)
@@ -7,6 +7,8 @@ import UrlParser as Url exposing (top, s)
 type Page
     = SignIn
     | Dashboard
+    | Users
+    | Collections
     | NotFound
 
 
@@ -23,6 +25,14 @@ useHashes =
     False
 
 
+prefix : String
+prefix =
+    if useHashes then
+        "#"
+    else
+        "/"
+
+
 getParser : Parser
 getParser =
     if useHashes then
@@ -36,6 +46,8 @@ route =
     Url.oneOf
         [ Url.map SignIn (s "sign-in")
         , Url.map Dashboard (s "dashboard")
+        , Url.map Collections (s "collections")
+        , Url.map Users (s "users")
         ]
 
 
@@ -58,13 +70,24 @@ getPath page =
         Dashboard ->
             "dashboard"
 
+        Collections ->
+            "collections"
+
+        Users ->
+            "users"
+
         NotFound ->
             "not-found"
+
+
+getLink : Page -> String
+getLink page =
+    prefix ++ getPath page
 
 
 getNewLocation : String -> Location -> Location
 getNewLocation newRoute location =
     if useHashes then
-        { location | hash = "#" ++ newRoute }
+        { location | hash = prefix ++ newRoute }
     else
-        { location | pathname = "/" ++ newRoute }
+        { location | pathname = prefix ++ newRoute }

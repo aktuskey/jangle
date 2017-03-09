@@ -26,3 +26,29 @@ main, .app, .app > div, .is-fullheight {
 .is-padded-right {
     padding-right: 10px;
 }
+
+.is-fixed {
+    position: fixed;
+    width: 100%;
+}
+
+.hero.is-fullheight > .hero-body > .container {
+    flex-direction: column;
+    display: flex;
+    align-items: center;
+}
+
+.dashboard-page .dashboard-options .box {
+    min-width: 200px;
+    max-width: 100%;
+    opacity: .6;
+    transition: opacity .3s;
+}
+
+.dashboard-page .dashboard-options .box:hover {
+    opacity: 1;
+}
+
+.dashboard-page .dashboard-options .title {
+    color: #363636;
+}

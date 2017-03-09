@@ -60,21 +60,21 @@ passport.serializeUser(function(user, done) {
 
 passport.deserializeUser(function(username, done) {
   if (username === config.mongodb.rootUser) {
-	  return {
+	  done(null, {
 		  name: {
 			  first: 'Admin',
 			  last: 'User'
 		  },
 		  username: username
-	  }
-  } else return null
+	  })
+  } else done(null, false)
 })
 
 app.use(session({
 	secret: process.env.COOKIE_SECRET || 'some-cookie-secret',
 	resave: false,
 	saveUninitialized: true,
-	cookie: { secure: true }
+	cookie: { secure: false }
 }))
 app.use(passport.initialize());
 app.use(passport.session());
