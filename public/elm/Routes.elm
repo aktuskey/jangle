@@ -44,8 +44,9 @@ getParser =
 route : Route
 route =
     Url.oneOf
-        [ Url.map SignIn (s "sign-in")
+        [ Url.map Dashboard (s "")
         , Url.map Dashboard (s "dashboard")
+        , Url.map SignIn (s "sign-in")
         , Url.map Collections (s "collections")
         , Url.map Users (s "users")
         ]

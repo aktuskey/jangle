@@ -113,6 +113,20 @@ app.post('/sign-in', passport.authenticate('local'), (req, res) => {
 	res.send(req.user)
 })
 
+app.post('/sign-out', (req, res) => {
+
+	let username = req.user ? req.user.username : 'No one'
+
+	req.logout()
+
+	res.status(200).json({
+		error: false,
+		message: `${username} was signed out.`,
+		data: []
+	})
+
+})
+
 
 // WEB APP
 app.get('*', (req, res) => {

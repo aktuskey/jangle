@@ -20,6 +20,13 @@ type alias Flags =
     }
 
 
+type alias Response a =
+    { error : Bool
+    , message : String
+    , data : List a
+    }
+
+
 type alias Context =
     { user : Maybe User
     , location : Navigation.Location

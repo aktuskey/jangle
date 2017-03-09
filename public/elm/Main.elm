@@ -24,6 +24,8 @@ type Msg
     | PasswordUpdated String
     | SignInSubmit
     | SignInResponded (Result Http.Error User)
+    | SignOutSubmit
+    | SignOutResponded (Result Http.Error (Response User))
 
 
 type alias Model =
@@ -32,7 +34,7 @@ type alias Model =
     , username : String
     , password : String
     , errorMessage : Maybe String
-    , signingIn : Bool
+    , handlingRequest : Bool
     }
 
 
@@ -69,10 +71,10 @@ update msg model =
             { model | password = newPassword } ! []
 
         SignInSubmit ->
-            if model.signingIn then
+            if model.handlingRequest then
                 model ! []
             else
-                { model | signingIn = True }
+                { model | handlingRequest = True }
                     ! [ attemptSignIn model.username model.password ]
 
         SignInResponded result ->
@@ -86,7 +88,7 @@ update msg model =
                             { context | user = Just user }
                     in
                         { model
-                            | signingIn = False
+                            | handlingRequest = False
                             , context = newContext
                             , errorMessage = Nothing
                         }
@@ -95,9 +97,40 @@ update msg model =
                 Err error ->
                     { model
                         | errorMessage = Just "Could not sign in."
-                        , signingIn = False
+                        , handlingRequest = False
                     }
                         ! []
+
+        SignOutSubmit ->
+            if model.handlingRequest then
+                model ! []
+            else
+                { model | handlingRequest = True }
+                    ! [ attemptSignOut ]
+
+        SignOutResponded result ->
+            case result of
+                Ok response ->
+                    let
+                        context =
+                            model.context
+
+                        newContext =
+                            { context | user = Nothing }
+                    in
+                        { model
+                            | handlingRequest = False
+                            , context = newContext
+                            , errorMessage = Nothing
+                        }
+                            ! [ getCmdForMsg <| PageChange Routes.SignIn ]
+
+                Err error ->
+                    { model
+                        | errorMessage = Just "Could not sign out."
+                        , handlingRequest = False
+                    }
+                        ! [ getCmdForMsg <| PageChange Routes.SignIn ]
 
         NoOp ->
             model ! []
@@ -113,6 +146,26 @@ attemptSignIn username password =
             Http.post url Http.emptyBody userDecoder
     in
         Http.send SignInResponded request
+
+
+attemptSignOut : Cmd Msg
+attemptSignOut =
+    let
+        url =
+            "/sign-out"
+
+        request =
+            Http.post url Http.emptyBody (responseDecoder userDecoder)
+    in
+        Http.send SignOutResponded request
+
+
+responseDecoder : Json.Decoder a -> Json.Decoder (Response a)
+responseDecoder decoder =
+    Json.map3 Response
+        (field "error" Json.bool)
+        (field "message" Json.string)
+        (field "data" (Json.list decoder))
 
 
 userDecoder : Json.Decoder User
@@ -159,6 +212,13 @@ viewNavbar model =
                                 ]
                             ]
                         ]
+                    , div [ class "nav-right" ]
+                        [ div [ class "nav-item" ]
+                            [ a
+                                [ onClick (SignOutSubmit) ]
+                                [ text "Sign out" ]
+                            ]
+                        ]
                     ]
                 ]
 
@@ -173,10 +233,10 @@ viewPage model =
             viewDashboardPage model
 
         Routes.Collections ->
-            viewNotFoundPage model
+            viewCollectionsPage model
 
         Routes.Users ->
-            viewNotFoundPage model
+            viewUsersPage model
 
         Routes.NotFound ->
             viewNotFoundPage model
@@ -235,7 +295,7 @@ buttonBar children =
 
 getSignInClasses : Model -> String
 getSignInClasses model =
-    (if model.signingIn then
+    (if model.handlingRequest then
         "is-loading "
      else
         ""
@@ -292,7 +352,62 @@ getGreeting model =
 
 viewNotFoundPage : Model -> Html Msg
 viewNotFoundPage model =
-    div [ class "not-found-page" ] []
+    div [ class "not-found-page" ]
+        [ div [ class "hero is-fullheight is-gray" ]
+            [ div [ class "hero-body has-text-centered is-paddingless" ]
+                [ div [ class "container is-fullheight justify-center" ]
+                    [ h1 [ class "title is-1" ] [ text "Page not found." ]
+                    , h2 [ class "subtitle is-3" ]
+                        [ text "Sorry about that!" ]
+                    , button
+                        [ class "button is-info is-medium"
+                        , onClick (PageChange Routes.Dashboard)
+                        ]
+                        [ text "Go to dashboard" ]
+                    ]
+                ]
+            ]
+        ]
+
+
+viewCollectionsPage : Model -> Html Msg
+viewCollectionsPage model =
+    div [ class "collections-page" ]
+        [ div [ class "hero is-fullheight is-primary" ]
+            [ div [ class "hero-body has-text-centered is-paddingless" ]
+                [ div [ class "container is-fullheight justify-center" ]
+                    [ h1 [ class "title is-1" ] [ text "Collections." ]
+                    , h2 [ class "subtitle is-3" ]
+                        [ text "Coming soon!" ]
+                    , button
+                        [ class "button is-primary is-medium is-inverted"
+                        , onClick (PageChange Routes.Dashboard)
+                        ]
+                        [ text "Go to dashboard" ]
+                    ]
+                ]
+            ]
+        ]
+
+
+viewUsersPage : Model -> Html Msg
+viewUsersPage model =
+    div [ class "users-page" ]
+        [ div [ class "hero is-fullheight is-dark" ]
+            [ div [ class "hero-body has-text-centered is-paddingless" ]
+                [ div [ class "container is-fullheight justify-center" ]
+                    [ h1 [ class "title is-1" ] [ text "Users." ]
+                    , h2 [ class "subtitle is-3" ]
+                        [ text "Coming soon!" ]
+                    , button
+                        [ class "button is-info is-medium"
+                        , onClick (PageChange Routes.Dashboard)
+                        ]
+                        [ text "Go to dashboard" ]
+                    ]
+                ]
+            ]
+        ]
 
 
 main : Program Flags Model Msg
