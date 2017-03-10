@@ -1,4 +1,4 @@
-module Routes exposing (Page(..), getPage, getPath, getLink, getNewLocation)
+module Routes exposing (Page(..), getPage, getPath, getLocation, getLink, getNewLocation)
 
 import Navigation exposing (Location)
 import UrlParser as Url exposing (top, s)
@@ -60,6 +60,13 @@ getPage location =
 
         Nothing ->
             NotFound
+
+
+getLocation : Page -> Location -> Location
+getLocation page location =
+    getNewLocation
+        (getPath page)
+        location
 
 
 getPath : Page -> String

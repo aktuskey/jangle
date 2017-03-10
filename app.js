@@ -42,7 +42,8 @@ passport.use(new LocalStrategy(
 				  first: 'Admin',
 				  last: 'User'
 			  },
-			  username: username
+			  username: username,
+			  token: process.env.ADMIN_TOKEN || 'token'
 		  })
 
 	  } else {
@@ -65,7 +66,8 @@ passport.deserializeUser(function(username, done) {
 			  first: 'Admin',
 			  last: 'User'
 		  },
-		  username: username
+		  username: username,
+		  token: process.env.ADMIN_TOKEN || 'token'
 	  })
   } else done(null, false)
 })

@@ -18,23 +18,27 @@ emptyHtml =
 
 type Msg
     = NoOp
-    | AppStart
     | PageChange Page
+    | PageLoaded
     | UsernameUpdated String
     | PasswordUpdated String
     | SignInSubmit
     | SignInResponded (Result Http.Error User)
     | SignOutSubmit
     | SignOutResponded (Result Http.Error (Response User))
+    | GetCollections
+    | CollectionsRetrieved (Result Http.Error (Response Collection))
 
 
 type alias Model =
     { context : Context
-    , page : Page
     , username : String
     , password : String
     , errorMessage : Maybe String
     , handlingRequest : Bool
+    , gettingCollections : Bool
+    , collections : List Collection
+    , collectionFilter : String
     }
 
 
@@ -47,28 +51,47 @@ init : Flags -> Location -> ( Model, Cmd Msg )
 init flags location =
     Model
         (Context flags.user location)
-        (Routes.getPage location)
         ""
         ""
         Nothing
         False
-        ! [ getCmdForMsg AppStart ]
+        False
+        []
+        ""
+        ! [ getCmdForMsg PageLoaded ]
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        AppStart ->
-            appStart model
-
         PageChange newPage ->
-            { model | page = newPage } ! [ Navigation.newUrl (Routes.getPath newPage) ]
+            let
+                context =
+                    model.context
+
+                newContext =
+                    setLocation newPage context
+            in
+                { model | context = newContext } ! [ Navigation.newUrl (Routes.getPath newPage) ]
+
+        PageLoaded ->
+            if (getPage model) /= Routes.SignIn && model.context.user == Nothing then
+                model ! [ getCmdForMsg (PageChange Routes.SignIn) ]
+            else
+                case (getPage model) of
+                    Routes.Collections ->
+                        model ! [ getCmdForMsg GetCollections ]
+
+                    _ ->
+                        model ! []
 
         UsernameUpdated newUsername ->
-            { model | username = newUsername } ! []
+            { model | username = newUsername }
+                ! []
 
         PasswordUpdated newPassword ->
-            { model | password = newPassword } ! []
+            { model | password = newPassword }
+                ! []
 
         SignInSubmit ->
             if model.handlingRequest then
@@ -99,6 +122,22 @@ update msg model =
                         | errorMessage = Just "Could not sign in."
                         , handlingRequest = False
                     }
+                        ! []
+
+        GetCollections ->
+            { model | gettingCollections = True } ! [ getCollections ]
+
+        CollectionsRetrieved result ->
+            case result of
+                Ok response ->
+                    { model
+                        | collections = response.data
+                        , gettingCollections = False
+                    }
+                        ! []
+
+                Err error ->
+                    { model | gettingCollections = False }
                         ! []
 
         SignOutSubmit ->
@@ -136,6 +175,28 @@ update msg model =
             model ! []
 
 
+setLocation : Page -> Context -> Context
+setLocation page context =
+    { context | location = (Routes.getLocation page context.location) }
+
+
+getPage : Model -> Page
+getPage model =
+    Routes.getPage model.context.location
+
+
+getCollections : Cmd Msg
+getCollections =
+    let
+        url =
+            "/api/jangle/collections"
+
+        request =
+            Http.get url (responseDecoder collectionsDecoder)
+    in
+        Http.send CollectionsRetrieved request
+
+
 attemptSignIn : String -> String -> Cmd Msg
 attemptSignIn username password =
     let
@@ -168,22 +229,58 @@ responseDecoder decoder =
         (field "data" (Json.list decoder))
 
 
+collectionsDecoder : Json.Decoder Collection
+collectionsDecoder =
+    Json.map3 Collection
+        (field "name" Json.string)
+        (field "labels" labelsDecoder)
+        (field "fields" (Json.list fieldDecoder))
+
+
+labelsDecoder : Json.Decoder Label
+labelsDecoder =
+    Json.map2 Label
+        (field "singular" Json.string)
+        (field "plural" Json.string)
+
+
+fieldDecoder : Json.Decoder Field
+fieldDecoder =
+    Json.map3 Field
+        (field "name" Json.string)
+        (field "labels" labelsDecoder)
+        (field "type" (Json.map getFieldType Json.string))
+
+
+getFieldType : String -> FieldType
+getFieldType fieldTypeName =
+    case fieldTypeName of
+        "single-line" ->
+            SingleLine
+
+        "multi-line" ->
+            MultiLine
+
+        "whole-number" ->
+            WholeNumber
+
+        _ ->
+            SingleLine
+
+
 userDecoder : Json.Decoder User
 userDecoder =
-    Json.map2 User (field "name" nameDecoder) (field "username" string)
+    Json.map3 User
+        (field "name" nameDecoder)
+        (field "username" string)
+        (field "token" string)
 
 
 nameDecoder : Json.Decoder Name
 nameDecoder =
-    Json.map2 Name (field "first" string) (field "last" string)
-
-
-appStart : Model -> ( Model, Cmd Msg )
-appStart model =
-    if model.page /= Routes.SignIn && model.context.user == Nothing then
-        model ! [ getCmdForMsg (PageChange Routes.SignIn) ]
-    else
-        model ! []
+    Json.map2 Name
+        (field "first" string)
+        (field "last" string)
 
 
 view : Model -> Html Msg
@@ -196,7 +293,7 @@ view model =
 
 viewNavbar : Model -> Html Msg
 viewNavbar model =
-    case model.page of
+    case getPage model of
         Routes.SignIn ->
             emptyHtml
 
@@ -206,16 +303,14 @@ viewNavbar model =
                     [ div [ class "nav-left" ]
                         [ div [ class "nav-item" ]
                             [ h3 [ class "subtitle is-3" ]
-                                [ a
-                                    [ href (Routes.getLink Routes.Dashboard) ]
+                                [ a [ onClick (PageChange Routes.Dashboard) ]
                                     [ text "Jangle" ]
                                 ]
                             ]
                         ]
-                    , div [ class "nav-right" ]
+                    , div [ class "nav-right no-flex" ]
                         [ div [ class "nav-item" ]
-                            [ a
-                                [ onClick (SignOutSubmit) ]
+                            [ a [ class "button", onClick (SignOutSubmit) ]
                                 [ text "Sign out" ]
                             ]
                         ]
@@ -223,9 +318,37 @@ viewNavbar model =
                 ]
 
 
+viewUserMenu : Model -> Html Msg
+viewUserMenu model =
+    a [ onClick (NoOp) ]
+        [ span [ class "icon is-margin-right" ]
+            [ i [ class "fa fa-user-circle" ] [] ]
+        , span [ class "" ]
+            [ text <|
+                Maybe.withDefault ""
+                    (getFirstName model.context.user)
+            ]
+        , span [ class "icon" ]
+            [ i [ class "fa fa-caret-down fa-small" ] [] ]
+        , ul [ class "is-hidden" ]
+            [ div [ class "nav-item" ]
+                [ a [ onClick (SignOutSubmit) ]
+                    [ text "Sign out" ]
+                ]
+            ]
+        ]
+
+
+getFirstName : Maybe User -> Maybe String
+getFirstName user =
+    user
+        |> Maybe.map (.name)
+        |> Maybe.map (.first)
+
+
 viewPage : Model -> Html Msg
 viewPage model =
-    case model.page of
+    case getPage model of
         Routes.SignIn ->
             viewSignInPage model
 
@@ -248,25 +371,40 @@ viewSignInPage model =
         [ div [ class "hero is-dark is-bold is-fullheight" ]
             [ div [ class "hero-body" ]
                 [ div [ class "container is-flex justify-center" ]
-                    [ Html.form [ class "sign-in-form", onSubmit SignInSubmit ]
-                        [ h1 [ class "title is-1 has-text-centered" ] [ text "Jangle" ]
-                        , div [ class "box" ]
-                            [ div [ class "fields" ]
-                                [ bulmaField "Username" "text" UsernameUpdated model.username
-                                , bulmaField "Password" "password" PasswordUpdated model.password
-                                ]
-                            , buttonBar
-                                [ case model.errorMessage of
-                                    Just message ->
-                                        span [ class "help is-danger is-padded-right" ] [ text message ]
-
-                                    Nothing ->
-                                        emptyHtml
-                                , button [ class (getSignInClasses model), onClick SignInSubmit ] [ text "Sign in" ]
-                                ]
-                            ]
-                        ]
+                    [ viewSignInForm model
                     ]
+                ]
+            ]
+        ]
+
+
+viewSignInForm : Model -> Html Msg
+viewSignInForm model =
+    Html.form [ class "sign-in-form", onSubmit SignInSubmit ]
+        [ h1 [ class "title is-1 has-text-centered" ] [ text "Jangle" ]
+        , div [ class "box" ]
+            [ div [ class "fields" ]
+                [ bulmaField "Username"
+                    "text"
+                    UsernameUpdated
+                    model.username
+                , bulmaField "Password"
+                    "password"
+                    PasswordUpdated
+                    model.password
+                ]
+            , buttonBar
+                [ case model.errorMessage of
+                    Just message ->
+                        span
+                            [ class "help is-danger is-padded-right" ]
+                            [ text message ]
+
+                    Nothing ->
+                        emptyHtml
+                , button
+                    [ class (getSignInClasses model), onClick SignInSubmit ]
+                    [ text "Sign in" ]
                 ]
             ]
         ]
@@ -321,19 +459,19 @@ viewDashboardPage model =
 viewDashboardOptions : Model -> Html Msg
 viewDashboardOptions model =
     div [ class "dashboard-options columns" ]
-        [ viewDashboardOption "Content"
-            "fa-database"
-            (Routes.getLink Routes.Collections)
+        [ viewDashboardOption "Collections"
+            "fa-files-o"
+            (Routes.Collections)
         , viewDashboardOption "Users"
             "fa-users"
-            (Routes.getLink Routes.Users)
+            (Routes.Users)
         ]
 
 
-viewDashboardOption : String -> String -> String -> Html Msg
+viewDashboardOption : String -> String -> Routes.Page -> Html Msg
 viewDashboardOption label_ iconClass url =
     div [ class "column is-half-tablet" ]
-        [ a [ class "box section", href url ]
+        [ a [ class "box section", onClick (PageChange url) ]
             [ i [ class <| "is-hidden-mobile title is-1 fa " ++ iconClass ] []
             , h3 [ class "title is-3" ] [ text label_ ]
             ]
@@ -373,18 +511,103 @@ viewNotFoundPage model =
 viewCollectionsPage : Model -> Html Msg
 viewCollectionsPage model =
     div [ class "collections-page" ]
-        [ div [ class "hero is-fullheight is-primary" ]
+        [ div [ class (getCollectionHeroClasses model) ]
             [ div [ class "hero-body has-text-centered is-paddingless" ]
-                [ div [ class "container is-fullheight justify-center" ]
+                [ div [ class "container section" ]
                     [ h1 [ class "title is-1" ] [ text "Collections." ]
-                    , h2 [ class "subtitle is-3" ]
-                        [ text "Coming soon!" ]
-                    , button
-                        [ class "button is-primary is-medium is-inverted"
-                        , onClick (PageChange Routes.Dashboard)
-                        ]
-                        [ text "Go to dashboard" ]
+                    , h2 [ class "subtitle is-3" ] [ text (getCollectionsSubtitle model) ]
+                    , viewCollectionsAction model
                     ]
+                ]
+            ]
+        , viewCollectionsSection model
+        ]
+
+
+getCollectionHeroClasses : Model -> String
+getCollectionHeroClasses model =
+    "hero is-primary animate-height "
+        ++ (if model.gettingCollections then
+                "is-fullheight"
+            else
+                "is-medium"
+           )
+
+
+getCollectionsSubtitle : Model -> String
+getCollectionsSubtitle model =
+    if model.gettingCollections then
+        ""
+    else if List.isEmpty model.collections then
+        "Let's get started!"
+    else
+        "Manage your things."
+
+
+viewCollectionsSection : Model -> Html Msg
+viewCollectionsSection model =
+    div [ class "container section is-fullwidth" ]
+        (if model.gettingCollections then
+            []
+         else
+            [ viewCollectionsList model
+            ]
+        )
+
+
+viewCollectionsAction : Model -> Html Msg
+viewCollectionsAction model =
+    if model.gettingCollections then
+        i [ class "title is-1 fa fa-spin fa-cog" ] []
+    else if List.isEmpty model.collections then
+        button [ class "button is-medium is-success", onClick (NoOp) ]
+            [ text "Add a collection" ]
+    else
+        div [ class "column is-half is-offset-3" ]
+            [ viewCollectionsSearch model ]
+
+
+viewCollectionsSearch : Model -> Html Msg
+viewCollectionsSearch model =
+    p [ class "control has-icon has-icon-right" ]
+        [ input [ class "input collections-filter is-medium", type_ "search", placeholder (getCollectionsSearchPlaceholder model) ] []
+        , span [ class "icon is-small" ]
+            [ i [ class "fa fa-search" ] [] ]
+        ]
+
+
+getCollectionsSearchPlaceholder : Model -> String
+getCollectionsSearchPlaceholder model =
+    (toString <| List.length model.collections)
+        ++ " collection"
+        ++ if List.length model.collections == 1 then
+            ""
+           else
+            "s"
+
+
+viewCollectionsList : Model -> Html Msg
+viewCollectionsList model =
+    div [ class "columns is-mobile is-multiline" ]
+        (model.collections
+            |> List.filter (filterCollection model)
+            |> List.map viewCollection
+        )
+
+
+filterCollection : Model -> Collection -> Bool
+filterCollection model collection =
+    True
+
+
+viewCollection : Collection -> Html Msg
+viewCollection collection =
+    div [ class "column is-full-mobile is-half-tablet is-one-third-desktop" ]
+        [ a [ class "box content" ]
+            [ h4 [ class "title is-3" ]
+                [ text collection.labels.plural
+                , span [ class "subtitle is-5 tag is-outlined is-medium is-margin-left" ]
+                    [ text collection.name ]
                 ]
             ]
         ]
@@ -413,7 +636,7 @@ viewUsersPage model =
 main : Program Flags Model Msg
 main =
     Navigation.programWithFlags
-        (\_ -> NoOp)
+        (\_ -> PageLoaded)
         { init = init
         , subscriptions = (\_ -> Sub.none)
         , update = update

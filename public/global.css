@@ -6,6 +6,15 @@ main, .app, .app > div, .is-fullheight {
     height: 100%;
 }
 
+.app > div {
+    padding-top: 50px;
+}
+
+.animate-height {
+    min-height: 0vh;
+    transition: .5s;
+}
+
 .sign-in-page .sign-in-form {
     width: 100%;
     max-width: 360px;
@@ -27,9 +36,29 @@ main, .app, .app > div, .is-fullheight {
     padding-right: 10px;
 }
 
+.is-margin-left {
+    margin-left: 10px;
+}
+
+.is-margin-right {
+    margin-right: 10px;
+}
+
 .is-fixed {
     position: fixed;
     width: 100%;
+}
+
+.no-flex {
+    flex: 0;
+}
+
+.is-fullwidth {
+    width: 100%;
+}
+
+.hero-body > .section {
+    background: inherit;
 }
 
 .hero.is-fullheight > .hero-body > .container {
@@ -51,4 +80,13 @@ main, .app, .app > div, .is-fullheight {
 
 .dashboard-page .dashboard-options .title {
     color: #363636;
+}
+
+.collections-page .collections-section {
+    padding-top: 0;
+    justify-content: center;
+}
+
+.collections-page .collections-filter {
+    flex: 1;
 }

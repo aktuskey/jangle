@@ -12,6 +12,35 @@ type alias Name =
 type alias User =
     { name : Name
     , username : String
+    , token : String
+    }
+
+
+type alias Label =
+    { singular : String
+    , plural : String
+    }
+
+
+type alias Field =
+    { name : String
+    , labels : Label
+    , type_ : FieldType
+    }
+
+
+type FieldType
+    = SingleLine
+    | MultiLine
+    | WholeNumber
+    | DecimalNumber
+    | Checkbox
+
+
+type alias Collection =
+    { name : String
+    , labels : Label
+    , fields : List Field
     }
 
 
