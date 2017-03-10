@@ -13,6 +13,27 @@ var express = require('express'),
 	config = require('./default-config')(userConfig)
  	promise = utilities.promise(global.Promise)
 
+if (process.env.NODE_ENV !== 'production') {
+	try {
+
+		require('dotenv').load()
+
+		console.log('hullo')
+
+		app.use((req,res,next) => {
+
+			if(process.env.SET_DELAY) {
+				setTimeout(next, parseInt(process.env.SET_DELAY))
+			} else {
+				next()
+			}
+		})
+
+	} catch (ignore) {
+
+	}
+}
+
 app.set('port', process.env.PORT || 3000)
 
 

@@ -72,11 +72,13 @@ update msg model =
                 newContext =
                     setLocation newPage context
             in
-                { model | context = newContext } ! [ Navigation.newUrl (Routes.getPath newPage) ]
+                { model | context = newContext }
+                    ! [ Navigation.newUrl (Routes.getPath newPage) ]
 
         PageLoaded ->
             if (getPage model) /= Routes.SignIn && model.context.user == Nothing then
-                model ! [ getCmdForMsg (PageChange Routes.SignIn) ]
+                model
+                    ! [ getCmdForMsg (PageChange Routes.SignIn) ]
             else
                 case (getPage model) of
                     Routes.Collections ->
@@ -413,10 +415,10 @@ viewSignInForm model =
 bulmaField : String -> String -> (String -> Msg) -> String -> Html Msg
 bulmaField fieldLabel inputType msg value_ =
     div [ class "control" ]
-        [ label [ class "label" ] [ text fieldLabel ]
+        [ label [ class "label is-medium" ] [ text fieldLabel ]
         , p [ class "control" ]
             [ input
-                [ class "input"
+                [ class "input is-medium"
                 , onInput msg
                 , type_ inputType
                 , value value_
@@ -438,7 +440,7 @@ getSignInClasses model =
      else
         ""
     )
-        ++ "button is-info"
+        ++ "button is-info is-medium"
 
 
 viewDashboardPage : Model -> Html Msg
@@ -514,8 +516,10 @@ viewCollectionsPage model =
         [ div [ class (getCollectionHeroClasses model) ]
             [ div [ class "hero-body has-text-centered is-paddingless" ]
                 [ div [ class "container section" ]
-                    [ h1 [ class "title is-1" ] [ text "Collections." ]
-                    , h2 [ class "subtitle is-3" ] [ text (getCollectionsSubtitle model) ]
+                    [ h1 [ class "title is-1" ]
+                        [ text "Collections." ]
+                    , h2 [ class "subtitle is-3" ]
+                        [ text (getCollectionsSubtitle model) ]
                     , viewCollectionsAction model
                     ]
                 ]
@@ -526,7 +530,7 @@ viewCollectionsPage model =
 
 getCollectionHeroClasses : Model -> String
 getCollectionHeroClasses model =
-    "hero is-primary animate-height "
+    "hero is-primary animate-height has-navbar "
         ++ (if model.gettingCollections then
                 "is-fullheight"
             else
@@ -570,7 +574,12 @@ viewCollectionsAction model =
 viewCollectionsSearch : Model -> Html Msg
 viewCollectionsSearch model =
     p [ class "control has-icon has-icon-right" ]
-        [ input [ class "input collections-filter is-medium", type_ "search", placeholder (getCollectionsSearchPlaceholder model) ] []
+        [ input
+            [ class "input collections-filter is-medium"
+            , type_ "search"
+            , placeholder (getCollectionsSearchPlaceholder model)
+            ]
+            []
         , span [ class "icon is-small" ]
             [ i [ class "fa fa-search" ] [] ]
         ]
@@ -606,7 +615,8 @@ viewCollection collection =
         [ a [ class "box content" ]
             [ h4 [ class "title is-3" ]
                 [ text collection.labels.plural
-                , span [ class "subtitle is-5 tag is-outlined is-medium is-margin-left" ]
+                , span
+                    [ class "subtitle is-5 tag is-medium is-margin-left" ]
                     [ text collection.name ]
                 ]
             ]
