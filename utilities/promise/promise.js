@@ -1,5 +1,5 @@
 module.exports = function (basePromise) {
-  var _Promise = basePromise
+  let _Promise = basePromise
 
   _Promise.prototype.success = function (onSuccess) {
     return this.then(

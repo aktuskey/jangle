@@ -1,3 +1,5 @@
+'use strict'
+
 let types = {
   String: 'String',
   Number: 'Number',

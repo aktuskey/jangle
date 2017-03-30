@@ -1,3 +1,5 @@
+'use strict'
+
 let mongoose = require('mongoose')
 let schema = require('./schemas/field-type')
 

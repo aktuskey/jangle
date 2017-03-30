@@ -1,3 +1,5 @@
+'use strict'
+
 let assert = require('assert')
 let before = require('./before.js')
 let CONNECTED = 1
