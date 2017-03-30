@@ -1,5 +1,3 @@
-'use strict'
-
 let assert = require('assert')
 let after = require('./after')
 let DISCONNECTED = 0

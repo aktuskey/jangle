@@ -1,5 +1,3 @@
-'use strict'
-
 let Schema = require('mongoose').Schema
 let FieldSchema = require('./field.js')
 let JangleMetaSchema = require('./jangle-meta.js')
