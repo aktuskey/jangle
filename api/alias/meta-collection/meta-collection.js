@@ -1,9 +1,7 @@
-module.exports = function(req, res, next) {
+module.exports = function (req, res, next) {
+  let metaCollectionName = req.params.metaCollectionName
 
-    let metaCollectionName = req.params.metaCollectionName
+  req.url = `/collections/jangle.${metaCollectionName}`
 
-    req.url = `/collections/jangle.${metaCollectionName}`
-
-    next()
-
+  next()
 }

@@ -1,83 +1,62 @@
-let assert = require('assert'),
-	auth = require('./auth')
+let assert = require('assert')
+let auth = require('./auth')
 
 describe('auth', function () {
+  let req = {}
 
-	let req = {}
+  beforeEach(function () {
+    req = {
+      query: {
+        username: 'admin',
+        password: 'password'
+      }
+    }
+  })
 
-	beforeEach(function () {
+  it('calls my function', function (done) {
+    req.query = {}
 
-		req = {
-			query: {
-				username: 'admin',
-				password: 'password'
-			}
-		}
+    auth(req, {}, done)
+  })
 
-	})
+  it('modifies req.res', function (done) {
+    auth(req, {}, function () {
+      assert.notEqual(req.res, undefined)
+      done()
+    })
+  })
 
-	it('calls my function', function (done) {
+  it('returns token on success', function (done) {
+    auth(req, {}, function () {
+      assert.equal(req.res.status, 200)
+      assert.notEqual(req.res.data[0].token, undefined)
 
-		req.query = {}
+      done()
+    })
+  })
 
-		auth(req, {}, done)
+  it('provides different message on missing credentials', function (done) {
+    let badCredentialsMessage = ''
+    let missingCredentialsMessage = ''
 
-	})
+    req.query.username = 'incorrect'
 
-	it('modifies req.res', function (done) {
+    auth(req, {}, function () {
+      badCredentialsMessage = req.res.message
 
-		auth(req, {}, function () {
+      req = {
+        query: {}
+      }
 
-			assert.notEqual(req.res, undefined)
-			done()
+      auth(req, {}, function () {
+        missingCredentialsMessage = req.res.message
 
-		})
+        assert.notEqual(badCredentialsMessage, undefined)
+        assert.notEqual(missingCredentialsMessage, undefined)
+        assert.notEqual(missingCredentialsMessage, badCredentialsMessage)
 
-	})
-
-	it('returns token on success', function (done) {
-
-		auth(req, {}, function () {
-
-			assert.equal(req.res.status, 200)
-			assert.notEqual(req.res.data[0].token, undefined)
-
-			done()
-
-		})
-
-	})
-
-	it('provides different message on missing credentials', function (done) {
-
-		let badCredentialsMessage = '',
-			missingCredentialsMessage = ''
-
-		req.query.username = 'incorrect'
-
-		auth(req, {}, function () {
-
-			badCredentialsMessage = req.res.message
-
-			req = {
-				query: {}
-			}
-
-			auth(req, {}, function () {
-
-				missingCredentialsMessage = req.res.message
-
-				assert.notEqual(badCredentialsMessage, undefined)
-				assert.notEqual(missingCredentialsMessage, undefined)
-				assert.notEqual(missingCredentialsMessage, badCredentialsMessage)
-
-				done()
-
-			})
-
-
-		})
-
-	})
-
+        done()
+      })
+    })
+  })
 })

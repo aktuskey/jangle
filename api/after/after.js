@@ -1,24 +1,18 @@
-let DISCONNECTED = 0,
-    CONNECTED = 1;
+let CONNECTED = 1
 
-module.exports = function(req, res) {
+module.exports = function (req, res) {
+  // Close open connections
+  if (req.connection && req.connection.readyState === CONNECTED) {
+    req.connection.close()
+  }
+  req.res = req.res || {}
 
-    // Close open connections
-    if (req.connection && req.connection.readyState === CONNECTED) {
+  let status = req.res.status || 500
+  let message = req.res.message || ''
+  let data = req.res.data || []
+  let error = status >= 400
 
-        req.connection.close()
+  console.info(`...\t` + message + '\n')
 
-    }
-
-    req.res = req.res || {}
-
-    let status = req.res.status || 500,
-        message = req.res.message || '',
-        data = req.res.data || [],
-        error = status >= 400
-
-    console.info(`...\t` + message + '\n')
-
-    res.status(status).json({ message, error, data })
-
+  res.status(status).json({ message, error, data })
 }

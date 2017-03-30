@@ -1,1 +1,1 @@
-module.exports = require('./before.js');
+module.exports = require('./before.js')

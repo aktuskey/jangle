@@ -1,22 +1,22 @@
-let mongoose = require('mongoose'),
-    Schema = mongoose.Schema
+let mongoose = require('mongoose')
+let Schema = mongoose.Schema
 
 module.exports = new Schema({
 
-    previousVersions: {
-        type: Schema.Types.Array,
-        required: true,
-        default: []
-    },
+  previousVersions: {
+    type: Schema.Types.Array,
+    required: true,
+    default: []
+  },
 
-    publishedVersion: {
-        type: Number,
-        required: true,
-        default: -1
-    }
+  publishedVersion: {
+    type: Number,
+    required: true,
+    default: -1
+  }
 
 }, {
 
-    _id: false
+  _id: false
 
 })
