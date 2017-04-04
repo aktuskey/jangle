@@ -8,6 +8,10 @@
 ### What is Jangle?
 Jangle is a content management system built on __NodeJS__, __MongoDB__, and __Elm__.
 
-It's goal is to make maintaining large amounts of content simpler by automatically generating an API for all of your data. On top of that, Jangle provides a simple UI to help interact with this API, and easily track versions of your stuff, as well as decide what should be publicly available.
+### Local Development
 
-Jangle is currently a work in progress.
+1. Install [Docker](https://docs.docker.com/engine/installation/)
+
+1. Run __`docker-compose up`__
+
+1. Change code, change things!

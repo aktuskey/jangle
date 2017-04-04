@@ -1,5 +1,5 @@
 module.exports = {
   database: require('./database'),
-  promise: require('./promise'),
+  Promise: require('./promise'),
   logging: require('./logging')
 }

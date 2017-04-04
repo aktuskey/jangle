@@ -1,6 +1,26 @@
-version: '2'
+version: '3'
 services:
   mongo:
     image: mongo
     ports:
       - "27017:27017"
+  jangle:
+    build:
+      context: .
+      dockerfile: dev.Dockerfile
+    image: ryannhg/jangle:dev
+    links:
+      - mongo
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./models:/usr/src/app/models
+      - ./api:/usr/src/app/api
+      - ./public:/usr/src/app/public
+      - ./utilities:/usr/src/app/utilities
+      - ./config:/usr/src/app/config
+      - ./app.js:/usr/src/app/app.js
+      - ./gulpfile.js:/usr/src/app/gulpfile.js
+      - ./nodemon.json:/usr/src/app/nodemon.json
+      - ./package.json:/usr/src/app/package.json
+      - ./elm-package.json:/usr/src/app/elm-package.json

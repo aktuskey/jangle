@@ -9,8 +9,8 @@ let api = require('./api')
 let utilities = require('./utilities')
 let models = require('./models')
 let initials = require('./models/initial')
-let userConfig = require('./jangle-config')
-let config = require('./default-config')(userConfig)
+let userConfig = require('./config/jangle-config')
+let config = require('./config/default-config')(userConfig)
 let Promise = utilities.Promise(global.Promise)
 
 if (process.env.NODE_ENV !== 'production') {
@@ -56,7 +56,6 @@ passport.use(new LocalStrategy(
       done(null, false)
     }
   }
-
 ))
 
 passport.serializeUser((user, done) => {

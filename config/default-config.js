@@ -5,7 +5,7 @@ module.exports = function (config) {
 
   return {
     mongodb: {
-      host: config.mongodb.host || 'localhost',
+      host: config.mongodb.host || 'mongo',
       port: config.mongodb.port || 27017,
       database: config.mongodb.database || 'jangle',
       metaPrefix: config.mongodb.metaPrefix || 'jangle.',
