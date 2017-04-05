@@ -4,6 +4,7 @@ module.exports = function (req, res, next) {
 
   Model
     .find(queryOptions.where)
+    .select(queryOptions.select)
     .exec(function (err, documents) {
       if (err) {
         console.error(`Error in GET: `, err)

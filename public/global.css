@@ -7,12 +7,22 @@ main, .app, .app > div, .is-fullheight {
 }
 
 .has-navbar {
-    padding-top: 50px;
+    padding-top: 56px;
+}
+
+.container {
+    width: 100%;
+}
+
+@media screen and (min-width: 1000px) {
+  .container {
+      margin: 0 auto;
+      max-width: 960px;
+  }
 }
 
 .animate-height {
     min-height: 0vh;
-    transition: .5s;
 }
 
 .sign-in-page .sign-in-form {
@@ -82,11 +92,17 @@ main, .app, .app > div, .is-fullheight {
     color: #363636;
 }
 
-.collections-page .collections-section {
-    padding-top: 0;
-    justify-content: center;
+.add-collection-form {
+  width: 100%;
+  max-width: 480px;
+  padding: 20px;
 }
 
-.collections-page .collections-filter {
-    flex: 1;
+.add-collection-form input {
+  /*width: initial;*/
+}
+
+.add-collection-page .container {
+    display: flex;
+    justify-content: center;
 }

@@ -24,7 +24,7 @@ type alias Label =
 
 type alias Field =
     { name : String
-    , labels : Label
+    , label : String
     , type_ : FieldType
     }
 

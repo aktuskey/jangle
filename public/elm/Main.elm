@@ -9,6 +9,7 @@ import Json.Decode as Json exposing (field, null, oneOf, string)
 import Task
 import Routes exposing (Page)
 import Types exposing (..)
+import String.Extra exposing (dasherize, decapitalize, humanize)
 
 
 emptyHtml : Html Msg
@@ -28,6 +29,16 @@ type Msg
     | SignOutResponded (Result Http.Error (Response User))
     | GetCollections
     | CollectionsRetrieved (Result Http.Error (Response Collection))
+    | UpdateSingularName String
+    | UpdatePluralName String
+    | EditingPluralName Bool
+    | RemoveFieldFromNewCollection Field
+    | OpenAddFieldModal
+    | CloseAddFieldModal
+    | AddField
+    | EditField Field
+    | UpdateFieldLabel String
+    | UpdateFieldType String
 
 
 type alias Model =
@@ -39,6 +50,11 @@ type alias Model =
     , gettingCollections : Bool
     , collections : List Collection
     , collectionFilter : String
+    , newCollection : Collection
+    , newField : Field
+    , editingPluralName : Bool
+    , showAddFieldModal : Bool
+    , nameOfFieldBeingEdited : String
     }
 
 
@@ -58,7 +74,30 @@ init flags location =
         False
         []
         ""
+        initCollection
+        initField
+        False
+        False
+        ""
         ! [ getCmdForMsg PageLoaded ]
+
+
+initCollection : Collection
+initCollection =
+    Collection
+        ""
+        (Label "" "")
+        [ Field "name" "Name" SingleLine
+        , Field "age" "Age" WholeNumber
+        ]
+
+
+initField : Field
+initField =
+    Field
+        ""
+        ""
+        SingleLine
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -173,13 +212,136 @@ update msg model =
                     }
                         ! [ getCmdForMsg <| PageChange Routes.SignIn ]
 
+        UpdateSingularName name ->
+            let
+                collection =
+                    model.newCollection
+
+                labels =
+                    model.newCollection.labels
+            in
+                { model
+                    | newCollection =
+                        { collection
+                            | labels =
+                                { labels
+                                    | singular = name
+                                }
+                        }
+                }
+                    ! []
+
+        UpdatePluralName name ->
+            let
+                collection =
+                    model.newCollection
+
+                labels =
+                    model.newCollection.labels
+            in
+                { model
+                    | newCollection =
+                        { collection
+                            | labels =
+                                { labels
+                                    | plural = name
+                                }
+                        }
+                }
+                    ! []
+
+        EditingPluralName value ->
+            { model | editingPluralName = value } ! []
+
+        RemoveFieldFromNewCollection field ->
+            let
+                collection =
+                    model.newCollection
+
+                fields =
+                    collection.fields
+            in
+                { model | newCollection = { collection | fields = (List.filter (\f -> f /= field) fields) } } ! []
+
+        AddField ->
+            let
+                collection =
+                    model.newCollection
+
+                fields =
+                    (List.filter
+                        (\field -> field.name /= model.nameOfFieldBeingEdited)
+                        collection.fields
+                    )
+                        ++ [ model.newField ]
+            in
+                { model
+                    | newCollection = { collection | fields = fields }
+                    , showAddFieldModal = False
+                    , nameOfFieldBeingEdited = ""
+                }
+                    ! []
+
+        OpenAddFieldModal ->
+            { model | showAddFieldModal = True } ! []
+
+        CloseAddFieldModal ->
+            { model
+                | showAddFieldModal = False
+                , newField = initField
+                , nameOfFieldBeingEdited = ""
+            }
+                ! []
+
+        EditField field ->
+            { model
+                | showAddFieldModal = True
+                , newField = field
+                , nameOfFieldBeingEdited = field.name
+            }
+                ! []
+
+        UpdateFieldLabel label ->
+            let
+                field =
+                    model.newField
+            in
+                { model
+                    | newField =
+                        { field
+                            | label = label
+                            , name = label |> decapitalize |> dasherize
+                        }
+                }
+                    ! []
+
+        UpdateFieldType fieldName ->
+            let
+                fieldType =
+                    toFieldType fieldName
+
+                field =
+                    model.newField
+            in
+                { model
+                    | newField =
+                        { field
+                            | type_ = fieldType
+                        }
+                }
+                    ! []
+
         NoOp ->
             model ! []
 
 
 setLocation : Page -> Context -> Context
 setLocation page context =
-    { context | location = (Routes.getLocation page context.location) }
+    let
+        newLocation =
+            Debug.log "New Location" (Routes.getLocation page context.location)
+    in
+        { context | location = newLocation }
 
 
 getPage : Model -> Page
@@ -250,7 +412,7 @@ fieldDecoder : Json.Decoder Field
 fieldDecoder =
     Json.map3 Field
         (field "name" Json.string)
-        (field "labels" labelsDecoder)
+        (field "label" Json.string)
         (field "type" (Json.map getFieldType Json.string))
 
 
@@ -359,6 +521,9 @@ viewPage model =
 
         Routes.Collections ->
             viewCollectionsPage model
+
+        Routes.AddCollection collection ->
+            viewAddCollectionPage model
 
         Routes.Users ->
             viewUsersPage model
@@ -513,112 +678,267 @@ viewNotFoundPage model =
 viewCollectionsPage : Model -> Html Msg
 viewCollectionsPage model =
     div [ class "collections-page" ]
-        [ div [ class (getCollectionHeroClasses model) ]
-            [ div [ class "hero-body has-text-centered is-paddingless" ]
-                [ div [ class "container section" ]
+        [ div [ class "hero is-fullheight" ]
+            [ div [ class "hero-body" ]
+                [ div [ class "container" ]
                     [ h1 [ class "title is-1" ]
                         [ text "Collections." ]
-                    , h2 [ class "subtitle is-3" ]
-                        [ text (getCollectionsSubtitle model) ]
-                    , viewCollectionsAction model
+                    , viewAddCollectionButton model
                     ]
                 ]
             ]
-        , viewCollectionsSection model
         ]
 
 
-getCollectionHeroClasses : Model -> String
-getCollectionHeroClasses model =
-    "hero is-primary animate-height has-navbar "
-        ++ (if model.gettingCollections then
-                "is-fullheight"
-            else
-                "is-medium"
-           )
-
-
-getCollectionsSubtitle : Model -> String
-getCollectionsSubtitle model =
-    if model.gettingCollections then
-        ""
-    else if List.isEmpty model.collections then
-        "Let's get started!"
-    else
-        "Manage your things."
-
-
-viewCollectionsSection : Model -> Html Msg
-viewCollectionsSection model =
-    div [ class "container section is-fullwidth" ]
-        (if model.gettingCollections then
-            []
-         else
-            [ viewCollectionsList model
-            ]
-        )
-
-
-viewCollectionsAction : Model -> Html Msg
-viewCollectionsAction model =
-    if model.gettingCollections then
-        i [ class "title is-1 fa fa-spin fa-cog" ] []
-    else if List.isEmpty model.collections then
-        button [ class "button is-medium is-success", onClick (NoOp) ]
-            [ text "Add a collection" ]
-    else
-        div [ class "column is-half is-offset-3" ]
-            [ viewCollectionsSearch model ]
-
-
-viewCollectionsSearch : Model -> Html Msg
-viewCollectionsSearch model =
-    p [ class "control has-icon has-icon-right" ]
-        [ input
-            [ class "input collections-filter is-medium"
-            , type_ "search"
-            , placeholder (getCollectionsSearchPlaceholder model)
-            ]
-            []
-        , span [ class "icon is-small" ]
-            [ i [ class "fa fa-search" ] [] ]
+viewAddCollectionButton : Model -> Html Msg
+viewAddCollectionButton model =
+    button
+        [ class "button is-medium is-success"
+        , onClick <| PageChange <| Routes.AddCollection "add"
         ]
+        [ text "Create a collection" ]
 
 
-getCollectionsSearchPlaceholder : Model -> String
-getCollectionsSearchPlaceholder model =
-    (toString <| List.length model.collections)
-        ++ " collection"
-        ++ if List.length model.collections == 1 then
-            ""
-           else
-            "s"
-
-
-viewCollectionsList : Model -> Html Msg
-viewCollectionsList model =
-    div [ class "columns is-mobile is-multiline" ]
-        (model.collections
-            |> List.filter (filterCollection model)
-            |> List.map viewCollection
-        )
-
-
-filterCollection : Model -> Collection -> Bool
-filterCollection model collection =
-    True
-
-
-viewCollection : Collection -> Html Msg
-viewCollection collection =
-    div [ class "column is-full-mobile is-half-tablet is-one-third-desktop" ]
-        [ a [ class "box content" ]
-            [ h4 [ class "title is-3" ]
-                [ text collection.labels.plural
-                , span
-                    [ class "subtitle is-5 tag is-medium is-margin-left" ]
-                    [ text collection.name ]
+viewAddCollectionPage : Model -> Html Msg
+viewAddCollectionPage model =
+    div [ class "add-collection-page" ]
+        [ div [ class "hero is-fullheight has-navbar" ]
+            [ div [ class "hero-head" ]
+                [ div [ class "container" ]
+                    [ viewCollectionForm model
+                    ]
                 ]
+            ]
+        ]
+
+
+
+-- /api/jangle/collections?where={"name":<name>}&select
+
+
+viewCollectionForm : Model -> Html Msg
+viewCollectionForm model =
+    Html.form
+        [ class "add-collection-form form", onSubmit NoOp ]
+        [ h1 [ class "title is-1" ]
+            [ text "New Collection." ]
+        , hr [] []
+        , h3 [ class "subtitle is-3" ] [ text "Name" ]
+        , div [ class "field" ]
+            [ label [ class "label" ] [ text "Singular" ]
+            , p [ class "control" ]
+                [ input
+                    [ onInput UpdateSingularName
+                    , type_ "text"
+                    , class "input"
+                    , value model.newCollection.labels.singular
+                    ]
+                    []
+                ]
+            ]
+        , showPluralInput model
+        , br [] []
+        , h3 [ class "subtitle is-3" ] [ text "Fields" ]
+        , viewFieldSelector model
+        , viewAddFieldModal model
+        ]
+
+
+showPluralInput : Model -> Html Msg
+showPluralInput model =
+    let
+        labels =
+            model.newCollection.labels
+
+        defaultPlural =
+            getPluralForm labels.singular
+    in
+        if model.editingPluralName then
+            div [ class "field" ]
+                [ label [ class "label" ] [ text "Plural" ]
+                , div [ class "field has-addons" ]
+                    [ p [ class "control", style [ ( "flex", "1" ) ] ]
+                        [ input
+                            [ onInput UpdatePluralName
+                            , type_ "text"
+                            , class "input"
+                            , placeholder defaultPlural
+                            , value labels.plural
+                            ]
+                            []
+                        ]
+                    , p [ class "control" ]
+                        [ button
+                            [ class "button", onClick (EditingPluralName False) ]
+                            [ i [ class "fa fa-check" ] [] ]
+                        ]
+                    ]
+                ]
+        else if String.length labels.singular /= 0 then
+            p [ class "control" ]
+                [ button
+                    [ class "button is-link"
+                    , onClick (EditingPluralName True)
+                    ]
+                    [ text <| "Plural: " ++ getPluralToSave labels
+                    ]
+                ]
+        else
+            emptyHtml
+
+
+getPluralForm : String -> String
+getPluralForm singular =
+    if String.length singular /= 0 then
+        singular ++ "s"
+    else
+        ""
+
+
+getPluralToSave : Label -> String
+getPluralToSave labels =
+    let
+        defaultPlural =
+            getPluralForm labels.singular
+    in
+        if String.length labels.plural == 0 then
+            defaultPlural
+        else
+            labels.plural
+
+
+viewFieldSelector : Model -> Html Msg
+viewFieldSelector model =
+    div [ class "fields-selector" ]
+        [ viewFields model.newCollection.fields
+        , div [ class "field" ]
+            [ button
+                [ class "button is-medium is-light"
+                , onClick OpenAddFieldModal
+                ]
+                [ text "Add a field" ]
+            ]
+        ]
+
+
+viewAddFieldModal : Model -> Html Msg
+viewAddFieldModal model =
+    if model.showAddFieldModal then
+        viewModal
+            (Html.form [ class "section", onSubmit NoOp ]
+                [ h3 [ class "subtitle is-3" ] [ text "Add field." ]
+                , hr [] []
+                , div [ class "field" ]
+                    [ label [ class "label" ] [ text "Name" ]
+                    , p [ class "control" ]
+                        [ input
+                            [ onInput UpdateFieldLabel
+                            , type_ "text"
+                            , class "input"
+                            , value model.newField.label
+                            ]
+                            []
+                        ]
+                    ]
+                , div [ class "field" ]
+                    [ label [ class "label" ] [ text "Type" ]
+                    , p [ class "control" ]
+                        [ span [ class "select" ]
+                            [ select
+                                [ onInput (UpdateFieldType)
+                                ]
+                                (List.map (viewTypeOption model.newField.type_) typeOptions)
+                            ]
+                        ]
+                    ]
+                , buttonBar
+                    [ button
+                        [ class "button is-medium is-success"
+                        , onClick AddField
+                        ]
+                        [ text "Add field" ]
+                    ]
+                ]
+            )
+    else
+        emptyHtml
+
+
+viewTypeOption : FieldType -> ( FieldType, String ) -> Html Msg
+viewTypeOption activeFieldType ( fieldType, fieldName ) =
+    let
+        text_ =
+            (fieldType |> toString |> humanize)
+
+        value_ =
+            toSelectValue fieldType
+    in
+        option
+            ([ value value_ ]
+                ++ if fieldType == activeFieldType then
+                    [ attribute "selected" "selected" ]
+                   else
+                    []
+            )
+            [ text text_ ]
+
+
+toSelectValue : FieldType -> String
+toSelectValue fieldType =
+    (fieldType |> toString |> decapitalize |> dasherize)
+
+
+toFieldType : String -> FieldType
+toFieldType fieldName =
+    case List.head (List.filter (\( a, b ) -> b == fieldName) typeOptions) of
+        Just ( a, b ) ->
+            a
+
+        Nothing ->
+            SingleLine
+
+
+typeOptions : List ( FieldType, String )
+typeOptions =
+    [ ( SingleLine, "single-line" )
+    , ( MultiLine, "multi-line" )
+    , ( WholeNumber, "whole-number" )
+    ]
+
+
+viewModal : Html Msg -> Html Msg
+viewModal content =
+    div [ class "modal is-active" ]
+        [ div [ class "modal-background", onClick CloseAddFieldModal ] []
+        , div [ class "modal-content" ] [ content ]
+        , button [ class "modal-close", onClick CloseAddFieldModal ] []
+        ]
+
+
+viewFields : List Field -> Html Msg
+viewFields fields =
+    if List.length fields /= 0 then
+        table [ class "table" ]
+            [ thead []
+                [ tr []
+                    (List.map (\header -> th [] [ text header ]) [ "Name", "Type", "" ])
+                ]
+            , tbody [] (List.map viewField fields)
+            ]
+    else
+        emptyHtml
+
+
+viewField : Field -> Html Msg
+viewField field =
+    tr []
+        [ td [] [ text field.label ]
+        , td [] [ text (toString field.type_ |> humanize) ]
+        , td [ style [ ( "text-align", "right" ) ] ]
+            [ a [ onClick <| EditField field ]
+                [ i [ class "fa fa-edit" ] [] ]
+            , a [ onClick <| RemoveFieldFromNewCollection field ]
+                [ i [ class "fa fa-close", style [ ( "margin-left", "4px" ), ( "margin-top", "-1px" ) ] ] [] ]
             ]
         ]
 

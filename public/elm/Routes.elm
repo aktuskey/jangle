@@ -1,7 +1,7 @@
 module Routes exposing (Page(..), getPage, getPath, getLocation, getLink, getNewLocation)
 
 import Navigation exposing (Location)
-import UrlParser as Url exposing (top, s)
+import UrlParser as Url exposing (top, s, (</>), string)
 
 
 type Page
@@ -9,6 +9,7 @@ type Page
     | Dashboard
     | Users
     | Collections
+    | AddCollection String
     | NotFound
 
 
@@ -48,13 +49,14 @@ route =
         , Url.map Dashboard (s "dashboard")
         , Url.map SignIn (s "sign-in")
         , Url.map Collections (s "collections")
+        , Url.map AddCollection (s "collections" </> string)
         , Url.map Users (s "users")
         ]
 
 
 getPage : Location -> Page
 getPage location =
-    case getParser route location of
+    case (getParser route location) of
         Just page ->
             page
 
@@ -65,7 +67,7 @@ getPage location =
 getLocation : Page -> Location -> Location
 getLocation page location =
     getNewLocation
-        (getPath page)
+        (getLink page)
         location
 
 
@@ -80,6 +82,9 @@ getPath page =
 
         Collections ->
             "collections"
+
+        AddCollection name ->
+            "collections/" ++ name
 
         Users ->
             "users"
@@ -96,6 +101,12 @@ getLink page =
 getNewLocation : String -> Location -> Location
 getNewLocation newRoute location =
     if useHashes then
-        { location | hash = prefix ++ newRoute }
+        { location
+            | hash = newRoute
+            , href = location.origin
+        }
     else
-        { location | pathname = prefix ++ newRoute }
+        { location
+            | pathname = newRoute
+            , href = location.origin
+        }
