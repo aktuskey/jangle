@@ -15,6 +15,8 @@ const auth = setupAuthentication(app)
 
 // Express Middleware
 app.use(bodyParser.json())
+app.set('views', path.join(__dirname, 'public'))
+app.set('view engine', 'pug')
 
 // Authentication API
 app.post('/api/sign-in', auth.signIn)
