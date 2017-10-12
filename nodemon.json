@@ -1,3 +1,10 @@
 {
-    "ignore": [ "public/*" ]
+    "watch": [
+        "_dist/app.js",
+        "_dist/authentication",
+        "_dist/graphql",
+        "_dist/utils"
+    ],
+    "delay": 1,
+    "legacyWatch": true
 }

@@ -1,23 +1,24 @@
 {
   "name": "jangle",
   "version": "1.0.0",
-  "description": "Simple content management.",
-  "main": "app.js",
+  "description": "Your experience matters.",
+  "main": "_dist/app.js",
   "scripts": {
-    "start": "node app.js",
-    "test": "node ./node_modules/mocha/bin/_mocha api/**/spec.js",
-    "lint": "node node_modules/standard/bin/cmd.js",
-    "test-watch": "node ./node_modules/mocha/bin/_mocha --watch api/**/spec.js",
-    "coverage": "node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec api/**/spec.js",
-    "coveralls": "npm run coverage && (cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage) || (echo 'Cleaning up istanbul' && rm -rf ./coverage)",
-    "dev": "node_modules/gulp/bin/gulp.js dev"
+    "start": "gulp && node _dist/app.js",
+    "dev": "gulp && gulp watch & nodemon",
+    "test": "gulp test"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ryannhg/jangle.git"
   },
   "keywords": [
-    "cms"
+    "content",
+    "management",
+    "system",
+    "cms",
+    "elm",
+    "graphql"
   ],
   "author": "Ryan Haskell-Glatz",
   "license": "ISC",
@@ -25,33 +26,36 @@
     "url": "https://github.com/ryannhg/jangle/issues"
   },
   "homepage": "https://github.com/ryannhg/jangle#readme",
-  "dependencies": {
-    "body-parser": "^1.17.1",
-    "express": "^4.14.0",
-    "express-session": "^1.15.1",
-    "mongoose": "^4.7.1",
-    "passport": "^0.3.2",
-    "passport-local": "^1.0.0",
-    "pug": "^2.0.0-beta11"
-  },
   "devDependencies": {
-    "coveralls": "^2.11.15",
-    "dotenv": "^4.0.0",
+    "@types/body-parser": "^1.16.5",
+    "@types/express": "^4.0.37",
+    "@types/jsonwebtoken": "^7.2.3",
+    "@types/mongoose": "^4.7.23",
+    "@types/morgan": "^1.7.33",
+    "@types/node": "^8.0.34",
+    "@types/passport": "^0.3.4",
+    "@types/passport-jwt": "^2.0.24",
+    "@types/promise": "^7.1.30",
+    "del": "^3.0.0",
+    "elm": "^0.18.0",
     "gulp": "^3.9.1",
-    "gulp-elm": "^0.6.1",
-    "gulp-nodemon": "^2.2.1",
-    "gulp-watch": "^4.3.11",
-    "istanbul": "^0.4.5",
-    "mocha": "^3.2.0",
-    "mocha-lcov-reporter": "^1.2.0",
-    "standard": "^9.0.2"
+    "gulp-elm": "^0.7.2",
+    "gulp-sass": "^3.1.0",
+    "gulp-typescript": "^3.2.2",
+    "nodemon": "^1.12.1",
+    "run-sequence": "^2.2.0",
+    "typescript": "^2.5.3"
   },
-  "standard": {
-    "globals": [
-      "describe",
-      "beforeEach",
-      "afterEach",
-      "it"
-    ]
+  "dependencies": {
+    "apollo-server-express": "^1.1.6",
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "graphql-tools": "^2.4.0",
+    "jsonwebtoken": "^8.1.0",
+    "mongoose": "^4.12.1",
+    "morgan": "^1.9.0",
+    "passport": "^0.4.0",
+    "passport-jwt": "^3.0.0",
+    "promise": "^8.0.1"
   }
 }

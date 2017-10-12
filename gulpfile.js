@@ -1,29 +1,84 @@
-let gulp = require('gulp')
-let watch = require('gulp-watch')
-let elm = require('gulp-elm')
-let nodemon = require('gulp-nodemon')
+const gulp = require('gulp')
+const del = require('del')
+const ts = require('gulp-typescript')
+const elm = require('gulp-elm')
+const sass = require('gulp-sass')
+const series = require('run-sequence')
 
-gulp.task('elm', function () {
-  gulp
-    .src('public/elm/Main.elm')
-    .pipe(elm({ debug: true }))
-    .on('error', console.error)
-    .pipe(gulp.dest('public/'))
+const tsProject = ts.createProject('tsconfig.json')
+const paths = {
+  del: {
+    folders: [ '_dist' ]
+  },
+  pug: {
+    src: 'web/**/*.pug',
+    dest: '_dist/public'
+  },
+  elm: {
+    src: 'web/elm/**/*.elm',
+    out: 'main.js',
+    dest: '_dist/public'
+  },
+  css: {
+    src: 'web/styles/**/*.scss',
+    dest: '_dist/public'
+  },
+  typescript: {
+    src: 'server/**/*.ts',
+    dest: '_dist'
+  }
+}
+
+// Typescript
+gulp.task('typescript', () => gulp
+  .src(paths.typescript.src)
+  .pipe(tsProject())
+  .js
+  .pipe(gulp.dest(paths.typescript.dest))
+)
+
+gulp.task('typescript:watch', ['typescript'], () => {
+  gulp.watch(paths.typescript.src, ['typescript'])
 })
 
-gulp.task('elm-watch', ['elm'], function () {
-  watch('public/elm/*.elm', () => gulp.start('elm'))
-})
+// Elm
+gulp.task('elm:init', elm.init)
 
-gulp.task('node-watch', function () {
-  nodemon({
-    script: 'app.js',
-    watch: ['api', 'config', 'models', 'utilities', 'app.js']
-  })
-})
+gulp.task('elm', ['elm:init'], () =>
+  gulp.src(paths.elm.src)
+    .pipe(elm.bundle(paths.elm.out))
+    .on('error', () => {})
+    .pipe(gulp.dest(paths.elm.dest))
+)
 
-gulp.task('build', ['elm'])
-gulp.task('watch', ['elm-watch'])
+gulp.task('elm:watch', ['elm'], () =>
+  gulp.watch(paths.elm.src, ['elm'])
+)
 
-gulp.task('dev', ['watch', 'node-watch'])
-gulp.task('default', ['build'])
+// Pug
+gulp.task('pug', () =>
+  gulp.src(paths.pug.src)
+    .pipe(gulp.dest(paths.pug.dest))
+)
+
+gulp.task('pug:watch', ['pug'], () =>
+  gulp.watch(paths.pug.src, ['pug'])
+)
+
+// CSS
+gulp.task('css', () =>
+  gulp.src(paths.css.src)
+    .pipe(sass().on('error', sass.logError))
+    .pipe(gulp.dest(paths.css.dest))
+)
+
+gulp.task('css:watch', ['css'], () =>
+  gulp.watch(paths.css.src, ['css'])
+)
+
+gulp.task('clean', () => del(paths.del.folders))
+gulp.task('build', ['elm', 'pug', 'css', 'typescript'])
+gulp.task('watch', ['elm:watch', 'pug:watch', 'css:watch', 'typescript:watch'])
+
+gulp.task('dev', (done) => series('clean', 'watch', done))
+gulp.task('default', (done) => series('clean', 'build', done))
