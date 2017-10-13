@@ -57,7 +57,7 @@ export const typeDefs : string = `
   type Query {
 
     # Get a list of all collections
-    collections: [Collection!]!
+    collections(id: ID): [Collection!]!
 
   }
 `

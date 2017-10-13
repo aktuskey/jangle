@@ -18,4 +18,4 @@ const db = {
   ]
 }
 
-export const getCollections = () =>Promise.resolve(db.collections)
+export const getCollections = () => Promise.resolve(db.collections)

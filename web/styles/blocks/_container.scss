@@ -1,0 +1,10 @@
+.container {
+
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+
+    &--tiny {
+        max-width: 360px;
+    }
+}
