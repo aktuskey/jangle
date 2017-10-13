@@ -1,0 +1,19 @@
+.page {
+    padding: 1rem;
+
+    &--dark {
+        background-color: #4f4f4f;
+        color: white;
+    }
+
+    &--full-height {
+        min-height: 100vh;
+    }
+
+    &--center-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+}

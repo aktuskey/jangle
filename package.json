@@ -5,8 +5,8 @@
   "main": "_dist/app.js",
   "scripts": {
     "start": "gulp && node _dist/app.js",
-    "dev": "gulp && gulp watch & nodemon",
-    "docker": "npm i && npm run dev"
+    "dev": "gulp watch & nodemon",
+    "docker": "npm run dev"
   },
   "repository": {
     "type": "git",

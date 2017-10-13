@@ -1,0 +1,45 @@
+.form {
+
+    & > * {
+      margin-top: 1rem;
+    }
+
+    &__label {
+        display: block;
+    }
+
+    &__label-text {
+        display: block;
+        font-weight: normal;
+        font-size: .8rem;
+        margin-bottom: .5rem;
+    }
+
+    &__input {
+        padding: .5rem;
+        font-size: 1rem;
+        border: solid 1px #ccc;
+        width: 100%;
+        box-sizing: border-box;
+        font-weight: lighter;
+    }
+
+    &__button-row {
+        display: flex;
+
+        &--right {
+            justify-content: flex-end;
+        }
+    }
+
+    &__button {
+        cursor: pointer;
+        box-sizing: border-box;
+        padding: .5rem 1rem;
+        font-size: 1rem;
+        border: solid 1px #ccc;
+        background-color: white;
+        font-weight: lighter;
+    }
+
+}

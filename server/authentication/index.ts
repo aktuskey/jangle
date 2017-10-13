@@ -10,17 +10,23 @@ type JwtPayload = {
   id: Id
 }
 
+type Name = {
+  first: String,
+  last: String
+}
+
 type User = {
   id: Id
   role: string
-  email: string
+  email: string,
+  name: Name,
   password: string
 }
 
 const getUsers = () : Promise<User[]> =>
   Promise.resolve([
-    { id: 1, role: 'admin', email: 'admin@jangle.com', password: 'admin' },
-    { id: 2, role: 'editor', email: 'editor@jangle.com', password: 'editor' }
+    { id: 1, role: 'admin', email: 'admin@jangle.com', password: 'admin', name: { first: 'Admin', last: 'Editor' } },
+    { id: 2, role: 'editor', email: 'editor@jangle.com', password: 'editor', name: { first: 'Content', last: 'Editor' } }
   ])
 
 const getUser = (email : string, password : string) : Promise<User> =>
@@ -56,10 +62,21 @@ passport.use(strategy)
 
 type Token = string
 
-const getToken = (email : string, password : string) : Promise<Token> =>
-  getUser(email, password).then(user => (user)
-    ? Promise.resolve(jwt.sign({ id: user.id }, jwtOptions.secretOrKey))
-    : Promise.reject('Sorry, could not find that user.')
+type SafeUser = {
+  email : string,
+  name : Name,
+  token: Token
+}
+
+const getUserWithToken = (email : string, password : string) : Promise<SafeUser> =>
+  getUser(email, password).then(user =>
+    (user)
+      ? Promise.resolve({
+          email: user.email,
+          name: user.name,
+          token: jwt.sign({ id: user.id }, jwtOptions.secretOrKey)
+        })
+      : Promise.reject('Sorry, could not find that user.')
   )
 
 export type Authentication = {
@@ -86,11 +103,11 @@ export const setupAuthentication = (app: Application) : Authentication => {
           data: undefined
         })
       } else {
-        getToken(email, password)
-          .then(token => res.json({
+        getUserWithToken(email, password)
+          .then(userWithToken => res.json({
             error: false,
             message: 'Login successful!',
-            data: token
+            data: userWithToken
           }))
           .catch(reason => res.json({
             error: true,
