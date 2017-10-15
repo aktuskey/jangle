@@ -74,6 +74,7 @@ const getUserWithToken = (email : string, password : string) : Promise<SafeUser>
       ? Promise.resolve({
           email: user.email,
           name: user.name,
+          role: user.role,
           token: jwt.sign({ id: user.id }, jwtOptions.secretOrKey)
         })
       : Promise.reject('Sorry, could not find that user.')

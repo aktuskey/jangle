@@ -1,4 +1,4 @@
-module Route exposing (Route(..), fromLocation, href, modifyUrl)
+module Route exposing (Route(..), fromLocation, href, modifyUrl, routeToString)
 
 import Navigation exposing (Location)
 import UrlParser as Url exposing ((</>), Parser, oneOf, parsePath, s, string, top)

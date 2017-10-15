@@ -1,4 +1,4 @@
-module Page.SignIn exposing (Model, Msg, init, update, view)
+module Page.SignIn exposing (Model, Msg(..), ExternalMsg(..), init, update, view)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -8,7 +8,8 @@ import Data.Context as Context exposing (Context)
 import Data.User as User exposing (User)
 import Data.Response as Response exposing (Response)
 import Json.Encode as Encode
-import Util exposing ((=>), viewMaybe)
+import Util exposing ((=>), viewMaybe, delay, getCmd)
+import Route exposing (Route)
 import Debug
 
 
@@ -41,34 +42,55 @@ type Msg
     | SetUser (Result Http.Error (Response User))
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+type ExternalMsg
+    = NoOp
+    | LoginUser User
+
+
+update : Msg -> Model -> ( ( Model, Cmd Msg ), ExternalMsg )
 update msg model =
     case msg of
         UpdateEmail email ->
-            { model | email = email } ! []
+            { model | email = email }
+                => Cmd.none
+                => NoOp
 
         UpdatePassword password ->
-            { model | password = password } ! []
+            { model | password = password }
+                => Cmd.none
+                => NoOp
 
         SetFocus field ->
-            { model | focusedField = Just field } ! []
+            { model | focusedField = Just field }
+                => Cmd.none
+                => NoOp
 
         RemoveFocus ->
-            { model | focusedField = Nothing } ! []
+            { model | focusedField = Nothing }
+                => Cmd.none
+                => NoOp
 
         AttemptSignIn ->
             if model.user /= Loading then
-                { model | user = Loading } ! [ attemptSignIn model.email model.password ]
+                { model | user = Loading }
+                    => (attemptSignIn model.email model.password)
+                    => NoOp
             else
-                model ! []
+                model
+                    => Cmd.none
+                    => NoOp
 
         SetUser result ->
             case Response.singleHandler result of
                 Ok user ->
-                    { model | user = Success user } ! []
+                    { model | user = Success user }
+                        => Cmd.none
+                        => LoginUser user
 
                 Err error ->
-                    { model | user = Error error } ! []
+                    { model | user = Error error }
+                        => Cmd.none
+                        => NoOp
 
 
 attemptSignIn : String -> String -> Cmd Msg
@@ -116,7 +138,7 @@ viewSignIn model =
 
 viewSignInHeader : Html Msg
 viewSignInHeader =
-    h3 [ class "card__title" ]
+    h3 [ class "card__title card__title--centered" ]
         [ text "Jangle" ]
 
 

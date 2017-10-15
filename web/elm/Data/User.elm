@@ -8,6 +8,7 @@ type alias User =
     { email : String
     , token : String
     , name : Name
+    , role : String
     }
 
 
@@ -23,6 +24,7 @@ decoder =
         |> required "email" Decode.string
         |> required "token" Decode.string
         |> required "name" nameDecoder
+        |> required "role" Decode.string
 
 
 nameDecoder : Decoder Name

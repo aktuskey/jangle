@@ -7,6 +7,7 @@ import Data.Context as Context exposing (Context)
 import Data.User as User exposing (User)
 import Page.Dashboard as Dashboard
 import Page.SignIn as SignIn
+import Util exposing ((=>))
 
 
 type alias Flags =
@@ -47,14 +48,24 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, model.page ) of
         ( SetRoute location, _ ) ->
-            { model | page = page model.context location } ! []
+            { model | page = pageFromLocation location } ! []
 
         ( SignInMsg subMsg, SignIn subModel ) ->
             let
-                ( updatedSubModel, subCmd ) =
+                ( ( updatedSubModel, subCmd ), externalMsg ) =
                     SignIn.update subMsg subModel
+
+                ( newModel, newCmd ) =
+                    case externalMsg of
+                        SignIn.NoOp ->
+                            { model | page = SignIn updatedSubModel }
+                                => Cmd.none
+
+                        SignIn.LoginUser user ->
+                            { model | page = SignIn updatedSubModel, context = Context (Just user) }
+                                => (Navigation.newUrl (Route.routeToString Route.Dashboard))
             in
-                { model | page = SignIn updatedSubModel } ! [ Cmd.map SignInMsg subCmd ]
+                newModel ! (newCmd :: [ Cmd.map SignInMsg subCmd ])
 
         ( _, _ ) ->
             model ! []
@@ -98,38 +109,41 @@ init flags location =
     let
         context =
             (Context flags.user)
+
+        page =
+            pageFromLocation location
+
+        cmd =
+            redirectCommand context.user page
     in
-        ( Model
-            (context)
-            (page context location)
-        , Cmd.none
+        ( Model context page
+        , cmd
         )
 
 
-initialRoute : { context | user : Maybe User } -> Location -> Maybe Route
-initialRoute { user } location =
-    case user of
-        Just _ ->
-            Route.fromLocation location
+pageFromLocation : Location -> Page
+pageFromLocation location =
+    case Route.fromLocation location of
+        Just route ->
+            pageFromRoute route
 
         Nothing ->
-            Just Route.SignIn
+            NotFound
 
 
-page : Context -> Location -> Page
-page context location =
-    let
-        maybeRoute =
-            initialRoute context location
-    in
-        case maybeRoute of
-            Just route ->
-                case route of
-                    Route.Dashboard ->
-                        Dashboard
+redirectCommand : Maybe User -> Page -> Cmd Msg
+redirectCommand user page =
+    if user == Nothing then
+        Navigation.modifyUrl (Route.routeToString Route.SignIn)
+    else
+        Cmd.none
 
-                    Route.SignIn ->
-                        SignIn SignIn.init
 
-            Nothing ->
-                NotFound
+pageFromRoute : Route -> Page
+pageFromRoute route =
+    case route of
+        Route.Dashboard ->
+            Dashboard
+
+        Route.SignIn ->
+            SignIn SignIn.init

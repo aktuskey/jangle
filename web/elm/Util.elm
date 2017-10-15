@@ -1,8 +1,11 @@
-module Util exposing ((=>), appendErrors, onClickStopPropagation, pair, viewIf, viewMaybe)
+module Util exposing ((=>), appendErrors, onClickStopPropagation, pair, viewIf, viewMaybe, delay, getCmd)
 
 import Html exposing (Attribute, Html)
 import Html.Events exposing (defaultOptions, onWithOptions)
 import Json.Decode as Decode
+import Time
+import Process
+import Task
 
 
 (=>) : a -> b -> ( a, b )
@@ -58,3 +61,14 @@ onClickStopPropagation msg =
 appendErrors : { model | errors : List error } -> List error -> { model | errors : List error }
 appendErrors model errors =
     { model | errors = model.errors ++ errors }
+
+
+delay : Float -> msg -> Cmd msg
+delay millisecondsToWait msg =
+    Process.sleep (Time.millisecond * millisecondsToWait)
+        |> Task.perform (\_ -> msg)
+
+
+getCmd : msg -> Cmd msg
+getCmd msg =
+    Cmd.map (always msg) Cmd.none

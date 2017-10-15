@@ -46,7 +46,11 @@ handler result =
                     Err ("Bad status " ++ status.message)
 
                 Http.BadPayload error _ ->
-                    Err error
+                    let
+                        _ =
+                            Debug.log "Response Error: " error
+                    in
+                        Err "Oops! Something went wrong, please try again."
 
 
 singleHandler : Result Http.Error (Response a) -> Result String a

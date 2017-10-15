@@ -28,12 +28,12 @@ app.use('/graphiql', graphiqlExpress({ endpointURL: '/graphql' }))
 
 // Web application
 app.use('/public', express.static(path.join(__dirname, 'public')))
-app.use((req, res) => {
+app.use((_req, res) => {
   const locals = {
     basedir: path.join(__dirname, 'public'),
     pretty: true,
     flags: JSON.stringify({
-      user: req.user || null
+      user: { id: 1, role: 'admin', email: 'admin@jangle.com', token: 'token', name: { first: 'Admin', last: 'User' } } || null
     } || {})
   }
 
