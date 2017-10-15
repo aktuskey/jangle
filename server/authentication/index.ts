@@ -25,8 +25,8 @@ type User = {
 
 const getUsers = () : Promise<User[]> =>
   Promise.resolve([
-    { id: 1, role: 'admin', email: 'admin@jangle.com', password: 'admin', name: { first: 'Admin', last: 'Editor' } },
-    { id: 2, role: 'editor', email: 'editor@jangle.com', password: 'editor', name: { first: 'Content', last: 'Editor' } }
+    { id: 1, role: 'admin', email: 'admin@jangle.com', password: 'password', name: { first: 'Admin', last: 'User' } },
+    { id: 2, role: 'editor', email: 'editor@jangle.com', password: 'password', name: { first: 'Editor', last: 'User' } }
   ])
 
 const getUser = (email : string, password : string) : Promise<User> =>
@@ -35,7 +35,7 @@ const getUser = (email : string, password : string) : Promise<User> =>
       const user = users.filter(user => user.email === email && user.password === password )[0]
       return user
         ? Promise.resolve(user)
-        : Promise.reject('Could not find user.')
+        : Promise.reject('Sorry, could not find that user.')
     })
 
 const getUserWithId = (id: Id) : Promise<User> =>
@@ -100,19 +100,19 @@ export const setupAuthentication = (app: Application) : Authentication => {
         res.json({
           error: true,
           message: 'Please provide an email and password.',
-          data: undefined
+          data: []
         })
       } else {
         getUserWithToken(email, password)
           .then(userWithToken => res.json({
             error: false,
             message: 'Login successful!',
-            data: userWithToken
+            data: [ userWithToken ]
           }))
           .catch(reason => res.json({
             error: true,
             message: reason,
-            data: undefined
+            data: []
           }))
       }
     }

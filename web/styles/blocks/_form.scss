@@ -56,9 +56,24 @@
 
     &__button-row {
         display: flex;
+        align-items: center;
 
         &--right {
             justify-content: flex-end;
+        }
+    }
+
+    &__response {
+        flex: 1;
+        opacity: 0;
+        transition: opacity .3s ease-in-out;
+
+        &--error {
+            color: $color__red;
+        }
+
+        &--visible {
+            opacity: 1;
         }
     }
 

@@ -30,7 +30,6 @@ app.use('/graphiql', graphiqlExpress({ endpointURL: '/graphql' }))
 app.use('/public', express.static(path.join(__dirname, 'public')))
 app.use((req, res) => {
   const locals = {
-    
     basedir: path.join(__dirname, 'public'),
     pretty: true,
     flags: JSON.stringify({

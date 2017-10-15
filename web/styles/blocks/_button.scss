@@ -10,34 +10,71 @@
     font-weight: lighter;
     text-align: left;
 
-    &:before {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 100%;
-        height: 100%;
-        background-color: $color__dark-gray;
-        transition: right .3s ease-in-out;
+    &:not(.button--loading) {
+        &:before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 100%;
+            height: 100%;
+            background-color: $color__dark-gray;
+            transition: right .2s ease-in-out;
+        }
+
+        &:after {
+            content: attr(data-content);
+            white-space: nowrap;
+            overflow: hidden;
+            color: white;
+            margin-left: 1rem;
+            padding: .5rem 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 100%;
+            transition: right .2s ease-in-out;
+        }
+
+        &:hover, &:focus {
+            &:before, &:after {
+                right: 0;
+            }
+        }
     }
 
-    &:after {
-        content: attr(data-content);
-        white-space: nowrap;
-        overflow: hidden;
+    &--loading {
+        
+        $spCol: $color__dark-gray;
+        cursor: not-allowed;
         color: white;
-        margin-left: 1rem;
-        padding: .5rem 0;
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 100%;
-        transition: right .3s ease-in-out;
-    }
 
-    &:hover, &:focus {
-        &:before, &:after {
-            right: 0;
+        &:after {
+            content: '';
+            display: block;
+            background-color: rgba(0,0,0,0);
+            border: 4px rgba($spCol,0.25) solid;
+            border-top: 4px rgba($spCol,1) solid;
+            border-radius: 50%;
+            -webkit-animation: spCircRot .8s infinite linear;
+            animation: spCircRot .8s infinite linear;
+            width: 1em;
+            height: 1em;
+            top: 50%;
+            left: 50%;
+            color: #4d4d4d;
+            background-color: rgba(0,0,0,0);
+            position: absolute;
+            margin-top: -.75em;
+            margin-left: -.75em;
+        }
+        @-webkit-keyframes spCircRot {
+            from { -webkit-transform: rotate(0deg); }
+            to { -webkit-transform: rotate(359deg); }
+        }
+        @keyframes spCircRot {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(359deg); }
         }
     }
 }
