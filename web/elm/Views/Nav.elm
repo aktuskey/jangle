@@ -118,7 +118,7 @@ viewNavigationLink link =
             a [ class "nav__link", href url ] [ text label ]
 
         ActionLink label msg ->
-            a [ class "nav__link", onClick msg ] [ text label ]
+            button [ class "nav__link", onClick msg, tabindex 0 ] [ text label ]
 
 
 viewNavigationFooter : Html Msg

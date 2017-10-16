@@ -1,6 +1,7 @@
 module Main exposing (Model, Msg, update, view, subscriptions, init)
 
 import Html exposing (..)
+import Html.Attributes exposing (class, href)
 import Navigation exposing (Location)
 import Route exposing (Route)
 import Ports
@@ -120,7 +121,7 @@ viewPage { context, page } =
             Html.map SignInMsg (SignIn.view context model)
 
         NotFound ->
-            div [] [ text "NotFound" ]
+            viewNotFoundPage
 
 
 viewDashboardPage : Context -> Dashboard.Model -> Html Msg
@@ -130,7 +131,23 @@ viewDashboardPage { user } model =
             Html.map DashboardMsg (Dashboard.view user model)
 
         Nothing ->
-            div [] [ text "Oops! This should have redirected you to the sign in page..." ]
+            viewProtectedPageWarning
+
+
+viewProtectedPageWarning : Html Msg
+viewProtectedPageWarning =
+    div [ class "page page--error" ]
+        [ h1 [ class "page__message" ] [ text "Oops! You need to sign in first." ]
+        , a [ class "page__link", href (Route.routeToString Route.SignIn) ] [ text "Sign in here." ]
+        ]
+
+
+viewNotFoundPage : Html Msg
+viewNotFoundPage =
+    div [ class "page page--error" ]
+        [ h1 [ class "page__message" ] [ text "Oops! Couldn't find that page..." ]
+        , a [ class "page__link", href (Route.routeToString Route.Dashboard) ] [ text "Try this one?" ]
+        ]
 
 
 subscriptions : Model -> Sub Msg

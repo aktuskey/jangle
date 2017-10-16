@@ -21,6 +21,22 @@
         justify-content: center;
     }
 
+    &--error {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        font-size: 2rem;
+        text-align: center;
+    }
+    
+    &__link {
+        margin-top: 1rem;
+        font-size: .75em;
+        text-decoration: none;
+        color: #888;
+    }
     @include respond-to(small) {
         &--has-nav {
             padding: 0;
