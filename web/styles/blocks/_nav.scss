@@ -42,11 +42,29 @@
     }
 
     &__header-menu-icon {
-        width: 3rem;
+
+        $line-thickness: 2px;
+
+        position: relative;
+        width: 2rem;
         display: block;
-        height: 3rem;
-        background: white;
+        height: 1.5rem;
+        background: rgba(0,0,0,0);
+        border-top: solid $line-thickness white;
+        border-bottom: solid $line-thickness white;
+        box-sizing: border-box;
         margin-right: 1rem;
+        &:before {
+            display: block;
+            content: '';
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            left: 0;
+            width: 100%;
+            height: $line-thickness;
+            background-color: white;
+        }
     }
 
     &__option {
