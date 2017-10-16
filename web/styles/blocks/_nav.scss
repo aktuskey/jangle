@@ -1,5 +1,7 @@
 .nav {
 
+    $bg-color: $color__dark-gray;
+
     background-color: rgba(0,0,0,0);
     color: white;
     position: fixed;
@@ -12,7 +14,7 @@
 
     &__header {
         font-size: 2rem;
-        background-color: $color__dark-blue;
+        background-color: $bg-color;
         padding: .5rem 1rem;
         display: flex;
         align-items: center;
@@ -34,7 +36,7 @@
 
     &__options {
         flex: 1;
-        background-color: $color__dark-blue;
+        background-color: $bg-color;
         overflow: auto;
         padding-bottom: 1.5rem;
     }
@@ -76,7 +78,7 @@
     }
 
     &__footer {
-        background-color: $color__dark-blue;
+        background-color: $bg-color;
         min-height: 2rem;
         padding: 0 1rem;
         padding-bottom: 1rem;

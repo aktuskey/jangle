@@ -187,6 +187,7 @@ viewSignInForm { email, password, focusedField, user } =
                 , type_ "submit"
                 , classList [ ( "button--loading", user == Loading ) ]
                 , dataContent "Sign In"
+                , onFocus RemoveFocus
                 ]
                 [ text "Sign In" ]
             ]
