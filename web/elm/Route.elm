@@ -9,6 +9,8 @@ import Html.Attributes as Attr
 type Route
     = SignIn
     | Dashboard
+    | Users
+    | AddUser
 
 
 route : Parser (Route -> a) a
@@ -16,6 +18,8 @@ route =
     oneOf
         [ Url.map Dashboard top
         , Url.map SignIn (s "sign-in")
+        , Url.map Users (s "users")
+        , Url.map AddUser (s "users" </> s "new")
         ]
 
 
@@ -30,6 +34,12 @@ routeToString page =
 
                 SignIn ->
                     [ "sign-in" ]
+
+                Users ->
+                    [ "users" ]
+
+                AddUser ->
+                    [ "users", "new" ]
     in
         "/" ++ (String.join "/" pieces)
 

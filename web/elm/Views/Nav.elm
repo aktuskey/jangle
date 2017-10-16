@@ -4,6 +4,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Util exposing ((=>))
+import Debug
 
 
 type Msg
@@ -46,23 +47,24 @@ update msg model =
 navigationOptions : List ( String, List Link )
 navigationOptions =
     [ ( "Collections"
-      , [ PageLink "Authors" "/collections/authors"
+      , [ PageLink "All collections" "/collections"
+        , PageLink "Authors" "/collections/authors"
         , PageLink "Blog Posts" "/collections/blog-posts"
         ]
       )
     , ( "Users"
-      , [ PageLink "Manage users" "/users/manage"
+      , [ PageLink "Manage users" "/users"
         , PageLink "Add a user" "/users/new"
         ]
       )
     ]
 
 
-view : Model -> Html Msg
-view model =
+view : String -> Model -> Html Msg
+view currentUrl model =
     nav [ class "nav" ]
         [ viewNavigationHeader
-        , viewCollapsableContent model
+        , viewCollapsableContent (Debug.log "currentUrl" currentUrl) model
         ]
 
 
@@ -70,7 +72,7 @@ viewNavigationHeader : Html Msg
 viewNavigationHeader =
     header [ class "nav__header" ]
         [ viewMobileMenuIcon
-        , h3 [ class "nav__header-title" ] [ text "Jangle" ]
+        , a [ class "nav__header-title", href "/" ] [ text "Jangle" ]
         ]
 
 
@@ -83,46 +85,55 @@ viewMobileMenuIcon =
         []
 
 
-viewCollapsableContent : Model -> Html Msg
-viewCollapsableContent { expandMenu } =
+viewCollapsableContent : String -> Model -> Html Msg
+viewCollapsableContent currentUrl { expandMenu } =
     div
         [ class "nav__content"
         , classList [ ( "nav__content--expanded", expandMenu ) ]
         ]
-        [ viewNavigationOptions
-        , viewNavigationFooter
+        [ viewNavigationOptions currentUrl
+        , viewNavigationFooter currentUrl
         ]
 
 
-viewNavigationOptions : Html Msg
-viewNavigationOptions =
+viewNavigationOptions : String -> Html Msg
+viewNavigationOptions currentUrl =
     ul [ class "nav__options" ]
-        (List.map viewNavigationOption navigationOptions)
+        (List.map (viewNavigationOption currentUrl) navigationOptions)
 
 
-viewNavigationOption : ( String, List Link ) -> Html Msg
-viewNavigationOption ( header, links ) =
+viewNavigationOption : String -> ( String, List Link ) -> Html Msg
+viewNavigationOption currentUrl ( header, links ) =
     li [ class "nav__option" ]
         ([ span
             [ class "nav__option-header" ]
             [ text header ]
          ]
-            ++ (List.map viewNavigationLink links)
+            ++ (List.map (viewNavigationLink currentUrl) links)
         )
 
 
-viewNavigationLink : Link -> Html Msg
-viewNavigationLink link =
+viewNavigationLink : String -> Link -> Html Msg
+viewNavigationLink currentUrl link =
     case link of
         PageLink label url ->
-            a [ class "nav__link", href url ] [ text label ]
+            a
+                [ class "nav__link"
+                , classList [ ( "nav__link--disabled", url == currentUrl ) ]
+                , (if url == currentUrl then
+                    disabled True
+                   else
+                    href url
+                  )
+                ]
+                [ text label ]
 
         ActionLink label msg ->
             button [ class "nav__link", onClick msg, tabindex 0 ] [ text label ]
 
 
-viewNavigationFooter : Html Msg
-viewNavigationFooter =
+viewNavigationFooter : String -> Html Msg
+viewNavigationFooter currentUrl =
     footer [ class "nav__footer" ]
-        [ viewNavigationLink (ActionLink "Sign out" SignOutClick)
+        [ (viewNavigationLink currentUrl) (ActionLink "Sign out" SignOutClick)
         ]

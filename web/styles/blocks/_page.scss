@@ -37,14 +37,11 @@
         text-decoration: none;
         color: #888;
     }
+
     @include respond-to(small) {
         &--has-nav {
             padding: 0;
             display: flex;
-        }
-        &--main-section {
-            flex: 1;
-            padding: 1rem;
         }
     }
 

@@ -5,4 +5,5 @@ import Data.User exposing (User)
 
 type alias Context =
     { user : Maybe User
+    , currentUrl : String
     }

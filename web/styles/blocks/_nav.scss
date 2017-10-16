@@ -96,6 +96,14 @@
             transform: scale(1.2);
             outline: none;
         }
+
+        &--disabled {
+            opacity: .6;
+            cursor: not-allowed;
+            &:hover, &focus {
+                transform: none;
+            }
+        }
     }
 
     &__footer {

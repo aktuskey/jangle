@@ -57,16 +57,23 @@ update msg model =
                 => Cmd.none
 
         ( SetUser user, _ ) ->
-            { model | context = Context user }
-                => case user of
-                    Just user ->
-                        User.storeContext user
+            let
+                context =
+                    model.context
 
-                    Nothing ->
-                        Cmd.batch
-                            [ Ports.storeContext Nothing
-                            , Navigation.newUrl (Route.routeToString Route.SignIn)
-                            ]
+                newContext =
+                    { context | user = user }
+            in
+                { model | context = newContext }
+                    => case user of
+                        Just user ->
+                            User.storeContext user
+
+                        Nothing ->
+                            Cmd.batch
+                                [ Ports.storeContext Nothing
+                                , Navigation.newUrl (Route.routeToString Route.SignIn)
+                                ]
 
         ( SignInMsg subMsg, SignIn subModel ) ->
             let
@@ -125,10 +132,10 @@ viewPage { context, page } =
 
 
 viewDashboardPage : Context -> Dashboard.Model -> Html Msg
-viewDashboardPage { user } model =
+viewDashboardPage { user, currentUrl } model =
     case user of
         Just user ->
-            Html.map DashboardMsg (Dashboard.view user model)
+            Html.map DashboardMsg (Dashboard.view currentUrl user model)
 
         Nothing ->
             viewProtectedPageWarning
@@ -166,7 +173,7 @@ init : Flags -> Location -> ( Model, Cmd Msg )
 init flags location =
     let
         context =
-            (Context flags.user)
+            (Context flags.user location.pathname)
 
         page =
             pageFromLocation location
@@ -201,7 +208,13 @@ pageFromRoute : Route -> Page
 pageFromRoute route =
     case route of
         Route.Dashboard ->
-            Dashboard Dashboard.init
+            Dashboard (Dashboard.init Dashboard.Dashboard)
 
         Route.SignIn ->
             SignIn SignIn.init
+
+        Route.Users ->
+            Dashboard (Dashboard.init Dashboard.Users)
+
+        Route.AddUser ->
+            Dashboard (Dashboard.init Dashboard.AddUser)
