@@ -33,7 +33,7 @@ app.use((_req, res) => {
     basedir: path.join(__dirname, 'public'),
     pretty: true,
     flags: JSON.stringify({
-      user: { id: 1, role: 'admin', email: 'admin@jangle.com', token: 'token', name: { first: 'Admin', last: 'User' } } || null
+      user: null//{ id: 1, role: 'admin', email: 'admin@jangle.com', token: 'token', name: { first: 'Admin', last: 'User' } } || null
     } || {})
   }
 

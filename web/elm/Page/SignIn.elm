@@ -83,7 +83,7 @@ update msg model =
         SetUser result ->
             case Response.singleHandler result of
                 Ok user ->
-                    { model | user = Success user }
+                    model
                         => Cmd.none
                         => LoginUser user
 

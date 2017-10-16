@@ -11,4 +11,14 @@ html( lang="en" )
     div#app
     script( src="/public/main.js" )
     script( type="text/javascript" ).
-      Elm.Main.embed(document.getElementById('app'), !{ flags })
+      var app = Elm.Main.embed(document.getElementById('app'), { user: JSON.parse(localStorage.context || null) })
+      
+      app.ports.storeContext.subscribe(function(context) {
+        localStorage.context = context
+      })
+
+      window.addEventListener("storage", function(event) {
+        if (event.storageArea === localStorage && event.key === "context") {
+          app.ports.onContextChange.send(event.newValue)
+        }
+      }, false)

@@ -1,91 +1,45 @@
-module Page.Dashboard exposing (Msg, view)
+module Page.Dashboard exposing (Msg, view, init, update, Model)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Data.User as User exposing (User)
+import Views.Nav as Nav
+import Util exposing ((=>))
 
 
 type Msg
-    = NoOp
+    = NavMsg Nav.Msg
 
 
-type alias Link =
-    { label : String
-    , url : String
+type alias ExternalMsg =
+    Nav.ExternalMsg
+
+
+type alias Model =
+    { navigation : Nav.Model
     }
 
 
-navigationOptions : List ( String, List Link )
-navigationOptions =
-    [ ( "Collections"
-      , [ Link "Authors" "/collections/authors"
-        , Link "Blog Posts" "/collections/blog-posts"
-        ]
-      )
-    ]
+init : Model
+init =
+    Model (Nav.init)
 
 
-view : User -> Html Msg
-view user =
+update : Msg -> Model -> ( Model, ExternalMsg )
+update msg model =
+    case msg of
+        NavMsg subMsg ->
+            let
+                ( navModel, navMsg ) =
+                    Nav.update subMsg model.navigation
+            in
+                { model | navigation = navModel }
+                    => navMsg
+
+
+view : User -> Model -> Html Msg
+view user model =
     div [ class "page page--has-nav" ]
-        [ viewNavigation
+        [ Html.map NavMsg (Nav.view model.navigation)
         , section [ class "page--main-section" ] []
-        ]
-
-
-viewNavigation : Html Msg
-viewNavigation =
-    nav [ class "nav" ]
-        [ viewNavigationHeader
-        , viewCollapsableContent
-        ]
-
-
-viewNavigationHeader : Html Msg
-viewNavigationHeader =
-    header [ class "nav__header" ]
-        [ viewMobileMenuIcon
-        , h3 [ class "nav__header-title" ] [ text "Jangle" ]
-        ]
-
-
-viewMobileMenuIcon : Html Msg
-viewMobileMenuIcon =
-    span [ class "nav__header-menu-icon" ] []
-
-
-viewCollapsableContent : Html Msg
-viewCollapsableContent =
-    div [ class "nav__content" ]
-        [ viewNavigationOptions
-        , viewNavigationFooter
-        ]
-
-
-viewNavigationOptions : Html Msg
-viewNavigationOptions =
-    ul [ class "nav__options" ]
-        (List.map viewNavigationOption navigationOptions)
-
-
-viewNavigationOption : ( String, List Link ) -> Html Msg
-viewNavigationOption ( header, links ) =
-    li [ class "nav__option" ]
-        ([ span
-            [ class "nav__option-header" ]
-            [ text header ]
-         ]
-            ++ (List.map viewNavigationLink links)
-        )
-
-
-viewNavigationLink : Link -> Html Msg
-viewNavigationLink link =
-    a [ class "nav__link", href link.url ] [ text link.label ]
-
-
-viewNavigationFooter : Html Msg
-viewNavigationFooter =
-    footer [ class "nav__footer" ]
-        [ viewNavigationLink (Link "Sign out" "/sign-out")
         ]

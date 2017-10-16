@@ -3,10 +3,13 @@ module Main exposing (Model, Msg, update, view, subscriptions, init)
 import Html exposing (..)
 import Navigation exposing (Location)
 import Route exposing (Route)
+import Ports
+import Json.Decode as Decode
 import Data.Context as Context exposing (Context)
 import Data.User as User exposing (User)
 import Page.Dashboard as Dashboard
 import Page.SignIn as SignIn
+import Views.Nav as Nav
 import Util exposing ((=>))
 
 
@@ -33,13 +36,14 @@ type alias Model =
 
 
 type Page
-    = Dashboard
+    = Dashboard Dashboard.Model
     | SignIn SignIn.Model
     | NotFound
 
 
 type Msg
     = SetRoute Location
+    | SetUser (Maybe User)
     | DashboardMsg Dashboard.Msg
     | SignInMsg SignIn.Msg
 
@@ -48,7 +52,20 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, model.page ) of
         ( SetRoute location, _ ) ->
-            { model | page = pageFromLocation location } ! []
+            { model | page = pageFromLocation location }
+                => Cmd.none
+
+        ( SetUser user, _ ) ->
+            { model | context = Context user }
+                => case user of
+                    Just user ->
+                        User.storeContext user
+
+                    Nothing ->
+                        Cmd.batch
+                            [ Ports.storeContext Nothing
+                            , Navigation.newUrl (Route.routeToString Route.SignIn)
+                            ]
 
         ( SignInMsg subMsg, SignIn subModel ) ->
             let
@@ -62,10 +79,27 @@ update msg model =
                                 => Cmd.none
 
                         SignIn.LoginUser user ->
-                            { model | page = SignIn updatedSubModel, context = Context (Just user) }
-                                => (Navigation.newUrl (Route.routeToString Route.Dashboard))
+                            let
+                                ( userModel, userCmd ) =
+                                    update (SetUser (Just user)) model
+                            in
+                                userModel
+                                    => Cmd.batch [ userCmd, Navigation.newUrl (Route.routeToString Route.Dashboard) ]
             in
                 newModel ! (newCmd :: [ Cmd.map SignInMsg subCmd ])
+
+        ( DashboardMsg subMsg, Dashboard subModel ) ->
+            let
+                ( updatedSubModel, externalMsg ) =
+                    Dashboard.update subMsg subModel
+            in
+                case externalMsg of
+                    Nav.SignOut ->
+                        update (SetUser Nothing) model
+
+                    Nav.NoOp ->
+                        { model | page = Dashboard updatedSubModel }
+                            => Cmd.none
 
         ( _, _ ) ->
             model ! []
@@ -79,8 +113,8 @@ view model =
 viewPage : Model -> Html Msg
 viewPage { context, page } =
     case page of
-        Dashboard ->
-            viewDashboardPage context
+        Dashboard model ->
+            viewDashboardPage context model
 
         SignIn model ->
             Html.map SignInMsg (SignIn.view context model)
@@ -89,11 +123,11 @@ viewPage { context, page } =
             div [] [ text "NotFound" ]
 
 
-viewDashboardPage : Context -> Html Msg
-viewDashboardPage { user } =
+viewDashboardPage : Context -> Dashboard.Model -> Html Msg
+viewDashboardPage { user } model =
     case user of
         Just user ->
-            Html.map DashboardMsg (Dashboard.view user)
+            Html.map DashboardMsg (Dashboard.view user model)
 
         Nothing ->
             div [] [ text "Oops! This should have redirected you to the sign in page..." ]
@@ -101,7 +135,14 @@ viewDashboardPage { user } =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    Sub.batch
+        [ Sub.map SetUser contextChange
+        ]
+
+
+contextChange : Sub (Maybe User)
+contextChange =
+    Ports.onContextChange (Decode.decodeValue User.decoder >> Result.toMaybe)
 
 
 init : Flags -> Location -> ( Model, Cmd Msg )
@@ -143,7 +184,7 @@ pageFromRoute : Route -> Page
 pageFromRoute route =
     case route of
         Route.Dashboard ->
-            Dashboard
+            Dashboard Dashboard.init
 
         Route.SignIn ->
             SignIn SignIn.init
