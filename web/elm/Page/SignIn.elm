@@ -153,7 +153,8 @@ viewSignInForm { email, password, focusedField, user } =
                 , value email
                 , onInput UpdateEmail
                 , onFocus (SetFocus Email)
-                , onBlur RemoveFocus
+
+                --, onBlur RemoveFocus
                 , attribute "autofocus" "true"
                 ]
                 []
@@ -166,7 +167,8 @@ viewSignInForm { email, password, focusedField, user } =
                 , value password
                 , onInput UpdatePassword
                 , onFocus (SetFocus Password)
-                , onBlur RemoveFocus
+
+                --, onBlur RemoveFocus
                 ]
                 []
             ]
