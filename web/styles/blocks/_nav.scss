@@ -53,6 +53,13 @@
         min-height: 4rem;
     }
 
+    &__brand {
+        transition: opacity .3s ease-in-out;
+        &:hover, &:focus {
+            opacity: .6;
+        }
+    }
+
     &__content {
         flex: 1;
         display: flex;
