@@ -64,7 +64,7 @@ update msg model =
 updateAsUser : User -> Context -> Dashboard.Msg -> Dashboard.Model -> Model -> ( Model, Cmd Msg )
 updateAsUser user context subMsg subModel model =
     let
-        ( ( updatedsubModel, subCmd ), externalMsg ) =
+        ( ( updatedSubModel, subCmd ), externalMsg ) =
             Dashboard.update user subMsg subModel
     in
         case externalMsg of
@@ -72,7 +72,7 @@ updateAsUser user context subMsg subModel model =
                 update (SetUser Nothing) model
 
             Nav.NoOp ->
-                { model | page = Dashboard subModel }
+                { model | page = Dashboard updatedSubModel }
                     => Cmd.none
 
             Nav.NavigateTo url ->

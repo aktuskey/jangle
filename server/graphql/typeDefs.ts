@@ -54,10 +54,28 @@ export const typeDefs : string = `
     value: String!
   }
 
+  type User {
+    name: Name!
+    email: String!
+    role: Role
+  }
+
+  type Name {
+    first: String!
+    last: String!
+  }
+
+  enum Role {
+    admin
+    editor
+  }
+
   type Query {
 
     # Get a list of all collections
     collections(id: ID): [Collection!]!
 
+    # Get a list of users
+    users: [User!]!
   }
 `

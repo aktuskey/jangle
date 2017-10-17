@@ -1,7 +1,8 @@
-import { getCollections } from '../data'
+import { getCollections, getAllUsers } from '../data'
 
 export const resolvers = {
   Query: {
-    collections: getCollections
+    collections: getCollections,
+    users: getAllUsers
   }
 }

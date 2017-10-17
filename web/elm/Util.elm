@@ -1,7 +1,8 @@
-module Util exposing ((=>), appendErrors, onClickStopPropagation, pair, viewIf, viewMaybe, delay, getCmd)
+module Util exposing ((=>), appendErrors, onClickStopPropagation, pair, viewIf, viewMaybe, delay, getCmd, parseError)
 
 import Html exposing (Attribute, Html)
 import Html.Events exposing (defaultOptions, onWithOptions, onClick)
+import Http
 import Json.Decode as Decode
 import Time
 import Process
@@ -77,3 +78,26 @@ getCmd msg =
 href : (String -> msg) -> String -> Html.Attribute msg
 href msg url =
     onClick (msg url)
+
+
+parseError : Http.Error -> String
+parseError error =
+    case error of
+        Http.BadUrl msg ->
+            msg
+
+        Http.Timeout ->
+            "Request timed out."
+
+        Http.NetworkError ->
+            "Network error"
+
+        Http.BadStatus { status } ->
+            ("Bad status " ++ status.message)
+
+        Http.BadPayload error _ ->
+            let
+                _ =
+                    Debug.log "Response Error: " error
+            in
+                "Oops! Something went wrong, please try again."

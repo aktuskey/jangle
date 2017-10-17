@@ -51,6 +51,6 @@ decoder =
         |> required "role" Decode.string
 
 
-fullname : User -> String
+fullname : { user | name : Name } -> String
 fullname user =
     user.name.first ++ " " ++ user.name.last

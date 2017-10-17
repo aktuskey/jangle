@@ -3,6 +3,7 @@ module Data.Response exposing (Response, decoder, post, handler, singleHandler)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline as Pipeline exposing (decode, required)
 import Http
+import Util
 
 
 type alias Response a =
@@ -32,25 +33,7 @@ handler result =
             Ok response.data
 
         Err error ->
-            case error of
-                Http.BadUrl msg ->
-                    Err msg
-
-                Http.Timeout ->
-                    Err "Request timed out."
-
-                Http.NetworkError ->
-                    Err "Network error"
-
-                Http.BadStatus { status } ->
-                    Err ("Bad status " ++ status.message)
-
-                Http.BadPayload error _ ->
-                    let
-                        _ =
-                            Debug.log "Response Error: " error
-                    in
-                        Err "Oops! Something went wrong, please try again."
+            Err (Util.parseError error)
 
 
 singleHandler : Result Http.Error (Response a) -> Result String a

@@ -2,6 +2,7 @@ import { makeExecutableSchema } from 'graphql-tools'
 import { graphqlExpress, graphiqlExpress } from 'apollo-server-express'
 import * as express from 'express'
 import * as bodyParser from 'body-parser'
+import * as morgan from 'morgan'
 import * as path from 'path'
 
 import { typeDefs, resolvers } from './graphql'
@@ -15,6 +16,7 @@ const auth = setupAuthentication(app)
 
 // Express Middleware
 app.use(bodyParser.json())
+app.use(morgan('tiny'))
 app.set('views', path.join(__dirname, 'public'))
 app.set('view engine', 'pug')
 

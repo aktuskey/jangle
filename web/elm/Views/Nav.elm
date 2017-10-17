@@ -97,7 +97,7 @@ view : String -> Model -> Html Msg
 view currentUrl model =
     nav [ class "nav nav--light" ]
         [ viewNavigationHeader
-        , viewCollapsableContent (Debug.log "currentUrl" currentUrl) model
+        , viewCollapsableContent currentUrl model
         ]
 
 

@@ -3,6 +3,7 @@ import * as passport from 'passport'
 import { Strategy, ExtractJwt, StrategyOptions } from 'passport-jwt'
 import * as jwt from 'jsonwebtoken'
 import { debug } from '../utils'
+import { getAllUsers } from '../data'
 
 type Id = number
 
@@ -23,14 +24,8 @@ type User = {
   password: string
 }
 
-const getUsers = () : Promise<User[]> =>
-  Promise.resolve([
-    { id: 1, role: 'admin', email: 'admin@jangle.com', password: 'password', name: { first: 'Admin', last: 'User' } },
-    { id: 2, role: 'editor', email: 'editor@jangle.com', password: 'password', name: { first: 'Editor', last: 'User' } }
-  ])
-
 const getUser = (email : string, password : string) : Promise<User> =>
-  getUsers()
+  getAllUsers()
     .then(users => {
       const user = users.filter(user => user.email === email && user.password === password )[0]
       return user
@@ -39,7 +34,7 @@ const getUser = (email : string, password : string) : Promise<User> =>
     })
 
 const getUserWithId = (id: Id) : Promise<User> =>
-    getUsers()
+    getAllUsers()
       .then(users => {
         const user = users.filter(user => user.id === id)[0]
         return user ? Promise.resolve(user) : Promise.reject('No user with that id')
