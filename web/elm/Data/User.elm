@@ -1,6 +1,7 @@
 module Data.User exposing (User, decoder, fullname, storeContext)
 
 import Ports
+import Data.Name as Name exposing (Name)
 import Json.Encode as Encode exposing (Value)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline as Pipeline exposing (decode, required)
@@ -12,12 +13,6 @@ type alias User =
     , token : String
     , name : Name
     , role : String
-    }
-
-
-type alias Name =
-    { first : String
-    , last : String
     }
 
 
@@ -52,15 +47,8 @@ decoder =
     decode User
         |> required "email" Decode.string
         |> required "token" Decode.string
-        |> required "name" nameDecoder
+        |> required "name" Name.decoder
         |> required "role" Decode.string
-
-
-nameDecoder : Decoder Name
-nameDecoder =
-    decode Name
-        |> required "first" Decode.string
-        |> required "last" Decode.string
 
 
 fullname : User -> String

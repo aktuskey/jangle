@@ -10,6 +10,7 @@ import Data.Context as Context exposing (Context)
 import Data.User as User exposing (User)
 import Page.Dashboard as Dashboard
 import Page.SignIn as SignIn
+import Page.Users as Users
 import Views.Nav as Nav
 import Util exposing ((=>))
 
@@ -52,13 +53,45 @@ type Msg
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
+    case ( model.context.user, msg, model.page ) of
+        ( Just user, DashboardMsg pageMsg, Dashboard pageModel ) ->
+            updateAsUser user model.context pageMsg pageModel model
+
+        _ ->
+            updateAnonymously msg model
+
+
+updateAsUser : User -> Context -> Dashboard.Msg -> Dashboard.Model -> Model -> ( Model, Cmd Msg )
+updateAsUser user context subMsg subModel model =
+    let
+        ( ( updatedsubModel, subCmd ), externalMsg ) =
+            Dashboard.update user subMsg subModel
+    in
+        case externalMsg of
+            Nav.SignOut ->
+                update (SetUser Nothing) model
+
+            Nav.NoOp ->
+                { model | page = Dashboard subModel }
+                    => Cmd.none
+
+            Nav.NavigateTo url ->
+                update (NewUrl url) model
+
+
+updateAnonymously : Msg -> Model -> ( Model, Cmd Msg )
+updateAnonymously msg model =
     case ( msg, model.page ) of
         ( SetRoute location, _ ) ->
-            { model
-                | page = pageFromLocation location
-                , context = Context.updateCurrentUrl location.pathname model.context
-            }
-                => Cmd.none
+            let
+                ( page, cmd ) =
+                    pageFromLocation model.context location
+            in
+                { model
+                    | page = page
+                    , context = Context.updateCurrentUrl location.pathname model.context
+                }
+                    => cmd
 
         ( NewUrl url, _ ) ->
             model
@@ -103,22 +136,6 @@ update msg model =
                                     => Cmd.batch [ userCmd, Navigation.newUrl (Route.routeToString Route.Dashboard) ]
             in
                 newModel ! (newCmd :: [ Cmd.map SignInMsg subCmd ])
-
-        ( DashboardMsg subMsg, Dashboard subModel ) ->
-            let
-                ( updatedSubModel, externalMsg ) =
-                    Dashboard.update subMsg subModel
-            in
-                case externalMsg of
-                    Nav.SignOut ->
-                        update (SetUser Nothing) model
-
-                    Nav.NoOp ->
-                        { model | page = Dashboard updatedSubModel }
-                            => Cmd.none
-
-                    Nav.NavigateTo url ->
-                        update (NewUrl url) model
 
         ( _, _ ) ->
             model ! []
@@ -186,25 +203,25 @@ init flags location =
         context =
             (Context flags.user location.pathname)
 
-        page =
-            pageFromLocation location
+        ( page, pageCmd ) =
+            pageFromLocation context location
 
         cmd =
             redirectCommand context.user page
     in
         ( Model context page
-        , cmd
+        , Cmd.batch [ cmd, pageCmd ]
         )
 
 
-pageFromLocation : Location -> Page
-pageFromLocation location =
+pageFromLocation : Context -> Location -> ( Page, Cmd Msg )
+pageFromLocation { user } location =
     case Route.fromLocation location of
         Just route ->
-            pageFromRoute route
+            pageFromRoute user route
 
         Nothing ->
-            NotFound
+            NotFound => Cmd.none
 
 
 redirectCommand : Maybe User -> Page -> Cmd Msg
@@ -215,17 +232,35 @@ redirectCommand user page =
         Cmd.none
 
 
-pageFromRoute : Route -> Page
-pageFromRoute route =
+pageFromRoute : Maybe User -> Route -> ( Page, Cmd Msg )
+pageFromRoute user route =
     case route of
         Route.Dashboard ->
             Dashboard (Dashboard.init Dashboard.Dashboard)
+                => Cmd.none
 
         Route.SignIn ->
             SignIn SignIn.init
+                => Cmd.none
 
         Route.Users ->
-            Dashboard (Dashboard.init Dashboard.Users)
+            case user of
+                Just user ->
+                    let
+                        ( page, cmd ) =
+                            Users.init user
+                    in
+                        (Dashboard <|
+                            Dashboard.init <|
+                                Dashboard.Users <|
+                                    page
+                        )
+                            => Cmd.map DashboardMsg (Cmd.map Dashboard.UsersMsg cmd)
+
+                Nothing ->
+                    NotFound
+                        => Cmd.none
 
         Route.AddUser ->
             Dashboard (Dashboard.init Dashboard.AddUser)
+                => Cmd.none
