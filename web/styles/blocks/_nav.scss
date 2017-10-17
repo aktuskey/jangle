@@ -1,6 +1,6 @@
 .nav {
 
-    $bg-color: $color__dark-gray;
+    $dark-color: $color__dark-gray;
 
     background-color: rgba(0,0,0,0);
     color: white;
@@ -12,9 +12,40 @@
     display: flex;
     flex-direction: column;
 
+    &--light {
+        color: $dark-color;
+
+        .nav__link {
+            color: $dark-color;
+
+            &:before {
+                background-color: $dark-color;
+            }
+        }
+
+        .nav__header {
+            background-color: white;
+        }
+
+        .nav__options {
+            background-color: white;
+        }
+
+        .nav__footer {
+            background-color: white;
+        }
+
+        .nav__menu-icon {
+            border-color: $dark-color;
+            &:before {
+                background-color: $dark-color;
+            }
+        }
+    }
+
     &__header {
         font-size: 2rem;
-        background-color: $bg-color;
+        background-color: $dark-color;
         padding: .5rem 1rem;
         display: flex;
         align-items: center;
@@ -36,12 +67,28 @@
 
     &__options {
         flex: 1;
-        background-color: $bg-color;
+        background-color: $dark-color;
         overflow: auto;
         padding-bottom: 1.5rem;
     }
 
-    &__header-menu-icon {
+    &__menu-button {
+        display: block;
+        background: none;
+        border: none;
+        padding: .5rem;
+        width: unset;
+        margin-right: 1rem;
+        cursor: pointer;
+        transition: opacity .3s ease-in-out;
+        box-sizing: border-box;
+
+        &:hover, &:focus {
+            opacity: .6;
+        }
+    }
+
+    &__menu-icon {
 
         $line-thickness: 2px;
 
@@ -53,7 +100,7 @@
         border-top: solid $line-thickness white;
         border-bottom: solid $line-thickness white;
         box-sizing: border-box;
-        margin-right: 1rem;
+
         &:before {
             display: block;
             content: '';
@@ -77,24 +124,45 @@
         font-size: 1.75rem;
         display: block;
         opacity: .6;
+        padding-bottom: .5rem;
     }
 
     &__link {
+
+        position: relative;
+        font-weight: lighter;
         cursor: pointer;
         color: white;
-        display: block;
-        margin-top: 1rem;
+        display: inline-block;
+        padding: 0;
+        margin-top: .5rem;
         font-size: 1.25rem;
         text-decoration: none;
         transform-origin: left;
-        transition: transform .3s ease-in-out;
         border: none;
         background: rgba(0,0,0,0);
         font-family: inherit;
+        padding-bottom: .5em;
+
+        &:before {
+            transition: transform .3s ease-in-out;
+            display: block;
+            content: '';
+            height: 2px;
+            background-color: white;
+            transform: scaleX(0);
+            transform-origin: left;
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+        }
 
         &:hover, &:focus {
-            transform: scale(1.2);
             outline: none;
+            &:before {
+                transform: none;
+            }
         }
 
         &--disabled {
@@ -107,10 +175,10 @@
     }
 
     &__footer {
-        background-color: $bg-color;
+        background-color: $dark-color;
         min-height: 2rem;
-        padding: 0 1rem;
-        padding-bottom: 1rem;
+        padding: .5rem 1rem;
+        box-sizing: border-box;
         border-top: solid 1px white;
     }
 
@@ -121,7 +189,7 @@
         position: relative;
         height: 100vh;
 
-        &__header-menu-icon {
+        &__menu-button {
             display: none;
         }
 

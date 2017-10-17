@@ -10,11 +10,13 @@ import Debug
 type Msg
     = ToggleMenu
     | SignOutClick
+    | Navigate String
 
 
 type ExternalMsg
     = NoOp
     | SignOut
+    | NavigateTo String
 
 
 type alias Model =
@@ -43,10 +45,41 @@ update msg model =
             model
                 => SignOut
 
+        Navigate url ->
+            { model | expandMenu = False }
+                => NavigateTo url
+
 
 navigationOptions : List ( String, List Link )
 navigationOptions =
     [ ( "Collections"
+      , [ PageLink "All collections" "/collections"
+        , PageLink "Authors" "/collections/authors"
+        , PageLink "Blog Posts" "/collections/blog-posts"
+        ]
+      )
+    , ( "Users"
+      , [ PageLink "Manage users" "/users"
+        , PageLink "Add a user" "/users/new"
+        ]
+      )
+    , ( "Collections"
+      , [ PageLink "All collections" "/collections"
+        , PageLink "Authors" "/collections/authors"
+        , PageLink "Blog Posts" "/collections/blog-posts"
+        ]
+      )
+    , ( "Users"
+      , [ PageLink "Manage users" "/users"
+        , PageLink "Add a user" "/users/new"
+        ]
+      )
+    , ( "Users"
+      , [ PageLink "Manage users" "/users"
+        , PageLink "Add a user" "/users/new"
+        ]
+      )
+    , ( "Collections"
       , [ PageLink "All collections" "/collections"
         , PageLink "Authors" "/collections/authors"
         , PageLink "Blog Posts" "/collections/blog-posts"
@@ -62,7 +95,7 @@ navigationOptions =
 
 view : String -> Model -> Html Msg
 view currentUrl model =
-    nav [ class "nav" ]
+    nav [ class "nav nav--light" ]
         [ viewNavigationHeader
         , viewCollapsableContent (Debug.log "currentUrl" currentUrl) model
         ]
@@ -72,17 +105,18 @@ viewNavigationHeader : Html Msg
 viewNavigationHeader =
     header [ class "nav__header" ]
         [ viewMobileMenuIcon
-        , a [ class "nav__header-title", href "/" ] [ text "Jangle" ]
+        , button [ class "nav__brand", onClick (Navigate "/") ] [ text "Jangle" ]
         ]
 
 
 viewMobileMenuIcon : Html Msg
 viewMobileMenuIcon =
-    span
-        [ class "nav__header-menu-icon"
+    button
+        [ class "nav__menu-button"
         , onClick ToggleMenu
         ]
-        []
+        [ span [ class "nav__menu-icon" ] []
+        ]
 
 
 viewCollapsableContent : String -> Model -> Html Msg
@@ -117,19 +151,21 @@ viewNavigationLink : String -> Link -> Html Msg
 viewNavigationLink currentUrl link =
     case link of
         PageLink label url ->
-            a
-                [ class "nav__link"
-                , classList [ ( "nav__link--disabled", url == currentUrl ) ]
-                , (if url == currentUrl then
-                    disabled True
-                   else
-                    href url
-                  )
+            div []
+                [ button
+                    [ class "nav__link"
+                    , classList [ ( "nav__link--disabled", url == currentUrl ) ]
+                    , if url == currentUrl then
+                        disabled True
+                      else
+                        onClick (Navigate url)
+                    , tabindex 0
+                    ]
+                    [ text label ]
                 ]
-                [ text label ]
 
         ActionLink label msg ->
-            button [ class "nav__link", onClick msg, tabindex 0 ] [ text label ]
+            div [] [ button [ class "nav__link", onClick msg, tabindex 0 ] [ text label ] ]
 
 
 viewNavigationFooter : String -> Html Msg

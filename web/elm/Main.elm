@@ -44,6 +44,7 @@ type Page
 
 type Msg
     = SetRoute Location
+    | NewUrl String
     | SetUser (Maybe User)
     | DashboardMsg Dashboard.Msg
     | SignInMsg SignIn.Msg
@@ -53,8 +54,15 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, model.page ) of
         ( SetRoute location, _ ) ->
-            { model | page = pageFromLocation location }
+            { model
+                | page = pageFromLocation location
+                , context = Context.updateCurrentUrl location.pathname model.context
+            }
                 => Cmd.none
+
+        ( NewUrl url, _ ) ->
+            model
+                => Navigation.newUrl url
 
         ( SetUser user, _ ) ->
             let
@@ -108,6 +116,9 @@ update msg model =
                     Nav.NoOp ->
                         { model | page = Dashboard updatedSubModel }
                             => Cmd.none
+
+                    Nav.NavigateTo url ->
+                        update (NewUrl url) model
 
         ( _, _ ) ->
             model ! []

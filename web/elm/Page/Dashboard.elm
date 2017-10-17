@@ -58,7 +58,7 @@ viewSection : User -> ContentSection -> Html Msg
 viewSection user section =
     case section of
         Dashboard ->
-            div []
+            div [ class "dashboard__header--right" ]
                 [ h1 [ class "dashboard__title" ] [ text <| "Welcome back, " ++ user.name.first ++ "." ]
                 , h3 [ class "dashboard__subtitle" ] [ text "Let's get started." ]
                 ]

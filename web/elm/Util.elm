@@ -1,7 +1,7 @@
 module Util exposing ((=>), appendErrors, onClickStopPropagation, pair, viewIf, viewMaybe, delay, getCmd)
 
 import Html exposing (Attribute, Html)
-import Html.Events exposing (defaultOptions, onWithOptions)
+import Html.Events exposing (defaultOptions, onWithOptions, onClick)
 import Json.Decode as Decode
 import Time
 import Process
@@ -72,3 +72,8 @@ delay millisecondsToWait msg =
 getCmd : msg -> Cmd msg
 getCmd msg =
     Cmd.map (always msg) Cmd.none
+
+
+href : (String -> msg) -> String -> Html.Attribute msg
+href msg url =
+    onClick (msg url)

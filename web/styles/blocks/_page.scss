@@ -1,10 +1,9 @@
 .page {
-    padding: 1rem;
 
-    &--dark {
-        background-color: $color__dark-gray;
-        color: white;
-    }
+    padding: 1rem;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 1024px;
 
     &--full-height {
         min-height: 100vh;
@@ -12,6 +11,7 @@
 
     &--has-nav {
         min-height: 100vh;
+        padding: 1rem 0;
         padding-top: 6rem;
     }
 

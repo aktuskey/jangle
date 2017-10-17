@@ -1,7 +1,20 @@
 .dashboard {
 
+    $dashboard-max-width: 720px;
+
     flex: 1;
     padding: 1rem;
+    margin: 0 auto;
+    width: 100%;
+    max-width: $dashboard-max-width;
+
+    &__header {
+
+        &--right {
+            text-align: right;
+        }
+
+    }
 
     &__title {
         font-size: 2rem;
