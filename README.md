@@ -1,6 +1,5 @@
 # Jangle
-> Your experience matters.
-
+> Make content management embarrassingly simple.
 
 ### Local Development
 
