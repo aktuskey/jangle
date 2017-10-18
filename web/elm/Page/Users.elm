@@ -4,29 +4,31 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Http
 import Data.RemoteData as RemoteData exposing (RemoteData(..))
-import Data.Name as Name exposing (Name)
 import Data.User as User exposing (User)
-import Data.Api.User as ApiUser
+import Data.Schema.User as SchemaUser
 import Util exposing ((=>))
 import GraphQL
 
 
 type alias Model =
-    { users : RemoteData (List ApiUser.User)
+    { users : RemoteData (List SchemaUser.User)
     }
+
+
+type alias UserQuery =
+    GraphQL.Response SchemaUser.UserQuery
 
 
 type Msg
     = FetchUsers
-    | HandleUserResponse (Result Http.Error ApiUser.GraphQLUser)
+    | HandleUserResponse (Result Http.Error UserQuery)
 
 
 update : User -> Msg -> Model -> ( Model, Cmd Msg )
 update user msg model =
     case msg of
         FetchUsers ->
-            model
-                => fetchUsersAs user
+            model => fetchUsersAs user
 
         HandleUserResponse (Ok response) ->
             { model | users = RemoteData.Success response.data.users }
@@ -39,7 +41,11 @@ update user msg model =
 
 fetchUsersAs : User -> Cmd Msg
 fetchUsersAs user =
-    GraphQL.sendQuery HandleUserResponse user (GraphQL.query "/graphql" "users" "{ name { first last } email role }") ApiUser.graphQlDecoder
+    GraphQL.sendQuery
+        HandleUserResponse
+        user
+        (SchemaUser.usersQuery "/graphql")
+        SchemaUser.usersDecoder
 
 
 view : User -> Model -> Html Msg
@@ -64,7 +70,7 @@ view user model =
         ]
 
 
-viewUsers : List ApiUser.User -> Html Msg
+viewUsers : List SchemaUser.User -> Html Msg
 viewUsers users =
     section [ class "list" ]
         [ h3 [ class "list__title" ] [ text "All Users" ]
@@ -72,9 +78,12 @@ viewUsers users =
         ]
 
 
-viewUser : ApiUser.User -> Html Msg
+viewUser : SchemaUser.User -> Html Msg
 viewUser user =
-    li [ class "list_row" ] [ text <| User.fullname user ]
+    li [ class "list_row" ]
+        [ a [ class "link", href ("/users/" ++ user.slug) ]
+            [ text <| User.fullname user ]
+        ]
 
 
 init : User -> ( Model, Cmd Msg )

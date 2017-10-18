@@ -1,42 +1,39 @@
-module Data.Api.User exposing (User, decoder, graphQlDecoder, GraphQLUser)
+module Data.Schema.User exposing (User, decoder, usersDecoder, UserQuery, usersQuery)
 
 import Data.Name as Name exposing (Name)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline as Pipeline exposing (decode, required)
+import GraphQL
 
 
 type alias User =
     { name : Name
+    , slug : String
     , email : String
     , role : String
     }
 
 
-type alias GraphQLUser =
-    { data : UserObject
-    }
-
-
-type alias UserObject =
+type alias UserQuery =
     { users : List User
     }
+
+
+usersQuery : String -> GraphQL.Query
+usersQuery endpoint =
+    GraphQL.query endpoint "users" "{name{first,last},slug,email,role}"
 
 
 decoder : Decoder User
 decoder =
     decode User
         |> required "name" Name.decoder
+        |> required "slug" Decode.string
         |> required "email" Decode.string
         |> required "role" Decode.string
 
 
-graphQlDecoder : Decoder GraphQLUser
-graphQlDecoder =
-    decode GraphQLUser
-        |> required "data" userObjectDecoder
-
-
-userObjectDecoder : Decoder UserObject
-userObjectDecoder =
-    decode UserObject
+usersDecoder : Decoder UserQuery
+usersDecoder =
+    decode UserQuery
         |> required "users" (Decode.list decoder)

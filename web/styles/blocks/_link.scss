@@ -1,0 +1,52 @@
+.link {
+
+    $link-color: $color__dark-gray;
+
+    position: relative;
+    font-weight: lighter;
+    cursor: pointer;
+    color: $link-color;
+    display: inline-block;
+    padding: 0;
+    padding-bottom: .25em;
+    font-size: 1.25rem;
+    text-decoration: none;
+    transform-origin: left;
+    border: none;
+    background: rgba(0,0,0,0);
+    font-family: inherit;
+
+    &:before {
+        transition: transform .3s ease-in-out;
+        display: block;
+        content: '';
+        height: 1px;
+        background-color: $link-color;
+        transform: scaleX(0);
+        transform-origin: left;
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+    }
+
+    &:hover, &:focus {
+        outline: none;
+        &:before {
+            transform: none;
+        }
+    }
+
+    &--disabled {
+        color: initial;
+        opacity: .6;
+        cursor: not-allowed;
+        &:before {
+            transform: none;
+        }
+
+        &:hover, &focus {
+            color: initial;
+        }
+    }
+}

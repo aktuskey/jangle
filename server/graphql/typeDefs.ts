@@ -56,6 +56,7 @@ export const typeDefs : string = `
 
   type User {
     name: Name!
+    slug: String!
     email: String!
     role: Role
   }

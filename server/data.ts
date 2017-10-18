@@ -17,8 +17,8 @@ const db = {
     }
   ],
   users: [
-    { id: 1, role: 'admin', email: 'ryan@jangle.com', password: 'password', name: { first: 'Ryan', last: 'Haskell-Glatz' } },
-    { id: 2, role: 'editor', email: 'editor@jangle.com', password: 'password', name: { first: 'Editor', last: 'User' } }
+    { id: 1, role: 'admin', email: 'ryan@jangle.com', password: 'password', name: { first: 'Ryan', last: 'Haskell-Glatz' }, slug: 'ryan-haskell-glatz' },
+    { id: 2, role: 'editor', email: 'editor@jangle.com', password: 'password', name: { first: 'Alex', last: 'Hawley' }, slug: 'alex-hawley' }
   ]
 }
 

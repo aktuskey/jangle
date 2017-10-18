@@ -29,9 +29,9 @@ init =
     Model False
 
 
-type Link
+type Link msg
     = PageLink String String
-    | ActionLink String Msg
+    | ActionLink String msg
 
 
 update : Msg -> Model -> ( Model, ExternalMsg )
@@ -50,36 +50,9 @@ update msg model =
                 => NavigateTo url
 
 
-navigationOptions : List ( String, List Link )
+navigationOptions : List ( String, List (Link Msg) )
 navigationOptions =
     [ ( "Collections"
-      , [ PageLink "All collections" "/collections"
-        , PageLink "Authors" "/collections/authors"
-        , PageLink "Blog Posts" "/collections/blog-posts"
-        ]
-      )
-    , ( "Users"
-      , [ PageLink "Manage users" "/users"
-        , PageLink "Add a user" "/users/new"
-        ]
-      )
-    , ( "Collections"
-      , [ PageLink "All collections" "/collections"
-        , PageLink "Authors" "/collections/authors"
-        , PageLink "Blog Posts" "/collections/blog-posts"
-        ]
-      )
-    , ( "Users"
-      , [ PageLink "Manage users" "/users"
-        , PageLink "Add a user" "/users/new"
-        ]
-      )
-    , ( "Users"
-      , [ PageLink "Manage users" "/users"
-        , PageLink "Add a user" "/users/new"
-        ]
-      )
-    , ( "Collections"
       , [ PageLink "All collections" "/collections"
         , PageLink "Authors" "/collections/authors"
         , PageLink "Blog Posts" "/collections/blog-posts"
@@ -105,7 +78,7 @@ viewNavigationHeader : Html Msg
 viewNavigationHeader =
     header [ class "nav__header" ]
         [ viewMobileMenuIcon
-        , button [ class "nav__brand", onClick (Navigate "/") ] [ text "Jangle" ]
+        , button [ class "link nav__brand", onClick (Navigate "/") ] [ text "Jangle" ]
         ]
 
 
@@ -136,7 +109,7 @@ viewNavigationOptions currentUrl =
         (List.map (viewNavigationOption currentUrl) navigationOptions)
 
 
-viewNavigationOption : String -> ( String, List Link ) -> Html Msg
+viewNavigationOption : String -> ( String, List (Link Msg) ) -> Html Msg
 viewNavigationOption currentUrl ( header, links ) =
     li [ class "nav__option" ]
         ([ span
@@ -147,25 +120,38 @@ viewNavigationOption currentUrl ( header, links ) =
         )
 
 
-viewNavigationLink : String -> Link -> Html Msg
-viewNavigationLink currentUrl link =
+viewNavigationLink : String -> Link Msg -> Html Msg
+viewNavigationLink =
+    viewLink Navigate "nav_link"
+
+
+viewLink : (String -> msg) -> String -> String -> Link msg -> Html msg
+viewLink msg classes currentUrl link =
     case link of
         PageLink label url ->
             div []
                 [ button
-                    [ class "nav__link"
-                    , classList [ ( "nav__link--disabled", url == currentUrl ) ]
-                    , if url == currentUrl then
+                    ([ class <| String.join " " [ "link", classes ]
+                     , classList [ ( "link--disabled", url == currentUrl ) ]
+                     , if url == currentUrl then
                         disabled True
-                      else
-                        onClick (Navigate url)
-                    , tabindex 0
-                    ]
+                       else
+                        onClick (msg url)
+                     , tabindex 0
+                     ]
+                    )
                     [ text label ]
                 ]
 
         ActionLink label msg ->
-            div [] [ button [ class "nav__link", onClick msg, tabindex 0 ] [ text label ] ]
+            div []
+                [ button
+                    [ class <| String.join " " [ "link", classes ]
+                    , onClick msg
+                    , tabindex 0
+                    ]
+                    [ text label ]
+                ]
 
 
 viewNavigationFooter : String -> Html Msg

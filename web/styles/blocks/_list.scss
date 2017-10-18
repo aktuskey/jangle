@@ -1,0 +1,19 @@
+.list {
+
+    margin-top: 2rem;
+
+    &__title {
+        font-weight: normal;
+        font-size: 2rem;
+    }
+
+    &__rows {
+        padding-top: .5rem;
+    }
+
+    &_row {
+        margin-top: .5rem;
+        font-size: 1.25rem;
+    }
+
+}
