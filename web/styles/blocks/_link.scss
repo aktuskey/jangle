@@ -37,7 +37,7 @@
         }
     }
 
-    &--disabled {
+    &--active {
         color: initial;
         opacity: .6;
         cursor: not-allowed;
@@ -47,6 +47,22 @@
 
         &:hover, &focus {
             color: initial;
+        }
+    }
+    
+    &--disabled {
+        color: initial;
+        opacity: .6;
+        cursor: not-allowed;
+        &:before {
+            transform: scaleX(0);
+        }
+
+        &:hover, &focus {
+            color: initial;
+            &:before {
+                transform: scaleX(0);
+            }
         }
     }
 }

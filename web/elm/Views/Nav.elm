@@ -30,8 +30,13 @@ init =
 
 
 type Link msg
-    = PageLink String String
-    | ActionLink String msg
+    = PageLink String String LinkState
+    | ActionLink String msg LinkState
+
+
+type LinkState
+    = Enabled
+    | Disabled
 
 
 update : Msg -> Model -> ( Model, ExternalMsg )
@@ -53,14 +58,14 @@ update msg model =
 navigationOptions : List ( String, List (Link Msg) )
 navigationOptions =
     [ ( "Collections"
-      , [ PageLink "All collections" "/collections"
-        , PageLink "Authors" "/collections/authors"
-        , PageLink "Blog Posts" "/collections/blog-posts"
+      , [ PageLink "All collections" "/collections" Disabled
+        , PageLink "Authors" "/collections/authors" Disabled
+        , PageLink "Blog Posts" "/collections/blog-posts" Disabled
         ]
       )
     , ( "Users"
-      , [ PageLink "Manage users" "/users"
-        , PageLink "Add a user" "/users/new"
+      , [ PageLink "Manage users" "/users" Enabled
+        , PageLink "Add a user" "/users/new" Enabled
         ]
       )
     ]
@@ -128,12 +133,15 @@ viewNavigationLink =
 viewLink : (String -> msg) -> String -> String -> Link msg -> Html msg
 viewLink msg classes currentUrl link =
     case link of
-        PageLink label url ->
+        PageLink label url state ->
             div []
                 [ button
                     ([ class <| String.join " " [ "link", classes ]
-                     , classList [ ( "link--disabled", url == currentUrl ) ]
-                     , if url == currentUrl then
+                     , classList
+                        [ ( "link--active", url == currentUrl )
+                        , ( "link--disabled", state == Disabled )
+                        ]
+                     , if url == currentUrl || state == Disabled then
                         disabled True
                        else
                         onClick (msg url)
@@ -143,10 +151,13 @@ viewLink msg classes currentUrl link =
                     [ text label ]
                 ]
 
-        ActionLink label msg ->
+        ActionLink label msg state ->
             div []
                 [ button
                     [ class <| String.join " " [ "link", classes ]
+                    , classList
+                        [ ( "link--disabled", state == Disabled )
+                        ]
                     , onClick msg
                     , tabindex 0
                     ]
@@ -157,5 +168,5 @@ viewLink msg classes currentUrl link =
 viewNavigationFooter : String -> Html Msg
 viewNavigationFooter currentUrl =
     footer [ class "nav__footer" ]
-        [ (viewNavigationLink currentUrl) (ActionLink "Sign out" SignOutClick)
+        [ (viewNavigationLink currentUrl) (ActionLink "Sign out" SignOutClick Enabled)
         ]
