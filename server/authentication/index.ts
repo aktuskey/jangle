@@ -2,43 +2,12 @@ import { Application, RequestHandler } from 'express'
 import * as passport from 'passport'
 import { Strategy, ExtractJwt, StrategyOptions } from 'passport-jwt'
 import * as jwt from 'jsonwebtoken'
-import { debug } from '../utils'
-import { getAllUsers } from '../data'
-
-type Id = number
+import * as Types from '../types'
+import { db } from '../data'
 
 type JwtPayload = {
-  id: Id
+  id: string
 }
-
-type Name = {
-  first: String,
-  last: String
-}
-
-type User = {
-  id: Id
-  role: string
-  email: string,
-  name: Name,
-  password: string
-}
-
-const getUser = (email : string, password : string) : Promise<User> =>
-  getAllUsers()
-    .then(users => {
-      const user = users.filter(user => user.email === email && user.password === password )[0]
-      return user
-        ? Promise.resolve(user)
-        : Promise.reject('Sorry, could not find that user.')
-    })
-
-const getUserWithId = (id: Id) : Promise<User> =>
-    getAllUsers()
-      .then(users => {
-        const user = users.filter(user => user.id === id)[0]
-        return user ? Promise.resolve(user) : Promise.reject('No user with that id')
-      })
 
 const jwtOptions : StrategyOptions = {
   secretOrKey: process.env.SECRET || 'super-secret-secret',
@@ -48,7 +17,7 @@ const jwtOptions : StrategyOptions = {
 const strategy = new Strategy(jwtOptions, (payload : JwtPayload | undefined, done) =>
   (payload == null)
     ? done('No payload received', undefined)
-    : getUserWithId(debug<JwtPayload>('payload')(payload).id)
+    : db.users.findById(payload.id)
       .then(user => done(false, user))
       .catch(reason => done(reason, undefined))
 )
@@ -59,21 +28,22 @@ type Token = string
 
 type SafeUser = {
   email : string,
-  name : Name,
+  name : Types.Name,
   token: Token
 }
 
 const getUserWithToken = (email : string, password : string) : Promise<SafeUser> =>
-  getUser(email, password).then(user =>
-    (user)
-      ? Promise.resolve({
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          token: jwt.sign({ id: user.id }, jwtOptions.secretOrKey)
-        })
-      : Promise.reject('Sorry, could not find that user.')
-  )
+  db.users.findWithLogin(email, password)
+    .then(user =>
+      (user)
+        ? Promise.resolve({
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            token: jwt.sign({ id: user.id }, jwtOptions.secretOrKey)
+          })
+        : Promise.reject('Sorry, could not find that user.')
+    )
 
 export type Authentication = {
   middleware : RequestHandler

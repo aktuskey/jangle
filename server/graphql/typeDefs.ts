@@ -56,9 +56,22 @@ export const typeDefs : string = `
 
   type User {
     name: Name!
+    fullName: String!
     slug: String!
     email: String!
-    role: Role
+    role: Role!
+  }
+
+  input UserInfo {
+    name: InputName
+    email: String!
+    password: String!
+    role: String!
+  }
+
+  input InputName {
+    first: String
+    last: String
   }
 
   type Name {
@@ -78,5 +91,10 @@ export const typeDefs : string = `
 
     # Get a list of users
     users: [User!]!
+  }
+
+  type Mutation {
+    # Create or update a user
+    createUser(user: UserInfo!): User 
   }
 `

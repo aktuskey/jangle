@@ -1,27 +1,70 @@
+import * as mongoose from 'mongoose'
+import { User, UserModel } from './models/User'
+import { UserInfo } from './types'
+import { hash } from './utils'
 
-const db = {
-  collections: [
-    {
-      id: 1, name: 'people', label: { singular: 'Person', plural: 'People' }, fields: [
-        {
-          name: 'firstName',
-          label: 'First Name',
-          type: 'SingleLine',
-          options: {
-            isOptional: false,
-            defaultValue: 'Ryan',
-            regex: 'Rya'
-          }
-        }
-      ]
-    }
-  ],
-  users: [
-    { id: 1, role: 'admin', email: 'ryan@jangle.com', password: 'password', name: { first: 'Ryan', last: 'Haskell-Glatz' }, slug: 'ryan-haskell-glatz' },
-    { id: 2, role: 'editor', email: 'editor@jangle.com', password: 'password', name: { first: 'Alex', last: 'Hawley' }, slug: 'alex-hawley' }
-  ]
+type ErrorMap = {
+  [key: number]: string
 }
 
-export const getCollections = () => Promise.resolve(db.collections)
+type MongoError = {
+  code: number,
+  message: string
+}
 
-export const getAllUsers = () => Promise.resolve(db.users)
+const handleMongoError = (errorMap: ErrorMap) => (error : MongoError) => {
+  return errorMap[error.code]
+    ? Promise.reject(errorMap[error.code])
+    : Promise.reject(error.message)
+}
+
+(<any>mongoose).Promise = global.Promise
+mongoose.connect(process.env.MONGO_URI || 'mongodb://mongo/jangle', { useMongoClient: true })
+
+const rejectIfNull = <T>(message: string) => (thing: T | null): Promise<T> =>
+  (thing === null)
+    ? Promise.reject(message)
+    : Promise.resolve(thing)
+
+export const db = {
+
+  users: {
+
+    create: ({ name, password, email, role} : UserInfo) : Promise<UserModel> =>
+      User.create({
+        name,
+        email,
+        role,
+        password: hash(password)
+      }).catch(handleMongoError({ 11000: 'That email is already taken.' })),
+
+    get: () : Promise<UserModel[]> =>
+      User.find()
+        .exec(),
+
+    findWithLogin: (email : string, password: string) : Promise<UserModel> =>
+      User.findOne({ email, password: hash(password) })
+        .exec()
+        .then(rejectIfNull('Could not find user with that login.')),
+
+    findById: (id : string) : Promise<UserModel> =>
+      User.findById(id)
+        .exec()
+        .then(rejectIfNull(`Could not find user with id: ${id}`))
+
+  }
+
+}
+
+// // TODO: Ask for initial login.
+// const firstUser = {
+//   email: 'admin@jangle.com',
+//   password: 'password',
+//   name: {
+//     first: 'Ryan',
+//     last: 'Haskell-Glatz'
+//   },
+//   role: 'admin'
+// }
+
+// db.users.create(firstUser).then(console.log).catch(() => {})
