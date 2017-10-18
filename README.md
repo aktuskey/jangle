@@ -1,10 +1,6 @@
 # Jangle
 > Your experience matters.
 
-### Overview
-
-Jangle is a CMS focused on providing a simple and intuitive user experience. With Jangle, users create __collections__ of __documents__.
-
 
 ### Local Development
 
