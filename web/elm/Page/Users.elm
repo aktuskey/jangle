@@ -1,27 +1,22 @@
 module Page.Users exposing (Model, Msg, view, update, init)
 
+import Http
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Http
 import Data.RemoteData as RemoteData exposing (RemoteData(..))
 import Data.User as User exposing (User)
-import Data.Schema.User as SchemaUser
+import Schema.User as GraphQLUser
 import Util exposing ((=>))
-import GraphQL
 
 
 type alias Model =
-    { users : RemoteData (List SchemaUser.User)
+    { users : RemoteData (List GraphQLUser.User)
     }
-
-
-type alias UserQuery =
-    GraphQL.Response SchemaUser.UserQuery
 
 
 type Msg
     = FetchUsers
-    | HandleUserResponse (Result Http.Error UserQuery)
+    | HandleUserResponse (Result Http.Error GraphQLUser.Query)
 
 
 update : User -> Msg -> Model -> ( Model, Cmd Msg )
@@ -37,15 +32,6 @@ update user msg model =
         HandleUserResponse (Err error) ->
             { model | users = Error (Util.parseError error) }
                 => Cmd.none
-
-
-fetchUsersAs : User -> Cmd Msg
-fetchUsersAs user =
-    GraphQL.sendQuery
-        HandleUserResponse
-        user
-        (SchemaUser.usersQuery "/graphql")
-        SchemaUser.usersDecoder
 
 
 view : User -> Model -> Html Msg
@@ -70,7 +56,7 @@ view user model =
         ]
 
 
-viewUsers : List SchemaUser.User -> Html Msg
+viewUsers : List GraphQLUser.User -> Html Msg
 viewUsers users =
     section [ class "list" ]
         [ h3 [ class "list__title" ] [ text "All Users" ]
@@ -78,12 +64,17 @@ viewUsers users =
         ]
 
 
-viewUser : SchemaUser.User -> Html Msg
+viewUser : GraphQLUser.User -> Html Msg
 viewUser user =
     li [ class "list_row" ]
         [ a [ class "link", href ("/users/" ++ user.slug) ]
             [ text <| User.fullname user ]
         ]
+
+
+fetchUsersAs : User -> Cmd Msg
+fetchUsersAs user =
+    GraphQLUser.fetchUsers user HandleUserResponse
 
 
 init : User -> ( Model, Cmd Msg )

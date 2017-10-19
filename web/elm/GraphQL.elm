@@ -1,4 +1,4 @@
-module GraphQL exposing (Query, Response, query, sendQuery)
+module GraphQL exposing (Query, Response, ResponseMsg, query, sendQuery)
 
 import Http
 import Data.User as User exposing (User)
@@ -7,7 +7,11 @@ import Json.Decode.Pipeline as Pipeline exposing (decode, required)
 
 
 type Query
-    = Query String String String
+    = Query String String
+
+
+type alias ResponseMsg a msg =
+    Result Http.Error (Response a) -> msg
 
 
 type alias Response a =
@@ -21,17 +25,17 @@ responseDecoder decoder =
         |> required "data" decoder
 
 
-query : String -> String -> String -> Query
-query endpoint query body =
-    Query endpoint query body
+query : String -> String -> Query
+query query body =
+    Query query body
 
 
 get : User -> Query -> Decoder a -> Http.Request (Response a)
-get user (Query endpoint query body) decoder =
+get user (Query query body) decoder =
     Http.request
         { method = "GET"
         , headers = [ Http.header "Authorization" ("Bearer " ++ user.token) ]
-        , url = endpoint ++ "?query={" ++ query ++ body ++ "}"
+        , url = "/graphql?query={" ++ query ++ body ++ "}"
         , body = Http.emptyBody
         , expect = Http.expectJson (responseDecoder decoder)
         , timeout = Nothing
@@ -39,6 +43,6 @@ get user (Query endpoint query body) decoder =
         }
 
 
-sendQuery : (Result Http.Error (Response a) -> msg) -> User -> Query -> Decoder a -> Cmd msg
+sendQuery : ResponseMsg a msg -> User -> Query -> Decoder a -> Cmd msg
 sendQuery msg user query decoder =
     Http.send msg (get user query decoder)
