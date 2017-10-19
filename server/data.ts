@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose'
 import { User, UserModel } from './models/User'
-import { UserInfo } from './types'
+import { UserInfo, Name } from './types'
 import { hash } from './utils'
 
 type ErrorMap = {
@@ -26,17 +26,26 @@ const rejectIfNull = <T>(message: string) => (thing: T | null): Promise<T> =>
     ? Promise.reject(message)
     : Promise.resolve(thing)
 
+const createUser = ({ name, password, email, role} : UserInfo) : Promise<UserModel> =>
+  User.create({
+    name,
+    email,
+    role,
+    password: hash(password)
+  })
+  .catch(handleMongoError({ 11000: 'That email is already taken.' }))
+
 export const db = {
 
   users: {
 
-    create: ({ name, password, email, role} : UserInfo) : Promise<UserModel> =>
-      User.create({
-        name,
-        email,
-        role,
-        password: hash(password)
-      }).catch(handleMongoError({ 11000: 'That email is already taken.' })),
+    hasUsers: () : Promise<boolean> =>
+      User.count({}).exec().then(count => count > 0),
+
+    createFirstUser: (email: string, password: string, name : Name) =>
+      createUser({ email, password, name, role: 'admin' }),
+
+    create: createUser,
 
     get: () : Promise<UserModel[]> =>
       User.find()

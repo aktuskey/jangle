@@ -6,7 +6,7 @@ import * as morgan from 'morgan'
 import * as path from 'path'
 
 import { typeDefs, resolvers } from './graphql'
-import { setupAuthentication } from './authentication'
+import { setupAuthentication, hasUsers } from './authentication'
 
 const port = process.env.PORT || 3000
 const graphQLOptions = { schema: makeExecutableSchema({ typeDefs, resolvers }) }
@@ -21,7 +21,7 @@ app.set('views', path.join(__dirname, 'public'))
 app.set('view engine', 'pug')
 
 // Authentication API
-app.post('/api/sign-in', auth.signIn)
+app.post('/api/sign-in', auth.signInOrUpIdkYet)
 app.use('/api', (_req, res) => res.json({ error: true, message: 'Endpoint does not exist', data: [] }))
 
 // (Soon to be Authenticated) GraphQL API
@@ -30,16 +30,18 @@ app.use('/graphiql', graphiqlExpress({ endpointURL: '/graphql' }))
 
 // Web application
 app.use('/public', express.static(path.join(__dirname, 'public')))
-app.use((_req, res) => {
-  const locals = {
-    basedir: path.join(__dirname, 'public'),
-    pretty: true,
-    flags: JSON.stringify({
-      user: null//{ id: 1, role: 'admin', email: 'admin@jangle.com', token: 'token', name: { first: 'Admin', last: 'User' } } || null
-    } || {})
-  }
+app.use((_req, res) => hasUsers()
+  .then((hasUsers: boolean) => {
+    const needsSetup = hasUsers === false
 
-  res.render('index', locals)
-})
+    const locals = {
+      basedir: path.join(__dirname, 'public'),
+      pretty: true,
+      flags: JSON.stringify({ needsSetup })
+    }
+
+    res.render('index', locals)
+  })
+)
 
 app.listen(port, () => console.info(`Ready at http://localhost:${port}`))

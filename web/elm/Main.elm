@@ -1,29 +1,30 @@
-module Main exposing (Model, Msg, update, view, subscriptions, init)
+module Main exposing (Model, Msg, init, subscriptions, update, view)
 
-import Html exposing (..)
-import Html.Attributes exposing (class, href)
-import Navigation exposing (Location)
-import Route exposing (Route)
-import Ports
-import Json.Decode as Decode
 import Data.Context as Context exposing (Context)
 import Data.User as User exposing (User)
+import Html exposing (..)
+import Html.Attributes exposing (class, href)
+import Json.Decode as Decode
+import Navigation exposing (Location)
 import Page.Dashboard as Dashboard
 import Page.SignIn as SignIn
 import Page.Users as Users
-import Views.Nav as Nav
+import Ports
+import Route exposing (Route)
 import Util exposing ((=>))
+import Views.Nav as Nav
 
 
 type alias Flags =
-    { user : Maybe User
+    { needsSetup : Bool
+    , user : Maybe User
     }
 
 
 main : Program Flags Model Msg
 main =
     Navigation.programWithFlags
-        (SetRoute)
+        SetRoute
         { init = init
         , view = view
         , update = update
@@ -67,16 +68,16 @@ updateAsUser user context subMsg subModel model =
         ( ( updatedSubModel, subCmd ), externalMsg ) =
             Dashboard.update user subMsg subModel
     in
-        case externalMsg of
-            Nav.SignOut ->
-                update (SetUser Nothing) model
+    case externalMsg of
+        Nav.SignOut ->
+            update (SetUser Nothing) model
 
-            Nav.NoOp ->
-                { model | page = Dashboard updatedSubModel }
-                    => Cmd.none
+        Nav.NoOp ->
+            { model | page = Dashboard updatedSubModel }
+                => Cmd.none
 
-            Nav.NavigateTo url ->
-                update (NewUrl url) model
+        Nav.NavigateTo url ->
+            update (NewUrl url) model
 
 
 updateAnonymously : Msg -> Model -> ( Model, Cmd Msg )
@@ -87,11 +88,11 @@ updateAnonymously msg model =
                 ( page, cmd ) =
                     pageFromLocation model.context location
             in
-                { model
-                    | page = page
-                    , context = Context.updateCurrentUrl location.pathname model.context
-                }
-                    => cmd
+            { model
+                | page = page
+                , context = Context.updateCurrentUrl location.pathname model.context
+            }
+                => cmd
 
         ( NewUrl url, _ ) ->
             model
@@ -105,8 +106,8 @@ updateAnonymously msg model =
                 newContext =
                     { context | user = user }
             in
-                { model | context = newContext }
-                    => case user of
+            { model | context = newContext }
+                => (case user of
                         Just user ->
                             User.storeContext user
 
@@ -115,6 +116,7 @@ updateAnonymously msg model =
                                 [ Ports.storeContext Nothing
                                 , Navigation.newUrl (Route.routeToString Route.SignIn)
                                 ]
+                   )
 
         ( SignInMsg subMsg, SignIn subModel ) ->
             let
@@ -132,10 +134,10 @@ updateAnonymously msg model =
                                 ( userModel, userCmd ) =
                                     update (SetUser (Just user)) model
                             in
-                                userModel
-                                    => Cmd.batch [ userCmd, Navigation.newUrl (Route.routeToString Route.Dashboard) ]
+                            userModel
+                                => Cmd.batch [ userCmd, Navigation.newUrl (Route.routeToString Route.Dashboard) ]
             in
-                newModel ! (newCmd :: [ Cmd.map SignInMsg subCmd ])
+            newModel ! (newCmd :: [ Cmd.map SignInMsg subCmd ])
 
         ( _, _ ) ->
             model ! []
@@ -201,17 +203,17 @@ init : Flags -> Location -> ( Model, Cmd Msg )
 init flags location =
     let
         context =
-            (Context flags.user location.pathname)
+            Context flags.user location.pathname
 
         ( page, pageCmd ) =
             pageFromLocation context location
 
         cmd =
-            redirectCommand context.user page
+            redirectCommand flags.needsSetup context.user page
     in
-        ( Model context page
-        , Cmd.batch [ cmd, pageCmd ]
-        )
+    ( Model context page
+    , Cmd.batch [ cmd, pageCmd ]
+    )
 
 
 pageFromLocation : Context -> Location -> ( Page, Cmd Msg )
@@ -224,9 +226,11 @@ pageFromLocation { user } location =
             NotFound => Cmd.none
 
 
-redirectCommand : Maybe User -> Page -> Cmd Msg
-redirectCommand user page =
-    if user == Nothing then
+redirectCommand : Bool -> Maybe User -> Page -> Cmd Msg
+redirectCommand needsSetup user page =
+    if needsSetup then
+        Navigation.modifyUrl (Route.routeToString Route.Welcome)
+    else if user == Nothing then
         Navigation.modifyUrl (Route.routeToString Route.SignIn)
     else
         Cmd.none
@@ -239,8 +243,12 @@ pageFromRoute user route =
             Dashboard (Dashboard.init Dashboard.Dashboard)
                 => Cmd.none
 
+        Route.Welcome ->
+            SignIn (SignIn.init True)
+                => Cmd.none
+
         Route.SignIn ->
-            SignIn SignIn.init
+            SignIn (SignIn.init False)
                 => Cmd.none
 
         Route.Users ->
@@ -250,12 +258,12 @@ pageFromRoute user route =
                         ( page, cmd ) =
                             Users.init user
                     in
-                        (Dashboard <|
-                            Dashboard.init <|
-                                Dashboard.Users <|
-                                    page
-                        )
-                            => Cmd.map DashboardMsg (Cmd.map Dashboard.UsersMsg cmd)
+                    (Dashboard <|
+                        Dashboard.init <|
+                            Dashboard.Users <|
+                                page
+                    )
+                        => Cmd.map DashboardMsg (Cmd.map Dashboard.UsersMsg cmd)
 
                 Nothing ->
                     NotFound

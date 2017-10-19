@@ -1,16 +1,14 @@
-module Page.SignIn exposing (Model, Msg(..), ExternalMsg(..), init, update, view)
+module Page.SignIn exposing (ExternalMsg(..), Model, Msg(..), init, update, view)
 
+import Data.Context as Context exposing (Context)
+import Data.Response as Response exposing (Response)
+import Data.User as User exposing (User)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onInput, onClick, onFocus, onBlur, onSubmit)
+import Html.Events exposing (onBlur, onClick, onFocus, onInput, onSubmit)
 import Http exposing (Request)
-import Data.Context as Context exposing (Context)
-import Data.User as User exposing (User)
-import Data.Response as Response exposing (Response)
 import Json.Encode as Encode
-import Util exposing ((=>), viewMaybe, delay, getCmd)
-import Route exposing (Route)
-import Debug
+import Util exposing ((=>), delay, getCmd, viewMaybe)
 
 
 type RemoteData a
@@ -23,23 +21,36 @@ type RemoteData a
 type Field
     = Email
     | Password
+    | FirstName
+    | LastName
+
+
+type FormPage
+    = NamePage
+    | LoginPage
 
 
 type alias Model =
     { email : String
     , password : String
+    , firstName : String
+    , lastName : String
     , focusedField : Maybe Field
     , user : RemoteData User
+    , signingUp : Bool
+    , page : FormPage
     }
 
 
 type Msg
-    = UpdateEmail String
-    | UpdatePassword String
+    = Update Field String
     | SetFocus Field
     | RemoveFocus
+    | AttemptSignUp
     | AttemptSignIn
     | SetUser (Result Http.Error (Response User))
+    | NextPage
+    | PrevPage
 
 
 type ExternalMsg
@@ -50,13 +61,20 @@ type ExternalMsg
 update : Msg -> Model -> ( ( Model, Cmd Msg ), ExternalMsg )
 update msg model =
     case msg of
-        UpdateEmail email ->
-            { model | email = email }
-                => Cmd.none
-                => NoOp
+        Update field value ->
+            (case field of
+                Email ->
+                    { model | email = value }
 
-        UpdatePassword password ->
-            { model | password = password }
+                Password ->
+                    { model | password = value }
+
+                FirstName ->
+                    { model | firstName = value }
+
+                LastName ->
+                    { model | lastName = value }
+            )
                 => Cmd.none
                 => NoOp
 
@@ -70,10 +88,20 @@ update msg model =
                 => Cmd.none
                 => NoOp
 
+        AttemptSignUp ->
+            if model.user /= Loading then
+                { model | user = Loading }
+                    => attemptSignUp model
+                    => NoOp
+            else
+                model
+                    => Cmd.none
+                    => NoOp
+
         AttemptSignIn ->
             if model.user /= Loading then
                 { model | user = Loading }
-                    => (attemptSignIn model.email model.password)
+                    => attemptSignIn model
                     => NoOp
             else
                 model
@@ -92,23 +120,47 @@ update msg model =
                         => Cmd.none
                         => NoOp
 
+        NextPage ->
+            if model.firstName /= "" && model.lastName /= "" then
+                { model | page = LoginPage, user = NotRequested } => Cmd.none => NoOp
+            else
+                { model | user = Error "Please provide your name." } => Cmd.none => NoOp
 
-attemptSignIn : String -> String -> Cmd Msg
-attemptSignIn email password =
-    Http.send SetUser (signInRequest email password)
+        PrevPage ->
+            { model | page = NamePage } => Cmd.none => NoOp
 
 
-signInRequest : String -> String -> Request (Response User)
-signInRequest email password =
-    Response.post "/api/sign-in" (signInBody email password) User.decoder
+attemptSignIn : Model -> Cmd Msg
+attemptSignIn model =
+    Http.send SetUser (Response.post "/api/sign-in" (signInBody model) User.decoder)
 
 
-signInBody : String -> String -> Http.Body
-signInBody email password =
+attemptSignUp : Model -> Cmd Msg
+attemptSignUp model =
+    Http.send SetUser (Response.post "/api/sign-in" (signUpBody model) User.decoder)
+
+
+signInBody : Model -> Http.Body
+signInBody { email, password } =
     Http.jsonBody
         (Encode.object
             [ "email" => Encode.string email
             , "password" => Encode.string password
+            ]
+        )
+
+
+signUpBody : Model -> Http.Body
+signUpBody { email, password, firstName, lastName } =
+    Http.jsonBody
+        (Encode.object
+            [ "email" => Encode.string email
+            , "password" => Encode.string password
+            , "name"
+                => Encode.object
+                    [ "first" => Encode.string firstName
+                    , "last" => Encode.string lastName
+                    ]
             ]
         )
 
@@ -143,55 +195,107 @@ viewSignInHeader =
 
 
 viewSignInForm : Model -> Html Msg
-viewSignInForm { email, password, focusedField, user } =
-    Html.form [ class "form card__content", attribute "novalidate" "novalidate", onSubmit AttemptSignIn ]
-        [ label [ class "form__label", classList [ ( "form__label--focused", isFocused Email focusedField ) ] ]
-            [ span [ class "form__label-text", classList [ ( "form__label-text--displaced", hasValue [ email ] || isFocused Email focusedField ) ] ] [ text "Email Address" ]
-            , input
-                [ class "form__input"
-                , type_ "email"
-                , value email
-                , onInput UpdateEmail
-                , onFocus (SetFocus Email)
+viewSignInForm { email, password, firstName, lastName, focusedField, user, signingUp, page } =
+    let
+        ( buttonLabel, buttonMsg ) =
+            case ( signingUp, page ) of
+                ( True, NamePage ) ->
+                    ( "Continue", NextPage )
 
-                --, onBlur RemoveFocus
-                , attribute "autofocus" "true"
-                ]
-                []
-            ]
-        , label [ class "form__label", classList [ ( "form__label--focused", isFocused Password focusedField ) ] ]
-            [ span [ class "form__label-text", classList [ ( "form__label-text--displaced", hasValue [ password ] || isFocused Password focusedField ) ] ] [ text "Password" ]
-            , input
-                [ class "form__input"
-                , type_ "password"
-                , value password
-                , onInput UpdatePassword
-                , onFocus (SetFocus Password)
+                ( True, LoginPage ) ->
+                    ( "Sign Up", AttemptSignUp )
 
-                --, onBlur RemoveFocus
-                ]
-                []
+                ( False, _ ) ->
+                    ( "Sign In", AttemptSignIn )
+
+        nameFields =
+            [ makeInput focusedField (InputConfig "First Name" "text" firstName FirstName AutoFocus)
+            , makeInput focusedField (InputConfig "Last Name" "text" lastName LastName NormalFocus)
             ]
-        , input [ type_ password, style [ ( "display", "none" ) ] ] []
-        , div [ class "form__button-row form__button-row--right" ]
-            [ p
-                [ class "form__response"
-                , classList
-                    [ ( "form__response--visible", user /= NotRequested )
-                    , ( "form__response--error", isError user )
+
+        loginFields =
+            [ makeInput focusedField (InputConfig "Email" "email" email Email AutoFocus)
+            , makeInput focusedField (InputConfig "Password" "password" password Password NormalFocus)
+            ]
+
+        fieldsToDisplay =
+            if signingUp && page == NamePage then
+                nameFields
+            else
+                loginFields
+    in
+    Html.form [ class "form card__content", attribute "novalidate" "novalidate", onSubmit buttonMsg ]
+        (fieldsToDisplay
+            ++ [ div [ class "form__button-row form__button-row--right" ]
+                    [ button
+                        [ class "button form__button"
+                        , type_ "submit"
+                        , classList [ ( "button--loading", user == Loading ) ]
+                        , dataContent buttonLabel
+                        , onFocus RemoveFocus
+                        ]
+                        [ text buttonLabel ]
+                    , button
+                        [ class "button form__button"
+                        , type_ "button"
+                        , dataContent "Back"
+                        , onFocus RemoveFocus
+                        , onClick PrevPage
+                        , classList [ ( "button--invisible", signingUp == False || page == NamePage ) ]
+                        ]
+                        [ text "Back" ]
+                    , p
+                        [ class "form__response"
+                        , classList
+                            [ ( "form__response--visible", user /= NotRequested )
+                            , ( "form__response--error", isError user )
+                            ]
+                        ]
+                        [ viewResponseMessage user ]
                     ]
-                ]
-                [ viewResponseMessage user ]
-            , button
-                [ class "button"
-                , type_ "submit"
-                , classList [ ( "button--loading", user == Loading ) ]
-                , dataContent "Sign In"
-                , onFocus RemoveFocus
-                ]
-                [ text "Sign In" ]
+               ]
+        )
+
+
+type FocusSetting
+    = AutoFocus
+    | NormalFocus
+
+
+type alias InputConfig =
+    { label_ : String
+    , type__ : String
+    , value_ : String
+    , field : Field
+    , focusSetting : FocusSetting
+    }
+
+
+makeInput : Maybe Field -> InputConfig -> Html Msg
+makeInput focusedField { label_, type__, value_, field, focusSetting } =
+    label [ class "form__label", classList [ ( "form__label--focused", isFocused field focusedField ) ] ]
+        [ span
+            [ class "form__label-text"
+            , classList [ ( "form__label-text--displaced", hasValue [ value_ ] || isFocused field focusedField ) ]
             ]
+            [ text label_ ]
+        , input
+            [ class "form__input"
+            , type_ type__
+            , value value_
+            , onInput (Update field)
+            , onFocus (SetFocus field)
+            , autofocus (focusSetting == AutoFocus)
+
+            --, onBlur RemoveFocus
+            ]
+            []
         ]
+
+
+makeFakeInput : Html Msg
+makeFakeInput =
+    input [ type_ "password", style [ ( "display", "none" ) ] ] []
 
 
 isError : RemoteData a -> Bool
@@ -232,6 +336,17 @@ dataContent =
     attribute "data-content"
 
 
-init : Model
-init =
-    Model "" "" Nothing NotRequested
+init : Bool -> Model
+init signingUp =
+    Model ""
+        ""
+        ""
+        ""
+        Nothing
+        NotRequested
+        signingUp
+        (if signingUp then
+            NamePage
+         else
+            LoginPage
+        )

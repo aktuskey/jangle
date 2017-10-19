@@ -26,6 +26,10 @@ const paths = {
   typescript: {
     src: 'server/**/*.ts',
     dest: '_dist'
+  },
+  assets: {
+    src: 'web/public/**/*',
+    dest: '_dist/public'
   }
 }
 
@@ -65,6 +69,16 @@ gulp.task('pug:watch', ['pug'], () =>
   gulp.watch(paths.pug.src, ['pug'])
 )
 
+// Assets
+gulp.task('assets', () =>
+  gulp.src(paths.assets.src)
+    .pipe(gulp.dest(paths.assets.dest))
+)
+
+gulp.task('assets:watch', ['assets'], () =>
+  gulp.watch(paths.assets.src, ['assets'])
+)
+
 // CSS
 gulp.task('css', () =>
   gulp.src(paths.css.src)
@@ -77,8 +91,8 @@ gulp.task('css:watch', ['css'], () =>
 )
 
 gulp.task('clean', () => del(paths.del.folders))
-gulp.task('build', ['elm', 'pug', 'css', 'typescript'])
-gulp.task('watch', ['elm:watch', 'pug:watch', 'css:watch', 'typescript:watch'])
+gulp.task('build', ['elm', 'pug', 'assets', 'css', 'typescript'])
+gulp.task('watch', ['elm:watch', 'pug:watch', 'assets:watch', 'css:watch', 'typescript:watch'])
 
 gulp.task('dev', (done) => series('clean', 'watch', done))
 gulp.task('default', (done) => series('clean', 'build', done))

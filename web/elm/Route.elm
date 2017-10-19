@@ -1,13 +1,14 @@
 module Route exposing (Route(..), fromLocation, href, modifyUrl, routeToString)
 
-import Navigation exposing (Location)
-import UrlParser as Url exposing ((</>), Parser, oneOf, parsePath, s, string, top)
 import Html exposing (Attribute)
 import Html.Attributes as Attr
+import Navigation exposing (Location)
+import UrlParser as Url exposing ((</>), Parser, oneOf, parsePath, s, string, top)
 
 
 type Route
-    = SignIn
+    = Welcome
+    | SignIn
     | Dashboard
     | Users
     | AddUser
@@ -17,6 +18,7 @@ route : Parser (Route -> a) a
 route =
     oneOf
         [ Url.map Dashboard top
+        , Url.map Welcome (s "welcome")
         , Url.map SignIn (s "sign-in")
         , Url.map Users (s "users")
         , Url.map AddUser (s "users" </> s "new")
@@ -32,6 +34,9 @@ routeToString page =
                 Dashboard ->
                     []
 
+                Welcome ->
+                    [ "welcome" ]
+
                 SignIn ->
                     [ "sign-in" ]
 
@@ -41,7 +46,7 @@ routeToString page =
                 AddUser ->
                     [ "users", "new" ]
     in
-        "/" ++ (String.join "/" pieces)
+    "/" ++ String.join "/" pieces
 
 
 

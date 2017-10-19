@@ -57,9 +57,14 @@
     &__button-row {
         display: flex;
         align-items: center;
+        width: 100%;
 
         &--right {
-            justify-content: flex-end;
+            flex-direction: row-reverse;
+            
+            & > *:not(:last-child) {
+                margin-left: 1rem;
+            }
         }
     }
 

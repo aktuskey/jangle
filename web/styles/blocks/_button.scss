@@ -9,6 +9,7 @@
     background-color: white;
     font-weight: lighter;
     text-align: left;
+    transition: opacity .3s ease-in-out;
 
     &:not(.button--loading) {
         &:before {
@@ -41,6 +42,13 @@
                 right: 0;
             }
         }
+    }
+
+    &--invisible {
+        width: 0;
+        height: 0;
+        pointer-events: none;
+        opacity: 0;
     }
 
     &--loading {
