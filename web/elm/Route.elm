@@ -12,6 +12,7 @@ type Route
     | Dashboard
     | Users
     | AddUser
+    | EditUser String
 
 
 route : Parser (Route -> a) a
@@ -22,6 +23,7 @@ route =
         , Url.map SignIn (s "sign-in")
         , Url.map Users (s "users")
         , Url.map AddUser (s "users" </> s "new")
+        , Url.map EditUser (s "users" </> string)
         ]
 
 
@@ -43,10 +45,13 @@ routeToString page =
                 Users ->
                     [ "users" ]
 
+                EditUser slug ->
+                    [ "users", slug ]
+
                 AddUser ->
                     [ "users", "new" ]
     in
-    "/" ++ String.join "/" pieces
+        "/" ++ String.join "/" pieces
 
 
 

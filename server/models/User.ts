@@ -1,6 +1,5 @@
 import { model, Model, Document, Schema } from 'mongoose'
 import * as Types from '../types'
-import { sluggify } from '../utils'
 
 export interface UserModel extends Types.User, Document {
   password: string,
@@ -27,6 +26,10 @@ const schema = new Schema({
       index: true
     }
   },
+  slug: {
+    type: String,
+    required: true
+  },
   role: {
     type: String,
     required: true
@@ -39,10 +42,6 @@ const schema = new Schema({
 
 schema.virtual('fullName').get(function () {
   return [ this.name.first, this.name.last ].join(' ')
-})
-
-schema.virtual('slug').get(function () {
-  return sluggify(this.fullName)
 })
 
 export const User : Model<UserModel> = model('User', schema)

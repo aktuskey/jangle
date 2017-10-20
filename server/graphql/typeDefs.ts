@@ -70,8 +70,8 @@ export const typeDefs : string = `
   }
 
   input InputName {
-    first: String
-    last: String
+    first: String!
+    last: String!
   }
 
   type Name {
@@ -91,10 +91,16 @@ export const typeDefs : string = `
 
     # Get a list of users
     users: [User!]!
+
+    # Get a user by slug
+    user(slug: String!): User!
+
   }
 
   type Mutation {
+
     # Create or update a user
-    createUser(user: UserInfo!): User 
+    createUser(user: UserInfo!): User
+
   }
 `

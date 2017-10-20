@@ -5,6 +5,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Data.RemoteData as RemoteData exposing (RemoteData(..))
 import Data.User as User exposing (User)
+import Views.Dashboard
 import Schema.User as GraphQLUser
 import Util exposing ((=>))
 
@@ -16,7 +17,7 @@ type alias Model =
 
 type Msg
     = FetchUsers
-    | HandleUserResponse (Result Http.Error GraphQLUser.Query)
+    | HandleUsersResponse (Result Http.Error GraphQLUser.UsersResponse)
 
 
 update : User -> Msg -> Model -> ( Model, Cmd Msg )
@@ -25,11 +26,11 @@ update user msg model =
         FetchUsers ->
             model => fetchUsersAs user
 
-        HandleUserResponse (Ok response) ->
+        HandleUsersResponse (Ok response) ->
             { model | users = RemoteData.Success response.data.users }
                 => Cmd.none
 
-        HandleUserResponse (Err error) ->
+        HandleUsersResponse (Err error) ->
             { model | users = Error (Util.parseError error) }
                 => Cmd.none
 
@@ -37,10 +38,7 @@ update user msg model =
 view : User -> Model -> Html Msg
 view user model =
     div []
-        [ div [ class "dashboard__header--right" ]
-            [ h1 [ class "dashboard__title" ] [ text "Manage users" ]
-            , h2 [ class "dashboard__subtitle" ] [ text "And let that power go straight to your head." ]
-            ]
+        [ Views.Dashboard.header "Manage users" "And let that power go straight to your head."
         , case model.users of
             NotRequested ->
                 text "I should add a button here..."
@@ -74,7 +72,7 @@ viewUser user =
 
 fetchUsersAs : User -> Cmd Msg
 fetchUsersAs user =
-    GraphQLUser.fetchUsers user HandleUserResponse
+    GraphQLUser.fetchUsers user HandleUsersResponse
 
 
 init : User -> ( Model, Cmd Msg )

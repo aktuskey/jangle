@@ -1,7 +1,7 @@
 import * as mongoose from 'mongoose'
 import { User, UserModel } from './models/User'
 import { UserInfo, Name } from './types'
-import { hash } from './utils'
+import { hash, sluggify } from './utils'
 
 type ErrorMap = {
   [key: number]: string
@@ -31,6 +31,7 @@ const createUser = ({ name, password, email, role} : UserInfo) : Promise<UserMod
     name,
     email,
     role,
+    slug: sluggify(name.first + ' ' + name.last),
     password: hash(password)
   })
   .catch(handleMongoError({ 11000: 'That email is already taken.' }))
@@ -59,7 +60,12 @@ export const db = {
     findById: (id : string) : Promise<UserModel> =>
       User.findById(id)
         .exec()
-        .then(rejectIfNull(`Could not find user with id: ${id}`))
+        .then(rejectIfNull(`Could not find user with id: ${id}`)),
+
+    findWithSlug: (slug : string) : Promise<UserModel> =>
+      User.findOne({ slug })
+        .exec()
+        .then(rejectIfNull('Could not find a user with that slug.'))
 
   }
 

@@ -6,17 +6,19 @@ import Data.User as User exposing (User)
 import Views.Nav as Nav
 import Util exposing ((=>))
 import Page.Users as Users
+import Page.EditUser as EditUser
 
 
 type Msg
     = NavMsg Nav.Msg
     | UsersMsg Users.Msg
+    | EditUserMsg EditUser.Msg
 
 
 type ContentSection
     = Dashboard
     | Users Users.Model
-    | AddUser --AddUser.Model
+    | EditUser EditUser.Model
 
 
 type alias ExternalMsg =
@@ -60,6 +62,20 @@ update user msg model =
                 => Cmd.none
                 => Nav.NoOp
 
+        ( EditUserMsg subMsg, EditUser sectionModel ) ->
+            let
+                ( subModel, subCmd ) =
+                    EditUser.update user subMsg sectionModel
+            in
+                { model | section = EditUser subModel }
+                    => Cmd.map EditUserMsg subCmd
+                    => Nav.NoOp
+
+        ( EditUserMsg _, _ ) ->
+            model
+                => Cmd.none
+                => Nav.NoOp
+
 
 view : String -> User -> Model -> Html Msg
 view currentUrl user model =
@@ -83,5 +99,5 @@ viewSection user section =
         Users model ->
             Html.map UsersMsg (Users.view user model)
 
-        AddUser ->
-            h1 [ class "dashboard__title" ] [ text "Add a new user" ]
+        EditUser model ->
+            Html.map EditUserMsg (EditUser.view user model)

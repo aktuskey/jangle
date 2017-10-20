@@ -1,4 +1,4 @@
-module Views.Nav exposing (Model, init, view, update, Msg, ExternalMsg(..))
+module Views.Nav exposing (Model, init, view, update, Msg, ExternalMsg(..), viewLink)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -56,15 +56,16 @@ update msg model =
 
 navigationOptions : List ( String, List (Link Msg) )
 navigationOptions =
-    [ ( "Collections"
-      , [ PageLink "All collections" "/collections" Disabled
-        , PageLink "Authors" "/collections/authors" Disabled
-        , PageLink "Blog Posts" "/collections/blog-posts" Disabled
-        ]
-      )
-    , ( "Users"
+    [ --     ( "Collections"
+      --   , [--PageLink "All collections" "/collections" Disabled
+      --      -- , PageLink "Authors" "/collections/authors" Disabled
+      --      -- , PageLink "Blog Posts" "/collections/blog-posts" Disabled
+      --     ]
+      --   )
+      ( "Users"
       , [ PageLink "Manage users" "/users" Enabled
-        , PageLink "Add a user" "/users/new" Enabled
+
+        -- , PageLink "Add a user" "/users/new" Disabled
         ]
       )
     ]
