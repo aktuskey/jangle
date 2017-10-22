@@ -1,12 +1,23 @@
-module Util exposing ((=>), appendErrors, onClickStopPropagation, pair, viewIf, viewMaybe, delay, getCmd, parseError)
+module Util
+    exposing
+        ( (=>)
+        , appendErrors
+        , delay
+        , getCmd
+        , onClickStopPropagation
+        , pair
+        , parseError
+        , viewIf
+        , viewMaybe
+        )
 
 import Html exposing (Attribute, Html)
-import Html.Events exposing (defaultOptions, onWithOptions, onClick)
+import Html.Events exposing (defaultOptions, onClick, onWithOptions)
 import Http
 import Json.Decode as Decode
-import Time
 import Process
 import Task
+import Time
 
 
 (=>) : a -> b -> ( a, b )
@@ -93,11 +104,11 @@ parseError error =
             "Network error"
 
         Http.BadStatus { status } ->
-            ("Bad status " ++ status.message)
+            "Bad status " ++ status.message
 
         Http.BadPayload error _ ->
             let
                 _ =
                     Debug.log "Response Error: " error
             in
-                "Oops! Something went wrong, please try again."
+            "Oops! Something went wrong, please try again."

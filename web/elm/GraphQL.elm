@@ -1,7 +1,7 @@
 module GraphQL exposing (Query, Response, ResponseMsg, query, sendQuery)
 
-import Http
 import Data.User as User exposing (User)
+import Http
 import Json.Decode as Decode exposing (Decoder, Value)
 import Json.Decode.Pipeline as Pipeline exposing (decode, required)
 
@@ -26,8 +26,8 @@ responseDecoder decoder =
 
 
 query : String -> String -> Query
-query query body =
-    Query query body
+query =
+    Query
 
 
 get : User -> Query -> Decoder a -> Http.Request (Response a)

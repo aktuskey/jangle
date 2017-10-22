@@ -11,7 +11,7 @@
     text-align: left;
     transition: opacity .3s ease-in-out;
 
-    &:not(.button--loading) {
+    &:not(.button--loading):not(.button--disabled)  {
         &:before {
             content: '';
             position: absolute;
@@ -51,6 +51,11 @@
         opacity: 0;
     }
 
+    &--disabled {
+        cursor: not-allowed;
+        opacity: .6;
+    }
+
     &--loading {
         
         $spCol: $color__dark-gray;
@@ -70,7 +75,7 @@
             height: 1em;
             top: 50%;
             left: 50%;
-            color: #4d4d4d;
+            color: $spCol;
             background-color: rgba(0,0,0,0);
             position: absolute;
             margin-top: -.75em;

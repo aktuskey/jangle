@@ -9,6 +9,7 @@ import Html.Events exposing (onBlur, onClick, onFocus, onInput, onSubmit)
 import Http exposing (Request)
 import Json.Encode as Encode
 import Util exposing ((=>), delay, getCmd, viewMaybe)
+import Views.Form as Form exposing (Form)
 
 
 type RemoteData a
@@ -28,6 +29,11 @@ type Field
 type FormPage
     = NamePage
     | LoginPage
+
+
+formConfig : Form Field Msg
+formConfig =
+    Form.form Update SetFocus
 
 
 type alias Model =
@@ -209,13 +215,13 @@ viewSignInForm { email, password, firstName, lastName, focusedField, user, signi
                     ( "Sign In", AttemptSignIn )
 
         nameFields =
-            [ makeInput focusedField (InputConfig "First Name" "text" firstName FirstName AutoFocus)
-            , makeInput focusedField (InputConfig "Last Name" "text" lastName LastName NormalFocus)
+            [ Form.input formConfig (Form.InputConfig "First Name" "text" "" firstName FirstName focusedField Form.AutoFocus)
+            , Form.input formConfig (Form.InputConfig "Last Name" "text" "" lastName LastName focusedField Form.NormalFocus)
             ]
 
         loginFields =
-            [ makeInput focusedField (InputConfig "Email" "email" email Email AutoFocus)
-            , makeInput focusedField (InputConfig "Password" "password" password Password NormalFocus)
+            [ Form.input formConfig (Form.InputConfig "Email" "email" email "" Email focusedField Form.AutoFocus)
+            , Form.input formConfig (Form.InputConfig "Password" "password" password "" Password focusedField Form.NormalFocus)
             ]
 
         fieldsToDisplay =
@@ -224,73 +230,37 @@ viewSignInForm { email, password, firstName, lastName, focusedField, user, signi
             else
                 loginFields
     in
-        Html.form [ class "form card__content", attribute "novalidate" "novalidate", onSubmit buttonMsg ]
-            (fieldsToDisplay
-                ++ [ div [ class "form__button-row form__button-row--right" ]
-                        [ button
-                            [ class "button form__button"
-                            , type_ "submit"
-                            , classList [ ( "button--loading", user == Loading ) ]
-                            , dataContent buttonLabel
-                            , onFocus RemoveFocus
-                            ]
-                            [ text buttonLabel ]
-                        , button
-                            [ class "button form__button"
-                            , type_ "button"
-                            , dataContent "Back"
-                            , onFocus RemoveFocus
-                            , onClick PrevPage
-                            , classList [ ( "button--invisible", signingUp == False || page == NamePage ) ]
-                            ]
-                            [ text "Back" ]
-                        , p
-                            [ class "form__response"
-                            , classList
-                                [ ( "form__response--visible", user /= NotRequested )
-                                , ( "form__response--error", isError user )
-                                ]
-                            ]
-                            [ viewResponseMessage user ]
+    Html.form [ class "form card__content", attribute "novalidate" "novalidate", onSubmit buttonMsg ]
+        (fieldsToDisplay
+            ++ [ div [ class "form__button-row form__button-row--right" ]
+                    [ button
+                        [ class "button form__button"
+                        , type_ "submit"
+                        , classList [ ( "button--loading", user == Loading ) ]
+                        , dataContent buttonLabel
+                        , onFocus RemoveFocus
                         ]
-                   ]
-            )
-
-
-type FocusSetting
-    = AutoFocus
-    | NormalFocus
-
-
-type alias InputConfig =
-    { label_ : String
-    , type__ : String
-    , value_ : String
-    , field : Field
-    , focusSetting : FocusSetting
-    }
-
-
-makeInput : Maybe Field -> InputConfig -> Html Msg
-makeInput focusedField { label_, type__, value_, field, focusSetting } =
-    label [ class "form__label", classList [ ( "form__label--focused", isFocused field focusedField ) ] ]
-        [ span
-            [ class "form__label-text"
-            , classList [ ( "form__label-text--displaced", hasValue [ value_ ] || isFocused field focusedField ) ]
-            ]
-            [ text label_ ]
-        , input
-            [ class "form__input"
-            , type_ type__
-            , value value_
-            , onInput (Update field)
-            , onFocus (SetFocus field)
-            , autofocus (focusSetting == AutoFocus)
-
-            --, onBlur RemoveFocus
-            ]
-            []
-        ]
+                        [ text buttonLabel ]
+                    , button
+                        [ class "button form__button"
+                        , type_ "button"
+                        , dataContent "Back"
+                        , onFocus RemoveFocus
+                        , onClick PrevPage
+                        , classList [ ( "button--invisible", signingUp == False || page == NamePage ) ]
+                        ]
+                        [ text "Back" ]
+                    , p
+                        [ class "form__response"
+                        , classList
+                            [ ( "form__response--visible", user /= NotRequested )
+                            , ( "form__response--error", isError user )
+                            ]
+                        ]
+                        [ viewResponseMessage user ]
+                    ]
+               ]
+        )
 
 
 makeFakeInput : Html Msg
@@ -319,16 +289,6 @@ viewResponseMessage user =
 
         _ ->
             text ""
-
-
-isFocused : Field -> Maybe Field -> Bool
-isFocused field maybeField =
-    maybeField == Just field
-
-
-hasValue : List String -> Bool
-hasValue =
-    List.any (\str -> String.length str > 0)
 
 
 dataContent : String -> Html.Attribute msg
