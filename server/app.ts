@@ -15,17 +15,21 @@ const app = express()
 const auth = setupAuthentication(app)
 
 // Express Middleware
-app.use(bodyParser.json())
 app.use(morgan('tiny'))
 app.set('views', path.join(__dirname, 'public'))
 app.set('view engine', 'pug')
 
 // Authentication API
-app.post('/api/sign-in', auth.signInOrUpIdkYet)
+app.post('/api/sign-in', bodyParser.json(), auth.signInOrUpIdkYet)
 app.use('/api', (_req, res) => res.json({ error: true, message: 'Endpoint does not exist', data: [] }))
 
 // (Soon to be Authenticated) GraphQL API
-app.use('/graphql', graphqlExpress(graphQLOptions))
+app.post('/test', bodyParser.json(), (req, res) => {
+  console.log('is JSON', req.is('json'))
+  console.log('body', req.body)
+  res.json({})
+})
+app.use('/graphql', bodyParser.json(), graphqlExpress(graphQLOptions))
 app.use('/graphiql', graphiqlExpress({ endpointURL: '/graphql' }))
 
 // Web application

@@ -1,11 +1,15 @@
 module Page.EditUser exposing (Model, Msg, init, update, view)
 
+import Data.Context as Context
+import Data.Delta as Delta exposing (Delta)
 import Data.EditableData as EditableData exposing (EditableData(..))
 import Data.User
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onSubmit)
+import Html.Events exposing (onClick, onSubmit)
 import Http
+import Json.Decode as Json
+import Route exposing (Route)
 import Schema.User as GraphQLUser exposing (User)
 import Util exposing ((=>))
 import Views.Dashboard
@@ -22,6 +26,15 @@ type alias UserFields a =
         | firstName : String
         , lastName : String
         , email : String
+        , password : String
+    }
+
+
+type alias Fields =
+    { firstName : String
+    , lastName : String
+    , email : String
+    , password : String
     }
 
 
@@ -31,7 +44,9 @@ type alias Model =
     , firstName : String
     , lastName : String
     , email : String
+    , password : String
     , focusedField : Maybe Field
+    , showRemoveConfirmation : Bool
     }
 
 
@@ -39,71 +54,134 @@ type Field
     = FirstName
     | LastName
     | Email
+    | Password
 
 
 type Msg
-    = NoOp
-    | HandleUserResponse (Result Http.Error GraphQLUser.UserResponse)
+    = DoNothing
+    | HandleUserFetch (Result Http.Error GraphQLUser.UserResponse)
+    | HandleUserUpdate (Result Http.Error GraphQLUser.UpdateUserResponse)
+    | HandleUserRemoval (Result Http.Error GraphQLUser.RemoveUserResponse)
     | UpdateField Field String
     | SetFocus Field
     | RemoveFocus
     | UpdateUser
+    | RemoveUser
+    | OpenRemoveConfirmation
+    | CloseRemoveConfirmation
 
 
 formConfig : Form Field Msg
 formConfig =
-    Form.form UpdateField SetFocus
+    Form.form UpdateField SetFocus RemoveFocus
 
 
-update : Data.User.User -> Msg -> Model -> ( Model, Cmd Msg )
-update user msg model =
+update : Data.User.User -> Msg -> Model -> ( ( Model, Cmd Msg ), Context.Msg )
+update signedInUser msg model =
     case msg of
-        NoOp ->
-            model => Cmd.none
+        DoNothing ->
+            model
+                => Cmd.none
+                => Context.NoOp
 
         UpdateField field value ->
             updateField field value model
                 => Cmd.none
+                => Context.NoOp
 
         SetFocus field ->
             { model | focusedField = Just field }
                 => Cmd.none
+                => Context.NoOp
 
         RemoveFocus ->
             { model | focusedField = Nothing }
                 => Cmd.none
+                => Context.NoOp
 
-        HandleUserResponse (Ok response) ->
+        HandleUserFetch (Ok response) ->
             { model | user = Success response.data.user }
                 => Cmd.none
+                => Context.NoOp
 
-        HandleUserResponse (Err error) ->
+        HandleUserFetch (Err error) ->
             { model | user = Error (Util.parseError error) }
                 => Cmd.none
+                => Context.NoOp
+
+        HandleUserUpdate (Ok response) ->
+            { model
+                | user = Success response.data.updateUser
+                , firstName = ""
+                , lastName = ""
+                , email = ""
+                , password = ""
+            }
+                => Cmd.none
+                => Context.NoOp
+
+        HandleUserUpdate (Err error) ->
+            { model | user = Error (Util.parseError error) }
+                => Cmd.none
+                => Context.NoOp
+
+        HandleUserRemoval (Ok response) ->
+            model
+                => Cmd.none
+                => Context.NavigateTo Route.Users
+
+        HandleUserRemoval (Err error) ->
+            { model | user = Error (Util.parseError error) }
+                => Cmd.none
+                => Context.NoOp
 
         UpdateUser ->
             case model.user of
                 Success user_ ->
                     { model | user = Updating user_ }
-                        => updateUser user_ model
+                        => updateUser signedInUser user_ model
+                        => Context.NoOp
 
                 _ ->
-                    model => Cmd.none
+                    model
+                        => Cmd.none
+                        => Context.NoOp
+
+        RemoveUser ->
+            case model.user of
+                Success user_ ->
+                    { model | user = Removing user_ }
+                        => removeUser signedInUser user_ model
+                        => Context.NoOp
+
+                _ ->
+                    model
+                        => Cmd.none
+                        => Context.NoOp
+
+        OpenRemoveConfirmation ->
+            { model | showRemoveConfirmation = True }
+                => Cmd.none
+                => Context.NoOp
+
+        CloseRemoveConfirmation ->
+            { model | showRemoveConfirmation = False }
+                => Cmd.none
+                => Context.NoOp
 
 
-updateUser : User -> Model -> Cmd Msg
-updateUser user_ { email, firstName, lastName } =
+updateUser : Data.User.User -> User -> Model -> Cmd Msg
+updateUser signedInUser user model =
     let
         changes =
-            getUpdatedFields
-                [ ( "firstName", user_.name.first, firstName )
-                , ( "lastName", user_.name.last, lastName )
-                , ( "email", user_.email, email )
-                ]
-                |> toString
-                |> Debug.log "Changes"
+            getUpdatedFieldsFor user model
     in
-    Cmd.none
+    GraphQLUser.updateUser signedInUser user.slug changes HandleUserUpdate
+
+
+removeUser : Data.User.User -> User -> Model -> Cmd Msg
+removeUser signedInUser user model =
+    GraphQLUser.removeUser signedInUser user.slug HandleUserRemoval
 
 
 updateField : Field -> String -> Model -> Model
@@ -118,6 +196,9 @@ updateField field value model =
         LastName ->
             { model | lastName = value }
 
+        Password ->
+            { model | password = value }
+
 
 init : Maybe String -> Data.User.User -> ( Model, Cmd Msg )
 init slug user =
@@ -127,7 +208,7 @@ init slug user =
                 Just slug ->
                     ( EditPage
                     , Fetching
-                    , GraphQLUser.fetchUser user slug HandleUserResponse
+                    , GraphQLUser.fetchUser user slug HandleUserFetch
                     )
 
                 Nothing ->
@@ -136,7 +217,7 @@ init slug user =
                     , Cmd.none
                     )
     in
-    ( Model user_ pageType "" "" "" Nothing, cmd )
+    ( Model user_ pageType "" "" "" "" Nothing False, cmd )
 
 
 view : Data.User.User -> Model -> Html Msg
@@ -144,6 +225,7 @@ view user model =
     div []
         [ viewHeader model
         , viewUser model
+        , viewRemoveConfirmationModal model
         ]
 
 
@@ -153,10 +235,10 @@ viewHeader { pageType } =
         title =
             case pageType of
                 AddPage ->
-                    "Add a user"
+                    "Add a user."
 
                 EditPage ->
-                    "Edit user"
+                    "Edit user."
     in
     Views.Dashboard.header title "People are nice."
 
@@ -176,6 +258,9 @@ viewUser model =
         Success user ->
             viewUserForm user model
 
+        Removing user ->
+            viewUserForm user model
+
         Error message ->
             text message
 
@@ -189,15 +274,16 @@ viewUserForm user model =
 
 
 viewForm : User -> Model -> Html Msg
-viewForm user_ { email, firstName, lastName, focusedField, user } =
+viewForm user_ { email, firstName, lastName, password, focusedField, user } =
     Html.form
         [ class "form container--tiny"
         , attribute "novalidate" "novalidate"
         , onSubmit UpdateUser
         ]
-        [ Form.input formConfig <| Form.InputConfig "First Name" "text" firstName user_.name.first FirstName focusedField Form.NormalFocus
+        [ Form.input formConfig <| Form.InputConfig "First Name" "text" firstName user_.name.first FirstName focusedField Form.AutoFocus
         , Form.input formConfig <| Form.InputConfig "Last Name" "text" lastName user_.name.last LastName focusedField Form.NormalFocus
         , Form.input formConfig <| Form.InputConfig "Email" "email" email user_.email Email focusedField Form.NormalFocus
+        , Form.input formConfig <| Form.InputConfig "Password" "password" password "" Password focusedField Form.NormalFocus
         , div [ class "form__button-row form__button-row--right" ]
             [ Form.button <|
                 Form.ButtonConfig
@@ -207,27 +293,77 @@ viewForm user_ { email, firstName, lastName, focusedField, user } =
                         Form.ButtonLoading
                      else if
                         List.length
-                            (getUpdatedFields
-                                [ ( "firstName", user_.name.first, firstName )
-                                , ( "lastName", user_.name.last, lastName )
-                                , ( "email", user_.email, email )
-                                ]
-                            )
+                            (getUpdatedFieldsFor user_ (Fields firstName lastName email password))
                             == 0
                      then
                         Form.ButtonDisabled
                      else
                         Form.ButtonNormal
                     )
+                    Form.ButtonPrimary
+            , Form.button <|
+                Form.ButtonConfig
+                    "Remove"
+                    (Form.NormalButtonType OpenRemoveConfirmation)
+                    Form.ButtonNormal
+                    Form.ButtonDanger
             ]
         ]
 
 
-type alias Delta dataType =
-    { fieldName : String
-    , before : dataType
-    , after : dataType
-    }
+onClickStopPropagation : Attribute Msg
+onClickStopPropagation =
+    Html.Events.onWithOptions "click" (Html.Events.Options True True) (Json.succeed DoNothing)
+
+
+viewRemoveConfirmationModal : Model -> Html Msg
+viewRemoveConfirmationModal { showRemoveConfirmation, user } =
+    div [ class "modal", classList [ ( "modal--visible", showRemoveConfirmation ) ], onClick CloseRemoveConfirmation ]
+        [ div [ class "modal__card", onClickStopPropagation ]
+            [ h3 [ class "modal__title" ] [ text "Remove user?" ]
+            , p [ class "modal__message" ] [ text <| "This will permanently remove " ++ getFirstName user ++ " from Jangle." ]
+            , div [ class "modal__actions form__button-row form__button-row--right" ]
+                [ Form.button <|
+                    Form.ButtonConfig
+                        ("Remove " ++ getFirstName user)
+                        (Form.NormalButtonType RemoveUser)
+                        (if EditableData.isRemoving user then
+                            Form.ButtonLoading
+                         else
+                            Form.ButtonNormal
+                        )
+                        Form.ButtonDanger
+                , Form.button <|
+                    Form.ButtonConfig "Cancel" (Form.NormalButtonType CloseRemoveConfirmation) Form.ButtonNormal Form.ButtonDefault
+                ]
+            ]
+        ]
+
+
+getFirstName : EditableData User -> String
+getFirstName user =
+    case user of
+        Success user ->
+            user.name.first
+
+        Updating user ->
+            user.name.first
+
+        Removing user ->
+            user.name.first
+
+        _ ->
+            "this user"
+
+
+getUpdatedFieldsFor : User -> UserFields model -> List (Delta String)
+getUpdatedFieldsFor user { email, password, firstName, lastName } =
+    getUpdatedFields
+        [ ( "firstName", user.name.first, firstName )
+        , ( "lastName", user.name.last, lastName )
+        , ( "email", user.email, email )
+        , ( "password", "", password )
+        ]
 
 
 getUpdatedFields : List ( String, String, String ) -> List (Delta String)

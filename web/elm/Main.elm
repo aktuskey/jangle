@@ -7,9 +7,9 @@ import Html.Attributes exposing (class, href)
 import Json.Decode as Decode
 import Navigation exposing (Location)
 import Page.Dashboard as Dashboard
+import Page.EditUser as EditUser
 import Page.SignIn as SignIn
 import Page.Users as Users
-import Page.EditUser as EditUser
 import Ports
 import Route exposing (Route)
 import Util exposing ((=>))
@@ -69,16 +69,16 @@ updateAsUser user context subMsg subModel model =
         ( ( updatedSubModel, subCmd ), externalMsg ) =
             Dashboard.update user subMsg subModel
     in
-        case externalMsg of
-            Nav.SignOut ->
-                update (SetUser Nothing) model
+    case externalMsg of
+        Context.NoOp ->
+            { model | page = Dashboard updatedSubModel }
+                => Cmd.map DashboardMsg subCmd
 
-            Nav.NoOp ->
-                { model | page = Dashboard updatedSubModel }
-                    => Cmd.none
+        Context.SignOut ->
+            update (SetUser Nothing) model
 
-            Nav.NavigateTo url ->
-                update (NewUrl url) model
+        Context.NavigateTo route ->
+            update (NewUrl (Route.routeToString route)) model
 
 
 updateAnonymously : Msg -> Model -> ( Model, Cmd Msg )
@@ -89,11 +89,11 @@ updateAnonymously msg model =
                 ( page, cmd ) =
                     pageFromLocation model.context location
             in
-                { model
-                    | page = page
-                    , context = Context.updateCurrentUrl location.pathname model.context
-                }
-                    => cmd
+            { model
+                | page = page
+                , context = Context.updateCurrentUrl location.pathname model.context
+            }
+                => cmd
 
         ( NewUrl url, _ ) ->
             model
@@ -107,17 +107,17 @@ updateAnonymously msg model =
                 newContext =
                     { context | user = user }
             in
-                { model | context = newContext }
-                    => (case user of
-                            Just user ->
-                                User.storeContext user
+            { model | context = newContext }
+                => (case user of
+                        Just user ->
+                            User.storeContext user
 
-                            Nothing ->
-                                Cmd.batch
-                                    [ Ports.storeContext Nothing
-                                    , Navigation.newUrl (Route.routeToString Route.SignIn)
-                                    ]
-                       )
+                        Nothing ->
+                            Cmd.batch
+                                [ Ports.storeContext Nothing
+                                , Navigation.newUrl (Route.routeToString Route.SignIn)
+                                ]
+                   )
 
         ( SignInMsg subMsg, SignIn subModel ) ->
             let
@@ -135,10 +135,10 @@ updateAnonymously msg model =
                                 ( userModel, userCmd ) =
                                     update (SetUser (Just user)) model
                             in
-                                userModel
-                                    => Cmd.batch [ userCmd, Navigation.newUrl (Route.routeToString Route.Dashboard) ]
+                            userModel
+                                => Cmd.batch [ userCmd, Navigation.newUrl (Route.routeToString Route.Dashboard) ]
             in
-                newModel ! (newCmd :: [ Cmd.map SignInMsg subCmd ])
+            newModel ! (newCmd :: [ Cmd.map SignInMsg subCmd ])
 
         ( _, _ ) ->
             model ! []
@@ -212,9 +212,9 @@ init flags location =
         cmd =
             redirectCommand flags.needsSetup context.user page
     in
-        ( Model context page
-        , Cmd.batch [ cmd, pageCmd ]
-        )
+    ( Model context page
+    , Cmd.batch [ cmd, pageCmd ]
+    )
 
 
 pageFromLocation : Context -> Location -> ( Page, Cmd Msg )
@@ -265,11 +265,11 @@ pageFromRoute maybeUser route =
                 ( page, cmd ) =
                     Users.init user
             in
-                (Dashboard.Users page
-                    |> Dashboard.init
-                    |> Dashboard
-                )
-                    => Cmd.map DashboardMsg (Cmd.map Dashboard.UsersMsg cmd)
+            (Dashboard.Users page
+                |> Dashboard.init
+                |> Dashboard
+            )
+                => Cmd.map DashboardMsg (Cmd.map Dashboard.UsersMsg cmd)
 
         ( Route.Users, Nothing ) ->
             signInPageAndCmd
@@ -279,11 +279,11 @@ pageFromRoute maybeUser route =
                 ( page, cmd ) =
                     EditUser.init Nothing user
             in
-                (Dashboard.EditUser page
-                    |> Dashboard.init
-                    |> Dashboard
-                )
-                    => Cmd.map DashboardMsg (Cmd.map Dashboard.EditUserMsg cmd)
+            (Dashboard.EditUser page
+                |> Dashboard.init
+                |> Dashboard
+            )
+                => Cmd.map DashboardMsg (Cmd.map Dashboard.EditUserMsg cmd)
 
         ( Route.AddUser, Nothing ) ->
             signInPageAndCmd
@@ -293,11 +293,11 @@ pageFromRoute maybeUser route =
                 ( page, cmd ) =
                     EditUser.init (Just slug) user
             in
-                (Dashboard.EditUser page
-                    |> Dashboard.init
-                    |> Dashboard
-                )
-                    => Cmd.map DashboardMsg (Cmd.map Dashboard.EditUserMsg cmd)
+            (Dashboard.EditUser page
+                |> Dashboard.init
+                |> Dashboard
+            )
+                => Cmd.map DashboardMsg (Cmd.map Dashboard.EditUserMsg cmd)
 
         ( Route.EditUser _, Nothing ) ->
             signInPageAndCmd

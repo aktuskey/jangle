@@ -62,14 +62,14 @@ export const typeDefs : string = `
     role: Role!
   }
 
-  input UserInfo {
-    name: InputName
+  input NewUser {
+    name: NameInput!
     email: String!
     password: String!
     role: String!
   }
 
-  input InputName {
+  input NameInput {
     first: String!
     last: String!
   }
@@ -100,7 +100,13 @@ export const typeDefs : string = `
   type Mutation {
 
     # Create or update a user
-    createUser(user: UserInfo!): User
+    createUser(user: NewUser!): User
+
+    # Update a user
+    updateUser(slug: String!, firstName: String, lastName: String, email: String, password: String): User
+
+    # Remove a user
+    removeUser(slug: String!): User
 
   }
 `

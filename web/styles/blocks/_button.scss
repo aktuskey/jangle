@@ -1,15 +1,35 @@
 .button {
 
+    $default-color: $color__dark-gray;
+    $success-color: #00966f;
+    $primary-color: #0066ff;
+    $danger-color: #b14545;
+
     position: relative;
     cursor: pointer;
     box-sizing: border-box;
     padding: .5rem 1rem;
     font-size: 1rem;
-    border: solid 1px $color__dark-gray;
+    border: solid 1px $default-color;
     background-color: white;
     font-weight: lighter;
     text-align: left;
     transition: opacity .3s ease-in-out;
+
+    &--primary {
+        color: $primary-color;
+        border-color: $primary-color;
+    }
+
+    &--success {
+        color: $success-color;
+        border-color: $success-color;
+    }
+
+    &--danger {
+        color: $danger-color;
+        border-color: $danger-color;
+    }
 
     &:not(.button--loading):not(.button--disabled)  {
         &:before {
@@ -19,8 +39,26 @@
             left: 0;
             right: 100%;
             height: 100%;
-            background-color: $color__dark-gray;
+            background-color: $default-color;
             transition: right .2s ease-in-out;
+        }
+
+        &.button--primary {
+            &:before {
+                background-color: $primary-color;            
+            }
+        }
+
+        &.button--success {
+            &:before {
+                background-color: $success-color;            
+            }
+        }
+
+        &.button--danger {
+            &:before {
+                background-color: $danger-color;            
+            }
         }
 
         &:after {
@@ -58,16 +96,15 @@
 
     &--loading {
         
-        $spCol: $color__dark-gray;
         cursor: not-allowed;
         color: white;
 
         &:after {
             content: '';
             display: block;
-            background-color: rgba(0,0,0,0);
-            border: 4px rgba($spCol,0.25) solid;
-            border-top: 4px rgba($spCol,1) solid;
+            background-color: rgba(0, 0, 0, 0);
+            border: 4px rgba($default-color, 0.25) solid;
+            border-top: 4px rgba($default-color, 1) solid;
             border-radius: 50%;
             -webkit-animation: spCircRot .8s infinite linear;
             animation: spCircRot .8s infinite linear;
@@ -75,19 +112,46 @@
             height: 1em;
             top: 50%;
             left: 50%;
-            color: $spCol;
+            color: $default-color;
             background-color: rgba(0,0,0,0);
             position: absolute;
             margin-top: -.75em;
             margin-left: -.75em;
         }
+
+        &.button--primary {
+            &:after {
+                border-color: rgba($primary-color, .25);
+                border-top-color: $primary-color;
+                color: $primary-color;
+            }
+        }
+
+        &.button--success {
+            &:after {
+                border-color: rgba($success-color, .25);
+                border-top-color: $success-color;
+                color: $success-color;
+            }
+        }
+
+        &.button--danger {
+            &:after {
+                border-color: rgba($danger-color, .25);
+                border-top-color: $danger-color;
+                color: $danger-color;
+            }
+        }
+
         @-webkit-keyframes spCircRot {
             from { -webkit-transform: rotate(0deg); }
             to { -webkit-transform: rotate(359deg); }
         }
+
         @keyframes spCircRot {
             from { transform: rotate(0deg); }
             to { transform: rotate(359deg); }
         }
+
     }
 }

@@ -1,0 +1,45 @@
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,.3);
+    z-index: 2;
+    transition: opacity .3s ease-in-out;
+    opacity: 0;
+    visibility: hidden;
+
+    &--visible {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    &__card {
+        width: calc(100% - 2rem);
+        max-width: 540px;
+        background-color: white;
+        padding: 2rem;
+        box-sizing: border-box;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    &__title {
+        font-size: 2rem;
+        font-weight: normal;
+    }
+
+    &__message {
+        font-size: 1.25rem;
+        margin-top: 1rem;
+        line-height: 1.2;
+    }
+
+    &__actions {
+        margin-top: 2rem;
+    }
+
+}

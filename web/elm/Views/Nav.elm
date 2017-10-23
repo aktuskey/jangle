@@ -1,21 +1,17 @@
-module Views.Nav exposing (Model, init, view, update, Msg, ExternalMsg(..), viewLink)
+module Views.Nav exposing (Model, Msg, init, update, view, viewLink)
 
+import Data.Context as Context
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Route exposing (Route)
 import Util exposing ((=>))
 
 
 type Msg
     = ToggleMenu
     | SignOutClick
-    | Navigate String
-
-
-type ExternalMsg
-    = NoOp
-    | SignOut
-    | NavigateTo String
+    | Navigate Route
 
 
 type alias Model =
@@ -29,7 +25,7 @@ init =
 
 
 type Link msg
-    = PageLink String String LinkState
+    = PageLink String Route LinkState
     | ActionLink String msg LinkState
 
 
@@ -38,20 +34,20 @@ type LinkState
     | Disabled
 
 
-update : Msg -> Model -> ( Model, ExternalMsg )
+update : Msg -> Model -> ( Model, Context.Msg )
 update msg model =
     case msg of
         ToggleMenu ->
             { model | expandMenu = not model.expandMenu }
-                => NoOp
+                => Context.NoOp
 
         SignOutClick ->
             model
-                => SignOut
+                => Context.SignOut
 
-        Navigate url ->
+        Navigate route ->
             { model | expandMenu = False }
-                => NavigateTo url
+                => Context.NavigateTo route
 
 
 navigationOptions : List ( String, List (Link Msg) )
@@ -63,7 +59,7 @@ navigationOptions =
       --     ]
       --   )
       ( "Users"
-      , [ PageLink "Manage users" "/users" Enabled
+      , [ PageLink "Manage users" Route.Users Enabled
 
         -- , PageLink "Add a user" "/users/new" Disabled
         ]
@@ -83,7 +79,7 @@ viewNavigationHeader : Html Msg
 viewNavigationHeader =
     header [ class "nav__header" ]
         [ viewMobileMenuIcon
-        , button [ class "link nav__brand", onClick (Navigate "/") ] [ text "Jangle" ]
+        , button [ class "link nav__brand", onClick (Navigate Route.Dashboard) ] [ text "Jangle" ]
         ]
 
 
@@ -121,7 +117,7 @@ viewNavigationOption currentUrl ( header, links ) =
             [ class "nav__option-header" ]
             [ text header ]
          ]
-            ++ (List.map (viewNavigationLink currentUrl) links)
+            ++ List.map (viewNavigationLink currentUrl) links
         )
 
 
@@ -130,24 +126,23 @@ viewNavigationLink =
     viewLink Navigate "nav_link"
 
 
-viewLink : (String -> msg) -> String -> String -> Link msg -> Html msg
+viewLink : (Route -> msg) -> String -> String -> Link msg -> Html msg
 viewLink msg classes currentUrl link =
     case link of
-        PageLink label url state ->
+        PageLink label route state ->
             div []
                 [ button
-                    ([ class <| String.join " " [ "link", classes ]
-                     , classList
-                        [ ( "link--active", url == currentUrl )
+                    [ class <| String.join " " [ "link", classes ]
+                    , classList
+                        [ ( "link--active", Route.routeToString route == currentUrl )
                         , ( "link--disabled", state == Disabled )
                         ]
-                     , if url == currentUrl || state == Disabled then
+                    , if Route.routeToString route == currentUrl || state == Disabled then
                         disabled True
-                       else
-                        onClick (msg url)
-                     , tabindex 0
-                     ]
-                    )
+                      else
+                        onClick (msg route)
+                    , tabindex 0
+                    ]
                     [ text label ]
                 ]
 
@@ -168,5 +163,5 @@ viewLink msg classes currentUrl link =
 viewNavigationFooter : String -> Html Msg
 viewNavigationFooter currentUrl =
     footer [ class "nav__footer" ]
-        [ (viewNavigationLink currentUrl) (ActionLink "Sign out" SignOutClick Enabled)
+        [ viewNavigationLink currentUrl (ActionLink "Sign out" SignOutClick Enabled)
         ]

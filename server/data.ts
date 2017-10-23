@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose'
 import { User, UserModel } from './models/User'
-import { UserInfo, Name } from './types'
+import { UserInfo, Name, Map } from './types'
 import { hash, sluggify } from './utils'
 
 type ErrorMap = {
@@ -65,6 +65,17 @@ export const db = {
     findWithSlug: (slug : string) : Promise<UserModel> =>
       User.findOne({ slug })
         .exec()
+        .then(rejectIfNull('Could not find a user with that slug.')),
+
+    removeWithSlug: (slug : string) : Promise<UserModel> =>
+      User.findOneAndRemove({ slug })
+        .exec()
+        .then(rejectIfNull('Could not find a user with that slug.')),
+
+    updateWithSlug: (slug: string, changes: Map<string>) : Promise<UserModel> =>
+      User.update({ slug }, changes)
+        .exec()
+        .then((_ : any) => User.findOne({ slug }).exec())
         .then(rejectIfNull('Could not find a user with that slug.'))
 
   }

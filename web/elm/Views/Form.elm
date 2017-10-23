@@ -32,10 +32,18 @@ type ButtonType msg
     | SubmitButtonType
 
 
+type ButtonStyle
+    = ButtonDefault
+    | ButtonPrimary
+    | ButtonDanger
+    | ButtonSuccess
+
+
 type alias ButtonConfig msg =
     { label_ : String
     , type__ : ButtonType msg
     , state : ButtonState
+    , style_ : ButtonStyle
     }
 
 
@@ -48,12 +56,12 @@ type alias SetFocusMsg field msg =
 
 
 type Form field msg
-    = Form (InputMsg field msg) (SetFocusMsg field msg)
+    = Form (InputMsg field msg) (SetFocusMsg field msg) msg
 
 
-form : InputMsg field msg -> SetFocusMsg field msg -> Form field msg
-form inputMsg setFocusMsg =
-    Form inputMsg setFocusMsg
+form : InputMsg field msg -> SetFocusMsg field msg -> msg -> Form field msg
+form inputMsg setFocusMsg removeFocusMsg =
+    Form inputMsg setFocusMsg removeFocusMsg
 
 
 isFocused : field -> Maybe field -> Bool
@@ -67,7 +75,7 @@ hasValue =
 
 
 input : Form field msg -> InputConfig field -> Html msg
-input (Form inputMsg setFocusMsg) { label_, type__, value_, placeholder_, field, focusSetting, focusedField } =
+input (Form inputMsg setFocusMsg removeFocusMsg) { label_, type__, value_, placeholder_, field, focusSetting, focusedField } =
     label
         [ class "form__label"
         , classList
@@ -92,6 +100,7 @@ input (Form inputMsg setFocusMsg) { label_, type__, value_, placeholder_, field,
             , placeholder placeholder_
             , onInput (inputMsg field)
             , onFocus (setFocusMsg field)
+            , onBlur removeFocusMsg
             , autofocus (focusSetting == AutoFocus)
             ]
             []
@@ -99,12 +108,14 @@ input (Form inputMsg setFocusMsg) { label_, type__, value_, placeholder_, field,
 
 
 button : ButtonConfig msg -> Html msg
-button { label_, type__, state } =
+button { label_, type__, state, style_ } =
     Html.button
         ([ class "button form__button"
          , classList
             [ ( "button--loading", state == ButtonLoading )
             , ( "button--disabled", state == ButtonDisabled )
+            , ( "button--primary", style_ == ButtonPrimary )
+            , ( "button--danger", style_ == ButtonDanger )
             ]
          , attribute "data-content" label_
          ]

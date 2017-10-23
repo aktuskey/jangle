@@ -28,11 +28,11 @@ route =
 
 
 routeToString : Route -> String
-routeToString page =
+routeToString route =
     let
         pieces : List String
         pieces =
-            case page of
+            case route of
                 Dashboard ->
                     []
 
@@ -51,7 +51,7 @@ routeToString page =
                 AddUser ->
                     [ "users", "new" ]
     in
-        "/" ++ String.join "/" pieces
+    "/" ++ String.join "/" pieces
 
 
 

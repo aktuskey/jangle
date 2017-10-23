@@ -18,3 +18,7 @@ export type UserInfo = {
   password: string,
   role: Role
 }
+
+export type Map<T> = {
+  [key: string]: T
+}

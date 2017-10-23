@@ -33,7 +33,7 @@ type FormPage
 
 formConfig : Form Field Msg
 formConfig =
-    Form.form Update SetFocus
+    Form.form Update SetFocus RemoveFocus
 
 
 type alias Model =
@@ -215,8 +215,8 @@ viewSignInForm { email, password, firstName, lastName, focusedField, user, signi
                     ( "Sign In", AttemptSignIn )
 
         nameFields =
-            [ Form.input formConfig (Form.InputConfig "First Name" "text" "" firstName FirstName focusedField Form.AutoFocus)
-            , Form.input formConfig (Form.InputConfig "Last Name" "text" "" lastName LastName focusedField Form.NormalFocus)
+            [ Form.input formConfig (Form.InputConfig "First Name" "text" firstName "" FirstName focusedField Form.AutoFocus)
+            , Form.input formConfig (Form.InputConfig "Last Name" "text" lastName "" LastName focusedField Form.NormalFocus)
             ]
 
         loginFields =

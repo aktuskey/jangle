@@ -1,13 +1,16 @@
-module Page.Users exposing (Model, Msg, view, update, init)
+module Page.Users exposing (Model, Msg, init, update, view)
 
-import Http
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Data.Context as Context
 import Data.RemoteData as RemoteData exposing (RemoteData(..))
 import Data.User as User exposing (User)
-import Views.Dashboard
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (onClick)
+import Http
+import Route exposing (Route)
 import Schema.User as GraphQLUser
 import Util exposing ((=>))
+import Views.Dashboard
 
 
 type alias Model =
@@ -17,31 +20,41 @@ type alias Model =
 
 type Msg
     = FetchUsers
+    | Navigate Route
     | HandleUsersResponse (Result Http.Error GraphQLUser.UsersResponse)
 
 
-update : User -> Msg -> Model -> ( Model, Cmd Msg )
+update : User -> Msg -> Model -> ( ( Model, Cmd Msg ), Context.Msg )
 update user msg model =
     case msg of
         FetchUsers ->
-            model => fetchUsersAs user
+            model
+                => fetchUsersAs user
+                => Context.NoOp
+
+        Navigate route ->
+            model
+                => Cmd.none
+                => Context.NavigateTo route
 
         HandleUsersResponse (Ok response) ->
             { model | users = RemoteData.Success response.data.users }
                 => Cmd.none
+                => Context.NoOp
 
         HandleUsersResponse (Err error) ->
             { model | users = Error (Util.parseError error) }
                 => Cmd.none
+                => Context.NoOp
 
 
 view : User -> Model -> Html Msg
 view user model =
     div []
-        [ Views.Dashboard.header "Manage users" "And let that power go straight to your head."
+        [ Views.Dashboard.header "Manage users." "And let that power go straight to your head."
         , case model.users of
             NotRequested ->
-                text "I should add a button here..."
+                text ""
 
             Loading ->
                 text "Fetching users..."
@@ -57,7 +70,7 @@ view user model =
 viewUsers : List GraphQLUser.User -> Html Msg
 viewUsers users =
     section [ class "list" ]
-        [ h3 [ class "list__title" ] [ text "All Users" ]
+        [ h3 [ class "list__title" ] [ text "All users." ]
         , ul [ class "list__rows" ] (List.map viewUser users)
         ]
 
@@ -65,7 +78,7 @@ viewUsers users =
 viewUser : GraphQLUser.User -> Html Msg
 viewUser user =
     li [ class "list_row" ]
-        [ a [ class "link", href ("/users/" ++ user.slug) ]
+        [ button [ class "link", onClick (Navigate (Route.EditUser user.slug)) ]
             [ text <| User.fullname user ]
         ]
 
