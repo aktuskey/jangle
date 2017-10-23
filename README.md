@@ -27,8 +27,8 @@ The backend is primarily [Typescript]() which runs an [Express](https://expressj
 - [ ] Users
   - [x] View
   - [ ] Add
-  - [ ] Edit
-  - [ ] Remove
+  - [x] Edit
+  - [x] Remove
 - [ ] Collections
   - [ ] View
   - [ ] Add
