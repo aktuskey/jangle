@@ -1,9 +1,5 @@
 import { db } from '../data'
-import { UserInfo, Map } from '../types'
-
-type CreateUserMutation = {
-  user: UserInfo
-}
+import { Map } from '../types'
 
 type UpdateUserMutation = {
   slug: string,
@@ -11,6 +7,14 @@ type UpdateUserMutation = {
   lastName: string | null,
   email: string | null,
   password: string | null
+}
+
+type CreateUserMutation = {
+  firstName: string,
+  lastName: string,
+  email: string,
+  role: string,
+  password: string
 }
 
 type RemoveUserMutation = {
@@ -31,8 +35,8 @@ export const resolvers = {
       db.users.findWithSlug(slug)
   },
   Mutation: {
-    createUser: (_ : any, userMutation : CreateUserMutation) =>
-      db.users.create(userMutation.user),
+    createUser: (_ : any, { firstName, lastName, email, role, password } : CreateUserMutation) =>
+      db.users.create({ name: { first: firstName, last: lastName }, password, role, email }),
     updateUser: (_: any, { slug, firstName, lastName, email, password} : UpdateUserMutation) =>
       db.users.updateWithSlug(slug, buildChanges({
         'name.first': firstName, 'name.last': lastName, email, password

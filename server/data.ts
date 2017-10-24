@@ -49,8 +49,7 @@ export const db = {
     create: createUser,
 
     get: () : Promise<UserModel[]> =>
-      User.find()
-        .exec(),
+      User.find().exec(),
 
     findWithLogin: (email : string, password: string) : Promise<UserModel> =>
       User.findOne({ email, password: hash(password) })

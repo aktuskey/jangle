@@ -16,11 +16,6 @@ import Views.Dashboard
 import Views.Form as Form exposing (Form)
 
 
-type PageType
-    = AddPage
-    | EditPage
-
-
 type alias UserFields a =
     { a
         | firstName : String
@@ -40,7 +35,6 @@ type alias Fields =
 
 type alias Model =
     { user : EditableData User
-    , pageType : PageType
     , firstName : String
     , lastName : String
     , email : String
@@ -73,7 +67,7 @@ type Msg
 
 formConfig : Form Field Msg
 formConfig =
-    Form.form UpdateField SetFocus RemoveFocus
+    Form.form UpdateField SetFocus
 
 
 update : Data.User.User -> Msg -> Model -> ( ( Model, Cmd Msg ), Context.Msg )
@@ -100,7 +94,12 @@ update signedInUser msg model =
                 => Context.NoOp
 
         HandleUserFetch (Ok response) ->
-            { model | user = Success response.data.user }
+            { model
+                | user = Success response.data.user
+                , firstName = response.data.user.name.first
+                , lastName = response.data.user.name.last
+                , email = response.data.user.email
+            }
                 => Cmd.none
                 => Context.NoOp
 
@@ -112,9 +111,9 @@ update signedInUser msg model =
         HandleUserUpdate (Ok response) ->
             { model
                 | user = Success response.data.updateUser
-                , firstName = ""
-                , lastName = ""
-                , email = ""
+                , firstName = response.data.updateUser.name.first
+                , lastName = response.data.updateUser.name.last
+                , email = response.data.updateUser.email
                 , password = ""
             }
                 => Cmd.none
@@ -176,7 +175,7 @@ updateUser signedInUser user model =
         changes =
             getUpdatedFieldsFor user model
     in
-    GraphQLUser.updateUser signedInUser user.slug changes HandleUserUpdate
+        GraphQLUser.updateUser signedInUser user.slug changes HandleUserUpdate
 
 
 removeUser : Data.User.User -> User -> Model -> Cmd Msg
@@ -200,47 +199,29 @@ updateField field value model =
             { model | password = value }
 
 
-init : Maybe String -> Data.User.User -> ( Model, Cmd Msg )
+init : String -> Data.User.User -> ( Model, Cmd Msg )
 init slug user =
     let
-        ( pageType, user_, cmd ) =
-            case slug of
-                Just slug ->
-                    ( EditPage
-                    , Fetching
-                    , GraphQLUser.fetchUser user slug HandleUserFetch
-                    )
-
-                Nothing ->
-                    ( AddPage
-                    , NotRequested
-                    , Cmd.none
-                    )
+        ( user_, cmd ) =
+            ( Fetching
+            , GraphQLUser.fetchUser user slug HandleUserFetch
+            )
     in
-    ( Model user_ pageType "" "" "" "" Nothing False, cmd )
+        ( Model user_ "" "" "" "" Nothing False, cmd )
 
 
 view : Data.User.User -> Model -> Html Msg
 view user model =
     div []
-        [ viewHeader model
+        [ viewHeader
         , viewUser model
         , viewRemoveConfirmationModal model
         ]
 
 
-viewHeader : Model -> Html Msg
-viewHeader { pageType } =
-    let
-        title =
-            case pageType of
-                AddPage ->
-                    "Add a user."
-
-                EditPage ->
-                    "Edit user."
-    in
-    Views.Dashboard.header title "People are nice."
+viewHeader : Html Msg
+viewHeader =
+    Views.Dashboard.header "Edit user." "People are nice."
 
 
 viewUser : Model -> Html Msg
@@ -283,7 +264,7 @@ viewForm user_ { email, firstName, lastName, password, focusedField, user } =
         [ Form.input formConfig <| Form.InputConfig "First Name" "text" firstName user_.name.first FirstName focusedField Form.AutoFocus
         , Form.input formConfig <| Form.InputConfig "Last Name" "text" lastName user_.name.last LastName focusedField Form.NormalFocus
         , Form.input formConfig <| Form.InputConfig "Email" "email" email user_.email Email focusedField Form.NormalFocus
-        , Form.input formConfig <| Form.InputConfig "Password" "password" password "" Password focusedField Form.NormalFocus
+        , Form.input formConfig <| Form.InputConfig "New Password" "password" password "" Password focusedField Form.NormalFocus
         , div [ class "form__button-row form__button-row--right" ]
             [ Form.button <|
                 Form.ButtonConfig

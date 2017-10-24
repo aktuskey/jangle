@@ -60,8 +60,7 @@ navigationOptions =
       --   )
       ( "Users"
       , [ PageLink "Manage users" Route.Users Enabled
-
-        -- , PageLink "Add a user" "/users/new" Disabled
+        , PageLink "Add a user" Route.AddUser Enabled
         ]
       )
     ]
@@ -123,7 +122,7 @@ viewNavigationOption currentUrl ( header, links ) =
 
 viewNavigationLink : String -> Link Msg -> Html Msg
 viewNavigationLink =
-    viewLink Navigate "nav_link"
+    viewLink Navigate "nav__link"
 
 
 viewLink : (Route -> msg) -> String -> String -> Link msg -> Html msg

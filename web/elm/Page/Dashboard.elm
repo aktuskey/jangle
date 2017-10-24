@@ -4,6 +4,7 @@ import Data.Context as Context
 import Data.User as User exposing (User)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Page.AddUser as AddUser
 import Page.EditUser as EditUser
 import Page.Users as Users
 import Util exposing ((=>))
@@ -13,12 +14,14 @@ import Views.Nav as Nav
 type Msg
     = NavMsg Nav.Msg
     | UsersMsg Users.Msg
+    | AddUserMsg AddUser.Msg
     | EditUserMsg EditUser.Msg
 
 
 type ContentSection
     = Dashboard
     | Users Users.Model
+    | AddUser AddUser.Model
     | EditUser EditUser.Model
 
 
@@ -41,20 +44,34 @@ update user msg model =
                 ( navModel, navMsg ) =
                     Nav.update subMsg model.navigation
             in
-            { model | navigation = navModel }
-                => Cmd.none
-                => navMsg
+                { model | navigation = navModel }
+                    => Cmd.none
+                    => navMsg
 
         ( UsersMsg subMsg, Users sectionModel ) ->
             let
                 ( ( subModel, subCmd ), contextMsg ) =
                     Users.update user subMsg sectionModel
             in
-            { model | section = Users subModel }
-                => Cmd.map UsersMsg subCmd
-                => contextMsg
+                { model | section = Users subModel }
+                    => Cmd.map UsersMsg subCmd
+                    => contextMsg
 
         ( UsersMsg _, _ ) ->
+            model
+                => Cmd.none
+                => Context.NoOp
+
+        ( AddUserMsg subMsg, AddUser sectionModel ) ->
+            let
+                ( ( subModel, subCmd ), contextMsg ) =
+                    AddUser.update user subMsg sectionModel
+            in
+                { model | section = AddUser subModel }
+                    => Cmd.map AddUserMsg subCmd
+                    => contextMsg
+
+        ( AddUserMsg _, _ ) ->
             model
                 => Cmd.none
                 => Context.NoOp
@@ -64,9 +81,9 @@ update user msg model =
                 ( ( subModel, subCmd ), contextMsg ) =
                     EditUser.update user subMsg sectionModel
             in
-            { model | section = EditUser subModel }
-                => Cmd.map EditUserMsg subCmd
-                => contextMsg
+                { model | section = EditUser subModel }
+                    => Cmd.map EditUserMsg subCmd
+                    => contextMsg
 
         ( EditUserMsg _, _ ) ->
             model
@@ -95,6 +112,9 @@ viewSection user section =
 
         Users model ->
             Html.map UsersMsg (Users.view user model)
+
+        AddUser model ->
+            Html.map AddUserMsg (AddUser.view model)
 
         EditUser model ->
             Html.map EditUserMsg (EditUser.view user model)

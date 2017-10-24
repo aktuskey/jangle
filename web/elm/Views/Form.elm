@@ -56,12 +56,12 @@ type alias SetFocusMsg field msg =
 
 
 type Form field msg
-    = Form (InputMsg field msg) (SetFocusMsg field msg) msg
+    = Form (InputMsg field msg) (SetFocusMsg field msg)
 
 
-form : InputMsg field msg -> SetFocusMsg field msg -> msg -> Form field msg
-form inputMsg setFocusMsg removeFocusMsg =
-    Form inputMsg setFocusMsg removeFocusMsg
+form : InputMsg field msg -> SetFocusMsg field msg -> Form field msg
+form inputMsg setFocusMsg =
+    Form inputMsg setFocusMsg
 
 
 isFocused : field -> Maybe field -> Bool
@@ -75,7 +75,7 @@ hasValue =
 
 
 input : Form field msg -> InputConfig field -> Html msg
-input (Form inputMsg setFocusMsg removeFocusMsg) { label_, type__, value_, placeholder_, field, focusSetting, focusedField } =
+input (Form inputMsg setFocusMsg) { label_, type__, value_, placeholder_, field, focusSetting, focusedField } =
     label
         [ class "form__label"
         , classList
@@ -100,7 +100,6 @@ input (Form inputMsg setFocusMsg removeFocusMsg) { label_, type__, value_, place
             , placeholder placeholder_
             , onInput (inputMsg field)
             , onFocus (setFocusMsg field)
-            , onBlur removeFocusMsg
             , autofocus (focusSetting == AutoFocus)
             ]
             []

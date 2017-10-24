@@ -1,4 +1,18 @@
-module Schema.User exposing (RemoveUserResponse, UpdateUserResponse, User, UserResponse, UsersResponse, fetchUser, fetchUsers, removeUser, updateUser)
+module Schema.User
+    exposing
+        ( RemoveUserResponse
+        , UpdateUserResponse
+        , CreateUserResponse
+        , User
+        , NewUser
+        , UserResponse
+        , UsersResponse
+        , fetchUser
+        , fetchUsers
+        , createUser
+        , removeUser
+        , updateUser
+        )
 
 import Data.Delta as Delta exposing (Delta)
 import Data.Name as Name exposing (Name)
@@ -16,12 +30,25 @@ type alias User =
     }
 
 
+type alias NewUser =
+    { firstName : String
+    , lastName : String
+    , email : String
+    , role : String
+    , password : String
+    }
+
+
 type alias UsersResponse =
     { data : UsersQuery }
 
 
 type alias UserResponse =
     { data : UserQuery }
+
+
+type alias CreateUserResponse =
+    { data : CreateUserMutation }
 
 
 type alias UpdateUserResponse =
@@ -39,6 +66,11 @@ type alias UserQuery =
 
 type alias UsersQuery =
     { users : List User
+    }
+
+
+type alias CreateUserMutation =
+    { createUser : User
     }
 
 
@@ -60,6 +92,11 @@ fetchUser user slug msg =
 fetchUsers : Data.User.User -> GraphQL.ResponseMsg UsersQuery msg -> Cmd msg
 fetchUsers user msg =
     GraphQL.executeQuery msg user usersQuery usersQueryDecoder
+
+
+createUser : Data.User.User -> NewUser -> GraphQL.ResponseMsg CreateUserMutation msg -> Cmd msg
+createUser user newUser msg =
+    GraphQL.executeMutation msg user (createUserMutation newUser) createUserMutationDecoder
 
 
 updateUser : Data.User.User -> String -> List (Delta String) -> GraphQL.ResponseMsg UpdateUserMutation msg -> Cmd msg
@@ -95,6 +132,19 @@ removeUserMutation slug =
         userReturnType
 
 
+createUserMutation : NewUser -> GraphQL.Mutation
+createUserMutation { firstName, lastName, password, email, role } =
+    GraphQL.mutation
+        "createUser"
+        [ ( "firstName", "String!", firstName )
+        , ( "lastName", "String!", lastName )
+        , ( "email", "String!", email )
+        , ( "role", "String!", role )
+        , ( "password", "String!", password )
+        ]
+        userReturnType
+
+
 updateUserMutation : String -> List (Delta String) -> GraphQL.Mutation
 updateUserMutation slug changes =
     GraphQL.mutation
@@ -127,6 +177,12 @@ userQueryDecoder : Decoder UserQuery
 userQueryDecoder =
     decode UserQuery
         |> required "user" userDecoder
+
+
+createUserMutationDecoder : Decoder CreateUserMutation
+createUserMutationDecoder =
+    decode CreateUserMutation
+        |> required "createUser" userDecoder
 
 
 updateUserMutationDecoder : Decoder UpdateUserMutation

@@ -33,7 +33,7 @@ type FormPage
 
 formConfig : Form Field Msg
 formConfig =
-    Form.form Update SetFocus RemoveFocus
+    Form.form Update SetFocus
 
 
 type alias Model =
@@ -230,37 +230,37 @@ viewSignInForm { email, password, firstName, lastName, focusedField, user, signi
             else
                 loginFields
     in
-    Html.form [ class "form card__content", attribute "novalidate" "novalidate", onSubmit buttonMsg ]
-        (fieldsToDisplay
-            ++ [ div [ class "form__button-row form__button-row--right" ]
-                    [ button
-                        [ class "button form__button"
-                        , type_ "submit"
-                        , classList [ ( "button--loading", user == Loading ) ]
-                        , dataContent buttonLabel
-                        , onFocus RemoveFocus
-                        ]
-                        [ text buttonLabel ]
-                    , button
-                        [ class "button form__button"
-                        , type_ "button"
-                        , dataContent "Back"
-                        , onFocus RemoveFocus
-                        , onClick PrevPage
-                        , classList [ ( "button--invisible", signingUp == False || page == NamePage ) ]
-                        ]
-                        [ text "Back" ]
-                    , p
-                        [ class "form__response"
-                        , classList
-                            [ ( "form__response--visible", user /= NotRequested )
-                            , ( "form__response--error", isError user )
+        Html.form [ class "form card__content", attribute "novalidate" "novalidate", onSubmit buttonMsg ]
+            (fieldsToDisplay
+                ++ [ div [ class "form__button-row form__button-row--right" ]
+                        [ button
+                            [ class "button form__button"
+                            , type_ "submit"
+                            , classList [ ( "button--loading", user == Loading ) ]
+                            , dataContent buttonLabel
+                            , onFocus RemoveFocus
                             ]
+                            [ text buttonLabel ]
+                        , button
+                            [ class "button form__button"
+                            , type_ "button"
+                            , dataContent "Back"
+                            , onFocus RemoveFocus
+                            , onClick PrevPage
+                            , classList [ ( "button--invisible", signingUp == False || page == NamePage ) ]
+                            ]
+                            [ text "Back" ]
+                        , p
+                            [ class "form__response"
+                            , classList
+                                [ ( "form__response--visible", user /= NotRequested )
+                                , ( "form__response--error", isError user )
+                                ]
+                            ]
+                            [ viewResponseMessage user ]
                         ]
-                        [ viewResponseMessage user ]
-                    ]
-               ]
-        )
+                   ]
+            )
 
 
 makeFakeInput : Html Msg

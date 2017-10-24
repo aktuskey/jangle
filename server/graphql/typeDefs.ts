@@ -100,7 +100,7 @@ export const typeDefs : string = `
   type Mutation {
 
     # Create or update a user
-    createUser(user: NewUser!): User
+    createUser(firstName: String!, lastName: String!, email: String!, password: String!, role: String!): User
 
     # Update a user
     updateUser(slug: String!, firstName: String, lastName: String, email: String, password: String): User
