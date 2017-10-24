@@ -24,9 +24,9 @@ The backend is primarily [Typescript]() which runs an [Express](https://expressj
 
 - [x] Create initial user on welcome screen
 - [x] Sign in / sign out with username/password
-- [ ] Users
+- [x] Users
   - [x] View
-  - [ ] Add
+  - [x] Add
   - [x] Edit
   - [x] Remove
 - [ ] Collections
