@@ -1,6 +1,7 @@
 # Jangle
 > Make content management embarrassingly simple.
 
+![alt text](https://raw.githubusercontent.com/RyanNHG/jangle/master/screenshots/users-desktop.png "Jangle Screenshot")
 
 ### Local Development
 
