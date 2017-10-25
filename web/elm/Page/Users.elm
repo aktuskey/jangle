@@ -15,6 +15,7 @@ import Views.Dashboard
 
 type alias Model =
     { users : RemoteData (List GraphQLUser.User)
+    , selectedUsers : List GraphQLUser.User
     }
 
 
@@ -22,6 +23,8 @@ type Msg
     = FetchUsers
     | Navigate Route
     | HandleUsersResponse (Result Http.Error GraphQLUser.UsersResponse)
+    | ToggleAll
+    | ToggleRow GraphQLUser.User
 
 
 update : User -> Msg -> Model -> ( ( Model, Cmd Msg ), Context.Msg )
@@ -47,6 +50,39 @@ update user msg model =
                 => Cmd.none
                 => Context.NoOp
 
+        ToggleAll ->
+            case model.users of
+                Success users ->
+                    { model | selectedUsers = toggleAll users model.selectedUsers }
+                        => Cmd.none
+                        => Context.NoOp
+
+                _ ->
+                    model
+                        => Cmd.none
+                        => Context.NoOp
+
+        ToggleRow user ->
+            { model | selectedUsers = toggleRow user model.selectedUsers }
+                => Cmd.none
+                => Context.NoOp
+
+
+toggleAll : List GraphQLUser.User -> List GraphQLUser.User -> List GraphQLUser.User
+toggleAll users selectedUsers =
+    if List.length selectedUsers == 0 then
+        users
+    else
+        []
+
+
+toggleRow : GraphQLUser.User -> List GraphQLUser.User -> List GraphQLUser.User
+toggleRow user selectedUsers =
+    if List.member user selectedUsers then
+        List.filter (\u -> u /= user) selectedUsers
+    else
+        user :: selectedUsers
+
 
 view : User -> Model -> Html Msg
 view user model =
@@ -60,7 +96,7 @@ view user model =
                 text "Fetching users..."
 
             Success users ->
-                viewUsers users
+                viewUsers model.selectedUsers users
 
             Error reason ->
                 text reason
@@ -75,22 +111,23 @@ type Field
 columns : List ( String, Int, Field )
 columns =
     [ ( "Name", 1, Name )
-    , ( "Email", 1, Email )
+
+    --, ( "Email", 1, Email )
     ]
 
 
-viewUsers : List GraphQLUser.User -> Html Msg
-viewUsers users =
+viewUsers : List GraphQLUser.User -> List GraphQLUser.User -> Html Msg
+viewUsers selectedUsers users =
     div []
-        [ viewTableActions
+        [ viewTableActions selectedUsers
         , table
             [ class "list__table" ]
-            ([ viewHeaderRow columns ] ++ List.map (viewRow columns) users)
+            ([ viewHeaderRow selectedUsers users columns ] ++ List.map (viewRow selectedUsers columns) users)
         ]
 
 
-viewTableActions : Html Msg
-viewTableActions =
+viewTableActions : List GraphQLUser.User -> Html Msg
+viewTableActions selectedUsers =
     div [ class "list__actions form__button-row form__button-row--right" ]
         [ button
             [ class "button button--success"
@@ -101,10 +138,12 @@ viewTableActions =
         ]
 
 
-viewHeaderRow : List ( String, Int, Field ) -> Html Msg
-viewHeaderRow list =
+viewHeaderRow : List GraphQLUser.User -> List GraphQLUser.User -> List ( String, Int, Field ) -> Html Msg
+viewHeaderRow selectedUsers users list =
     tr [ class "list__row list__row--header" ]
-        (List.map viewHeaderCell list)
+        ([ viewHeaderCheckboxCell selectedUsers users ]
+            ++ (List.map viewHeaderCell list)
+        )
 
 
 viewHeaderCell : ( String, Int, Field ) -> Html Msg
@@ -117,12 +156,40 @@ viewHeaderCell ( label, size, _ ) =
         ]
 
 
-viewRow : List ( String, Int, Field ) -> GraphQLUser.User -> Html Msg
-viewRow list user =
+viewHeaderCheckboxCell : List GraphQLUser.User -> List GraphQLUser.User -> Html Msg
+viewHeaderCheckboxCell selectedUsers users =
+    th [ class "list__cell list__cell--checkbox" ]
+        [ button [ class "list__checkbox", onClick ToggleAll ]
+            [ if List.length selectedUsers == 0 then
+                i [ class "material-icons" ] [ text "check_box_outline_blank" ]
+              else if List.length selectedUsers == List.length users then
+                i [ class "material-icons" ] [ text "check_box" ]
+              else
+                i [ class "material-icons" ] [ text "indeterminate_check_box" ]
+            ]
+        ]
+
+
+viewRow : List GraphQLUser.User -> List ( String, Int, Field ) -> GraphQLUser.User -> Html Msg
+viewRow selectedUsers list user =
     tr
         [ class "list__row"
         ]
-        (List.map (viewCell user) list)
+        ([ viewCheckboxCell selectedUsers user ]
+            ++ (List.map (viewCell user) list)
+        )
+
+
+viewCheckboxCell : List GraphQLUser.User -> GraphQLUser.User -> Html Msg
+viewCheckboxCell selectedUsers user =
+    td [ class "list__cell list__cell--checkbox" ]
+        [ button [ class "list__checkbox", onClick (ToggleRow user) ]
+            [ if List.member user selectedUsers then
+                i [ class "material-icons" ] [ text "check_box" ]
+              else
+                i [ class "material-icons" ] [ text "check_box_outline_blank" ]
+            ]
+        ]
 
 
 viewCell : GraphQLUser.User -> ( String, Int, Field ) -> Html Msg
@@ -161,5 +228,5 @@ fetchUsersAs user =
 
 init : User -> ( Model, Cmd Msg )
 init user =
-    Model RemoteData.NotRequested
+    Model RemoteData.NotRequested []
         => fetchUsersAs user

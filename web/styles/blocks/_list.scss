@@ -30,9 +30,17 @@
         }
     }
     
+    &__checkbox {
+        display: flex;
+    }
+
     &__cell {
         text-align: left;
         padding: .5rem;
+
+        &--checkbox {
+            color: #4d4d4d;
+        }
     }
 
 }
