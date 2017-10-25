@@ -51,7 +51,7 @@
         padding: .5rem 1rem;
         display: flex;
         align-items: center;
-        border-bottom: solid 1px white;
+        border-bottom: solid 1px #ddd;
         min-height: 4rem;
         pointer-events: all;
     }
@@ -149,7 +149,7 @@
         min-height: 2rem;
         padding: 1rem;
         box-sizing: border-box;
-        border-top: solid 1px white;
+        border-top: solid 1px #ddd;
     }
 
     @include respond-to(small) {
@@ -174,15 +174,15 @@
         }
 
         &__option {
-            padding-top: 1.25rem;
+            font-size: 1.5rem;
         }
 
         &__option-header {
-            font-size: 1.25rem;
+            font-size: 1.5rem;
         }
 
         &__link {
-            font-size: 1rem;
+            font-size: 1.25rem;
         }
     }
 

@@ -1,15 +1,15 @@
 module Page.AddUser exposing (Model, Msg(..), init, update, view)
 
-import Data.User
 import Data.Context as Context
 import Data.RemoteData as RemoteData exposing (..)
-import Util exposing ((=>))
-import Schema.User as GraphQLUser
+import Data.User
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onSubmit)
 import Http
 import Route
+import Schema.User as GraphQLUser
+import Util exposing ((=>))
 import Views.Dashboard
 import Views.Form as Form exposing (Form)
 
@@ -128,8 +128,7 @@ view model =
 viewUserForm : Model -> Html Msg
 viewUserForm model =
     section [ class "list" ]
-        [ h3 [ class "list__title" ] [ text "Create user." ]
-        , viewForm model
+        [ viewForm model
         ]
 
 

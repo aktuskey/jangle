@@ -8,6 +8,7 @@ import Page.AddUser as AddUser
 import Page.EditUser as EditUser
 import Page.Users as Users
 import Util exposing ((=>))
+import Views.Dashboard
 import Views.Nav as Nav
 
 
@@ -44,18 +45,18 @@ update user msg model =
                 ( navModel, navMsg ) =
                     Nav.update subMsg model.navigation
             in
-                { model | navigation = navModel }
-                    => Cmd.none
-                    => navMsg
+            { model | navigation = navModel }
+                => Cmd.none
+                => navMsg
 
         ( UsersMsg subMsg, Users sectionModel ) ->
             let
                 ( ( subModel, subCmd ), contextMsg ) =
                     Users.update user subMsg sectionModel
             in
-                { model | section = Users subModel }
-                    => Cmd.map UsersMsg subCmd
-                    => contextMsg
+            { model | section = Users subModel }
+                => Cmd.map UsersMsg subCmd
+                => contextMsg
 
         ( UsersMsg _, _ ) ->
             model
@@ -67,9 +68,9 @@ update user msg model =
                 ( ( subModel, subCmd ), contextMsg ) =
                     AddUser.update user subMsg sectionModel
             in
-                { model | section = AddUser subModel }
-                    => Cmd.map AddUserMsg subCmd
-                    => contextMsg
+            { model | section = AddUser subModel }
+                => Cmd.map AddUserMsg subCmd
+                => contextMsg
 
         ( AddUserMsg _, _ ) ->
             model
@@ -81,9 +82,9 @@ update user msg model =
                 ( ( subModel, subCmd ), contextMsg ) =
                     EditUser.update user subMsg sectionModel
             in
-                { model | section = EditUser subModel }
-                    => Cmd.map EditUserMsg subCmd
-                    => contextMsg
+            { model | section = EditUser subModel }
+                => Cmd.map EditUserMsg subCmd
+                => contextMsg
 
         ( EditUserMsg _, _ ) ->
             model
@@ -105,9 +106,16 @@ viewSection : User -> ContentSection -> Html Msg
 viewSection user section =
     case section of
         Dashboard ->
-            div [ class "dashboard__header--right" ]
-                [ h1 [ class "dashboard__title" ] [ text <| "Welcome back, " ++ user.name.first ++ "." ]
-                , h3 [ class "dashboard__subtitle" ] [ text "Let's get started." ]
+            div []
+                [ Views.Dashboard.header
+                    ("Welcome back, " ++ user.name.first ++ ".")
+                    "It's great to see you."
+                , p [ class "dashboard__text" ]
+                    [ text "This would be a dashboard, but we're still working on that part." ]
+                , p [ class "dashboard__text" ]
+                    [ text "Why don't you try managing some users on the left?" ]
+                , p [ class "dashboard__text" ]
+                    [ text "We'll give them something useful to do soon." ]
                 ]
 
         Users model ->

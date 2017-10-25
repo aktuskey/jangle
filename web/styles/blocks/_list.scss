@@ -7,13 +7,32 @@
         font-size: 2rem;
     }
 
-    &__rows {
-        padding-top: .5rem;
+    &__actions {
+        padding-top: 2rem;
     }
 
-    &_row {
-        margin-top: .5rem;
+    &__table {
+        display: block;
+        margin-top: 1rem;
         font-size: 1.25rem;
+        border: solid 1px #ddd;
+        border-bottom: none;
+    }
+    
+    &__row {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        border-bottom: solid 1px #ddd;
+
+        &--header {
+            font-weight: normal;
+        }
+    }
+    
+    &__cell {
+        text-align: left;
+        padding: .5rem;
     }
 
 }

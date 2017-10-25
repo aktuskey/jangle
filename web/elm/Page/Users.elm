@@ -67,12 +67,83 @@ view user model =
         ]
 
 
+type Field
+    = Name
+    | Email
+
+
+columns : List ( String, Int, Field )
+columns =
+    [ ( "Name", 1, Name )
+    , ( "Email", 1, Email )
+    ]
+
+
 viewUsers : List GraphQLUser.User -> Html Msg
 viewUsers users =
-    section [ class "list" ]
-        [ h3 [ class "list__title" ] [ text "All users." ]
-        , ul [ class "list__rows" ] (List.map viewUser users)
+    div []
+        [ viewTableActions
+        , table
+            [ class "list__table" ]
+            ([ viewHeaderRow columns ] ++ List.map (viewRow columns) users)
         ]
+
+
+viewTableActions : Html Msg
+viewTableActions =
+    div [ class "list__actions form__button-row form__button-row--right" ]
+        [ button
+            [ class "button button--success"
+            , onClick (Navigate Route.AddUser)
+            , attribute "data-content" "Add user"
+            ]
+            [ text "Add user" ]
+        ]
+
+
+viewHeaderRow : List ( String, Int, Field ) -> Html Msg
+viewHeaderRow list =
+    tr [ class "list__row list__row--header" ]
+        (List.map viewHeaderCell list)
+
+
+viewHeaderCell : ( String, Int, Field ) -> Html Msg
+viewHeaderCell ( label, size, _ ) =
+    th
+        [ class "list__cell list__cell--header"
+        , style [ ( "flex", toString size ) ]
+        ]
+        [ span [ class "" ] [ text label ]
+        ]
+
+
+viewRow : List ( String, Int, Field ) -> GraphQLUser.User -> Html Msg
+viewRow list user =
+    tr
+        [ class "list__row"
+        ]
+        (List.map (viewCell user) list)
+
+
+viewCell : GraphQLUser.User -> ( String, Int, Field ) -> Html Msg
+viewCell user ( _, size, field ) =
+    td
+        [ class "list__cell"
+        , style [ ( "flex", toString size ) ]
+        ]
+        [ button [ class "link", onClick (Navigate (Route.EditUser user.slug)) ]
+            [ text (getFieldText user field) ]
+        ]
+
+
+getFieldText : GraphQLUser.User -> Field -> String
+getFieldText user field =
+    case field of
+        Name ->
+            user.name.first ++ " " ++ user.name.last
+
+        Email ->
+            user.email
 
 
 viewUser : GraphQLUser.User -> Html Msg

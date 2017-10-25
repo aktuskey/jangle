@@ -175,7 +175,7 @@ updateUser signedInUser user model =
         changes =
             getUpdatedFieldsFor user model
     in
-        GraphQLUser.updateUser signedInUser user.slug changes HandleUserUpdate
+    GraphQLUser.updateUser signedInUser user.slug changes HandleUserUpdate
 
 
 removeUser : Data.User.User -> User -> Model -> Cmd Msg
@@ -207,7 +207,7 @@ init slug user =
             , GraphQLUser.fetchUser user slug HandleUserFetch
             )
     in
-        ( Model user_ "" "" "" "" Nothing False, cmd )
+    ( Model user_ "" "" "" "" Nothing False, cmd )
 
 
 view : Data.User.User -> Model -> Html Msg
@@ -221,7 +221,7 @@ view user model =
 
 viewHeader : Html Msg
 viewHeader =
-    Views.Dashboard.header "Edit user." "People are nice."
+    Views.Dashboard.header "Edit user." "But don't hurt their feelings."
 
 
 viewUser : Model -> Html Msg
