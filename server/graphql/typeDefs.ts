@@ -108,5 +108,8 @@ export const typeDefs : string = `
     # Remove a user
     removeUser(slug: String!): User
 
+    # Remove users
+    removeUsers(slugs: [String!]!): [User!]!
+
   }
 `

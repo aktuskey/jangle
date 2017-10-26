@@ -21,6 +21,10 @@ type RemoveUserMutation = {
   slug: string
 }
 
+type RemoveUsersMutation = {
+  slugs: string[]
+}
+
 type UserQuery = {
   slug: string
 }
@@ -42,7 +46,11 @@ export const resolvers = {
         'name.first': firstName, 'name.last': lastName, email, password
       })),
     removeUser: (_ : any, removeUserMutation : RemoveUserMutation) =>
-      db.users.removeWithSlug(removeUserMutation.slug)
+      db.users.removeWithSlug(removeUserMutation.slug),
+    removeUsers: (_ : any, removeUserMutation : RemoveUsersMutation) =>
+        Promise.all(removeUserMutation.slugs.map(
+          slug => db.users.removeWithSlug(slug)
+        ))
   }
 }
 

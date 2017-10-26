@@ -146,7 +146,7 @@ viewForm { email, firstName, lastName, password, focusedField, newUser } =
         , div [ class "form__button-row form__button-row--right" ]
             [ Form.button <|
                 Form.ButtonConfig
-                    "Update"
+                    "Create"
                     Form.SubmitButtonType
                     (if newUser == Loading then
                         Form.ButtonLoading
@@ -155,7 +155,7 @@ viewForm { email, firstName, lastName, password, focusedField, newUser } =
                      else
                         Form.ButtonNormal
                     )
-                    Form.ButtonPrimary
+                    Form.ButtonSuccess
             , p
                 [ class "form__response"
                 , classList

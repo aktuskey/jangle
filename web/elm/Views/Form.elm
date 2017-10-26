@@ -115,6 +115,7 @@ button { label_, type__, state, style_ } =
             , ( "button--disabled", state == ButtonDisabled )
             , ( "button--primary", style_ == ButtonPrimary )
             , ( "button--danger", style_ == ButtonDanger )
+            , ( "button--success", style_ == ButtonSuccess )
             ]
          , attribute "data-content" label_
          ]

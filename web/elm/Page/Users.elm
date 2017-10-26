@@ -13,9 +13,16 @@ import Util exposing ((=>))
 import Views.Dashboard
 
 
+type DeletableData a
+    = NothingToDelete
+    | Deleting a
+    | ErrorDeleting String
+
+
 type alias Model =
     { users : RemoteData (List GraphQLUser.User)
     , selectedUsers : List GraphQLUser.User
+    , usersBeingRemoved : DeletableData (List GraphQLUser.User)
     }
 
 
@@ -25,6 +32,8 @@ type Msg
     | HandleUsersResponse (Result Http.Error GraphQLUser.UsersResponse)
     | ToggleAll
     | ToggleRow GraphQLUser.User
+    | RemoveSelectedUsers
+    | HandleRemoveUsers (Result Http.Error GraphQLUser.RemoveUsersResponse)
 
 
 update : User -> Msg -> Model -> ( ( Model, Cmd Msg ), Context.Msg )
@@ -67,6 +76,40 @@ update user msg model =
                 => Cmd.none
                 => Context.NoOp
 
+        RemoveSelectedUsers ->
+            { model | usersBeingRemoved = Deleting model.selectedUsers }
+                => removeUsers user model.selectedUsers
+                => Context.NoOp
+
+        HandleRemoveUsers (Ok response) ->
+            { model
+                | selectedUsers = []
+                , users = filterRemovedUsers response.data.removedUsers model.users
+                , usersBeingRemoved = NothingToDelete
+            }
+                => Cmd.none
+                => Context.NoOp
+
+        HandleRemoveUsers (Err error) ->
+            { model | usersBeingRemoved = ErrorDeleting (Util.parseError error) }
+                => Cmd.none
+                => Context.NoOp
+
+
+removeUsers : User -> List GraphQLUser.User -> Cmd Msg
+removeUsers user usersToRemove =
+    GraphQLUser.removeUsers user (List.map (.slug) usersToRemove) HandleRemoveUsers
+
+
+filterRemovedUsers : List GraphQLUser.User -> RemoteData (List GraphQLUser.User) -> RemoteData (List GraphQLUser.User)
+filterRemovedUsers removedUsers users =
+    case users of
+        Success users_ ->
+            Success (List.filter (\u -> (List.member u removedUsers) == False) users_)
+
+        _ ->
+            users
+
 
 toggleAll : List GraphQLUser.User -> List GraphQLUser.User -> List GraphQLUser.User
 toggleAll users selectedUsers =
@@ -93,7 +136,8 @@ view user model =
                 text ""
 
             Loading ->
-                text "Fetching users..."
+                -- TODO: Loading spinner
+                text ""
 
             Success users ->
                 viewUsers model.selectedUsers users
@@ -112,7 +156,7 @@ columns : List ( String, Int, Field )
 columns =
     [ ( "Name", 1, Name )
 
-    --, ( "Email", 1, Email )
+    --, ( "Email", 2, Email )
     ]
 
 
@@ -129,13 +173,34 @@ viewUsers selectedUsers users =
 viewTableActions : List GraphQLUser.User -> Html Msg
 viewTableActions selectedUsers =
     div [ class "list__actions form__button-row form__button-row--right" ]
-        [ button
+        ([ button
             [ class "button button--success"
             , onClick (Navigate Route.AddUser)
             , attribute "data-content" "Add user"
             ]
             [ text "Add user" ]
+         ]
+            ++ (viewSelectedUserActions selectedUsers)
+        )
+
+
+viewSelectedUserActions : List GraphQLUser.User -> List (Html Msg)
+viewSelectedUserActions selectedUsers =
+    if List.length selectedUsers > 0 then
+        [ button
+            [ class "button button--danger"
+            , onClick (RemoveSelectedUsers)
+            ]
+            [ text
+                (if List.length selectedUsers == 1 then
+                    "Remove user"
+                 else
+                    "Removes users"
+                )
+            ]
         ]
+    else
+        []
 
 
 viewHeaderRow : List GraphQLUser.User -> List GraphQLUser.User -> List ( String, Int, Field ) -> Html Msg
@@ -228,5 +293,5 @@ fetchUsersAs user =
 
 init : User -> ( Model, Cmd Msg )
 init user =
-    Model RemoteData.NotRequested []
+    Model RemoteData.NotRequested [] NothingToDelete
         => fetchUsersAs user

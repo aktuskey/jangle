@@ -1,4 +1,16 @@
-module GraphQL exposing (Mutation, MutationTriplet, Query, Response, ResponseMsg, executeMutation, executeQuery, mutation, query)
+module GraphQL
+    exposing
+        ( Mutation
+        , MutationParameter
+        , Query
+        , Response
+        , ResponseMsg
+        , QLType(..)
+        , executeMutation
+        , executeQuery
+        , mutation
+        , query
+        )
 
 import Data.User as User exposing (User)
 import Http
@@ -11,12 +23,18 @@ type Query
     = Query String String
 
 
-type alias MutationTriplet =
-    ( String, String, String )
+type QLType
+    = QLString String
+    | QLMaybeString String
+    | QLArray (List String)
+
+
+type alias MutationParameter =
+    ( String, QLType )
 
 
 type Mutation
-    = Mutation String (List MutationTriplet) String
+    = Mutation String (List MutationParameter) String
 
 
 type alias ResponseMsg a msg =
@@ -39,7 +57,7 @@ query =
     Query
 
 
-mutation : String -> List MutationTriplet -> String -> Mutation
+mutation : String -> List MutationParameter -> String -> Mutation
 mutation =
     Mutation
 
@@ -96,23 +114,44 @@ getQueryForMutation (Mutation name triplets returnType) =
         )
 
 
-getMutationParameterString : List MutationTriplet -> String
+getMutationParameterString : List MutationParameter -> String
 getMutationParameterString triplets =
     triplets
-        |> List.map (\( name, type_, _ ) -> "$" ++ name ++ ": " ++ type_)
+        |> List.map (\( name, param ) -> "$" ++ name ++ ": " ++ (getType param))
         |> String.join ", "
 
 
-getMutationVariableString : List MutationTriplet -> String
+getType : QLType -> String
+getType param =
+    case param of
+        QLString _ ->
+            "String!"
+
+        QLMaybeString _ ->
+            "String"
+
+        QLArray _ ->
+            "[String!]!"
+
+
+getMutationVariableString : List MutationParameter -> String
 getMutationVariableString triplets =
     triplets
-        |> List.map (\( name, _, _ ) -> name ++ ": $" ++ name)
+        |> List.map (\( name, _ ) -> name ++ ": $" ++ name)
         |> String.join ", "
 
 
-getEncodeField : MutationTriplet -> ( String, Encode.Value )
-getEncodeField ( name, _, value ) =
-    ( name, Encode.string value )
+getEncodeField : MutationParameter -> ( String, Encode.Value )
+getEncodeField ( name, param ) =
+    case param of
+        QLString value ->
+            ( name, Encode.string value )
+
+        QLMaybeString value ->
+            ( name, Encode.string value )
+
+        QLArray values ->
+            ( name, Encode.list (List.map Encode.string values) )
 
 
 executeQuery : ResponseMsg a msg -> User -> Query -> Decoder a -> Cmd msg
