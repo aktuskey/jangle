@@ -1,11 +1,11 @@
 .link {
 
-    $link-color: $color__dark-gray;
+    $link-color: $color__special;
 
     position: relative;
     font-weight: lighter;
     cursor: pointer;
-    color: $link-color;
+    color: $color__dark-gray;
     display: inline-block;
     padding: 0;
     padding-bottom: .25em;
@@ -40,7 +40,7 @@
     &--active {
         color: initial;
         opacity: .6;
-        cursor: not-allowed;
+        cursor: auto;
         &:before {
             transform: none;
         }

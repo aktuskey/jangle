@@ -21,7 +21,7 @@
             color: $dark-color;
 
             &:before {
-                background-color: $dark-color;
+                background-color: $color__special;
             }
         }
 
@@ -40,7 +40,7 @@
         .nav__menu-icon {
             border-color: $dark-color;
             &:before {
-                background-color: $dark-color;
+                background-color: $color__special;
             }
         }
     }
@@ -169,6 +169,7 @@
 
         &__header {
             padding: 1rem;
+            padding-top: 4rem;
             font-size: 1.5rem;
             min-height: 1.75rem;
         }
